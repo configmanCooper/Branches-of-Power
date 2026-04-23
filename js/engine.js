@@ -80,7 +80,8 @@ var Engine = (function() {
                 stateOfUnionUsedThisRound: false,
                 initiatedLegislationThisRound: false,
                 uniqueActionsThisRound: [],
-                speakersGavelGranted: false
+                speakersGavelGranted: false,
+                billsPassedTotal: 0
             },
 
             senate: {
@@ -726,8 +727,8 @@ var Engine = (function() {
                 addLog('house', 'Host Hearing', '+2 PC, -2 President Popularity.');
                 break;
             case 'gainVP':
-                state.house.vp += 2;
-                addLog('house', 'Host Hearing', '+2 VP.');
+                state.house.vp += 3;
+                addLog('house', 'Host Hearing', '+3 VP.');
                 break;
         }
         advanceTurn();
@@ -808,7 +809,12 @@ var Engine = (function() {
         if (votes >= threshold) {
             bill.passedByHouse = true;
             state.billPassedByHouse = true;
-            var housePassVP = 4 + Math.ceil(votes / 80);
+            var housePassVP = 5 + Math.ceil(votes / 80);
+            // Override Momentum: bonus VP for overriding a presidential veto
+            if (bill.requiresSupermajority) {
+                housePassVP += 4;
+                addLog('house', 'Override Momentum', 'Veto overridden! House +4 bonus VP.');
+            }
             state.house.vp += housePassVP;
             bill.vpEarned = bill.vpEarned || { president: 0, house: 0, senate: 0, supremeCourt: 0 };
             bill.vpEarned.house += housePassVP;
@@ -818,6 +824,14 @@ var Engine = (function() {
                 state.house.vp += 3;
                 bill.vpEarned.house += 3;
                 addLog('house', 'Populist Surge', 'Bill popularity ≥ 15! House +3 bonus VP.');
+            }
+
+            // Legislative Blitz: bonus VP for 3rd+ bill passed
+            state.house.billsPassedTotal++;
+            if (state.house.billsPassedTotal >= 3) {
+                state.house.vp += 2;
+                bill.vpEarned.house += 2;
+                addLog('house', 'Legislative Blitz', 'Bill #' + state.house.billsPassedTotal + ' passed! +2 bonus VP.');
             }
 
             if (bill.passedBySenate) {
@@ -1271,7 +1285,9 @@ var Engine = (function() {
 
         if (result.result === 'unconstitutional') {
             var swingVote = Math.abs(result.unconstitutional - result.constitutional) === 1;
+            var unanimous = result.constitutional === 0;
             var reviewVP = swingVote ? 15 : 10;
+            if (unanimous) reviewVP += 3;
             state.supremeCourt.vp += reviewVP;
             state.supremeCourt.jp += 1;
             // Rescind VP earned by all players from this bill
@@ -1282,16 +1298,18 @@ var Engine = (function() {
             state.supremeCourt.vp -= rescinded.supremeCourt;
             var rescindDetails = 'Pres ' + rescinded.president + ', House ' + rescinded.house +
                 ', Senate ' + rescinded.senate + ', SC ' + rescinded.supremeCourt;
-            addLog('supremeCourt', 'Judicial Review', '"' + bill.name + '" ruled UNCONSTITUTIONAL! +' + reviewVP + ' VP' + (swingVote ? ' (Swing Vote!)' : '') + ', +1 JP. VP rescinded: ' + rescindDetails);
+            addLog('supremeCourt', 'Judicial Review', '"' + bill.name + '" ruled UNCONSTITUTIONAL! +' + reviewVP + ' VP' + (swingVote ? ' (Swing Vote!)' : '') + (unanimous ? ' (Unanimous!)' : '') + ', +1 JP. VP rescinded: ' + rescindDetails);
             var idx = state.passedBills.indexOf(bill);
             if (idx !== -1) state.passedBills.splice(idx, 1);
             state.unconstitutionalBills.push(bill);
         } else {
-            state.supremeCourt.vp += 5;
+            var unanimousCon = result.unconstitutional === 0;
+            var conVP = unanimousCon ? 8 : 5;
+            state.supremeCourt.vp += conVP;
             state.supremeCourt.jp += 1;
             bill.markers = bill.markers || [];
             bill.markers.push('C');
-            addLog('supremeCourt', 'Judicial Review', '"' + bill.name + '" ruled CONSTITUTIONAL. +5 VP, +1 JP. Cannot be reviewed again.');
+            addLog('supremeCourt', 'Judicial Review', '"' + bill.name + '" ruled CONSTITUTIONAL. +' + conVP + ' VP' + (unanimousCon ? ' (Unanimous!)' : '') + ', +1 JP. Cannot be reviewed again.');
         }
 
         // Store precedent
