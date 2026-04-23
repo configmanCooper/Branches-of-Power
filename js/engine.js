@@ -2125,6 +2125,12 @@ var Engine = (function() {
             state.supremeCourt.vp += 1;
         }
 
+        // Senate penalty: if House passed a bill but Senate didn't pass it this round
+        if (state.billPassedByHouse && !state.billPassedBySenate) {
+            state.senate.vp -= 1;
+            addLog('passive', 'Senate Inaction', 'House passed bill but Senate did not. Senate -1 VP.');
+        }
+
         // Advance round
         state.round++;
 
