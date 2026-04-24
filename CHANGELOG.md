@@ -5,6 +5,28 @@ Uses [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.1.0] — 2025-07-14
+
+### Added
+- **Mobile responsive design** — comprehensive media queries for tablets (≤900px), phones (≤600px), and small phones (≤380px)
+- **Accessibility improvements:**
+  - ARIA attributes on modal (`role="dialog"`, `aria-modal`, `aria-labelledby`), game content (`role="main"`), and loading state (`aria-live`)
+  - `:focus-visible` outlines for keyboard navigation on all interactive elements
+  - `prefers-reduced-motion` support — disables all animations for vestibular disorder users
+  - Minimum 44px touch targets on touchscreen devices (`pointer: coarse`)
+- `theme-color` and `description` meta tags
+- `development/mobile_audit.md` — full audit with 15 findings
+
+### Fixed
+- iOS Safari auto-zoom on chat input (set 16px minimum font size)
+- Game header overflow on narrow viewports
+- Modal cut-off on mobile (now 96% width, 92vh height)
+- Toast notifications partially off-screen on phones
+- Bill tabs not scrollable when multiple bills present
+- Justice dots overlapping on small screens
+
+---
+
 ## [2.0.0] — 2025-07-14
 
 ### Added

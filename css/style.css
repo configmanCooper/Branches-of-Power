@@ -548,6 +548,8 @@ body {
 }
 
 /* --- Responsive --- */
+
+/* Tablet breakpoint */
 @media (max-width: 900px) {
     .game-main {
         grid-template-columns: 1fr;
@@ -560,6 +562,8 @@ body {
         border-right: none;
         border-bottom: 1px solid var(--border-color);
         flex-wrap: nowrap;
+        padding: 8px;
+        -webkit-overflow-scrolling: touch;
     }
     .player-panel h3 { display: none; }
     .player-card { min-width: 150px; flex-shrink: 0; }
@@ -571,11 +575,166 @@ body {
     .action-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }
 
+/* Mobile breakpoint */
 @media (max-width: 600px) {
-    .game-header { flex-direction: column; gap: 4px; padding: 6px; }
-    .header-center { flex-direction: column; gap: 4px; }
+    /* Header: compact layout */
+    .game-header {
+        flex-direction: column;
+        gap: 2px;
+        padding: 4px 8px;
+        min-height: auto;
+    }
+    .header-left h2 { font-size: 0.9em; }
+    .header-center {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+        width: 100%;
+    }
+    .round-display { font-size: 0.8em; padding: 2px 8px; }
+    .turn-display { font-size: 0.75em !important; padding: 2px 8px !important; }
+    .vp-scoreboard { font-size: 0.75em; gap: 6px; }
+    .stability-gauge { margin-left: 0 !important; font-size: 0.85em; }
+    .header-right { display: none; } /* Room code not needed on small screens */
+
+    /* Menu */
+    .main-menu h1 { font-size: 1.6em; }
+    .subtitle { font-size: 1em; }
     .menu-buttons { width: 100%; }
-    .bill-stats { flex-direction: column; gap: 8px; }
-    .chat-bar { flex-direction: column; }
-    .chat-input { width: 100%; }
+
+    /* Player cards: horizontal scroll, smaller */
+    .player-card { min-width: 120px; padding: 6px; }
+    .player-role-name { font-size: 0.75em; }
+    .stat { padding: 2px 5px; min-width: 32px; }
+    .stat-label { font-size: 0.6em; }
+    .stat-value { font-size: 0.85em; }
+
+    /* Center panel: tighter padding */
+    .center-panel { padding: 6px 8px; gap: 8px; }
+
+    /* Bill card */
+    .bill-header { padding: 6px 10px; }
+    .bill-header h3 { font-size: 0.85em; }
+    .bill-stats { flex-direction: column; gap: 4px; padding: 6px 10px; }
+    .bill-stat-value { font-size: 1.1em; }
+    .bill-status { padding: 4px 10px; gap: 6px; flex-wrap: wrap; }
+
+    /* Bill tabs: scrollable on mobile */
+    .bill-tabs { 
+        display: flex !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        gap: 4px !important;
+        padding-bottom: 4px;
+    }
+
+    /* Action buttons: full width single column */
+    .action-grid { grid-template-columns: 1fr; gap: 4px; }
+    .action-btn { 
+        padding: 10px 12px;
+        min-height: 44px; /* iOS touch target minimum */
+    }
+    .action-name { font-size: 0.9em; }
+    .action-desc { font-size: 0.75em; }
+
+    /* Role switcher: wrap on mobile */
+    .role-switcher { flex-wrap: wrap; gap: 4px; }
+    .role-switch-btn { 
+        padding: 6px 8px;
+        font-size: 0.75em;
+        min-height: 36px;
+    }
+
+    /* Composition bars */
+    .comp-bar-container { padding: 6px 8px; }
+    .comp-label { font-size: 0.7em; }
+    .court-justices { gap: 3px; }
+    .justice-dot { width: 24px; height: 24px; font-size: 0.7em; }
+
+    /* Modal: full screen on mobile */
+    .modal {
+        width: 96%;
+        max-width: none;
+        max-height: 92vh;
+        border-radius: 8px;
+    }
+    .modal-header { padding: 10px 14px; }
+    .modal-header h3 { font-size: 1em; }
+    .modal-body { padding: 12px; }
+    .modal-footer { padding: 8px 12px; flex-wrap: wrap; }
+    .modal-footer .btn { flex: 1; min-width: 100px; min-height: 44px; }
+
+    /* Deals panel */
+    .deals-panel { padding: 8px !important; }
+    .deal-card { padding: 6px !important; font-size: 0.85em; }
+    .trust-display { gap: 6px !important; }
+
+    /* Event banner */
+    .event-banner { padding: 8px 10px !important; font-size: 0.9em; }
+
+    /* Chat */
+    .chat-bar { flex-direction: column; padding: 4px 8px; }
+    .chat-input { width: 100%; font-size: 16px; } /* 16px prevents iOS zoom */
+
+    /* Log panel */
+    .log-panel { max-height: 150px; padding: 8px; }
+    .log-entry { font-size: 0.72em; padding: 3px 6px; }
+
+    /* Toast */
+    .toast-container { top: 8px; right: 8px; left: 8px; }
+    .toast { max-width: none; font-size: 0.85em; padding: 8px 14px; }
+
+    /* Game over */
+    .game-over h1 { font-size: 1.6em; }
+    .winner-display { padding: 14px 20px; }
+    .winner-display h2 { font-size: 1.3em; }
+    .winner-vp { font-size: 1.5em; }
+
+    /* Lobby */
+    .lobby { padding: 20px 12px; }
+    .room-code-display { font-size: 1.1em; padding: 10px 20px; }
+    .role-card { padding: 10px 12px; min-height: 44px; }
+}
+
+/* Small phone breakpoint */
+@media (max-width: 380px) {
+    .main-menu h1 { font-size: 1.3em; }
+    .player-card { min-width: 100px; }
+    .stat { padding: 1px 4px; min-width: 28px; }
+    .vp-scoreboard { font-size: 0.7em; gap: 4px; }
+    .action-btn { padding: 8px 10px; }
+    .modal-body { padding: 8px; }
+}
+
+/* Accessibility: touch targets, focus, reduced motion */
+@media (pointer: coarse) {
+    .btn, .action-btn, .role-card, .role-switch-btn {
+        min-height: 44px;
+    }
+    .modal-close {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+.btn:focus-visible, .action-btn:focus-visible, .role-card:focus-visible, .role-switch-btn:focus-visible {
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 2px;
+}
+.menu-input:focus-visible, .chat-input:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 1px;
 }
