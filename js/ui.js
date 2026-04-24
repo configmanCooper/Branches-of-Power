@@ -95,11 +95,12 @@ var UI = (function() {
                         }
                         if (!isAI && !firstHumanRole) firstHumanRole = r;
                     }
-                    Network.startLocalGame(len2 ? len2.value : 'standard');
+                    // Set currentRole BEFORE starting game so renderGame has correct context
                     currentRole = firstHumanRole || 'president';
+                    Network.startLocalGame(len2 ? len2.value : 'standard');
                 } catch (err) {
                     console.error('Start game error:', err);
-                    alert('Error starting game: ' + err.message);
+                    alert('Error starting game: ' + err.message + '\n' + err.stack);
                 }
                 break;
             case 'connectToGame':
@@ -529,6 +530,7 @@ var UI = (function() {
             return;
         }
 
+        try {
         var isMyTurn = Engine.getCurrentRole() === currentRole;
         var currentTurnRole = Engine.getCurrentRole();
         var isLocal = Network.getRoomCode() === 'LOCAL';
@@ -657,6 +659,10 @@ var UI = (function() {
                     playAITurn(aiTurnRole);
                 }, 400);
             }
+        }
+        } catch (renderErr) {
+            console.error('Render error:', renderErr);
+            alert('Error rendering game: ' + renderErr.message + '\n' + renderErr.stack);
         }
     }
 
