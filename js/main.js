@@ -14,8 +14,13 @@ var Game = (function() {
 
         // Wire up network events
         Network.onStateUpdate(function(state) {
-            Engine.setState(state);
-            UI.renderGame(state);
+            try {
+                Engine.setState(state);
+                UI.renderGame(state);
+            } catch (err) {
+                console.error('State update error:', err);
+                alert('Error rendering game: ' + err.message);
+            }
         });
 
         Network.onLobbyUpdate(function(lobby) {

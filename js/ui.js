@@ -32,7 +32,12 @@ var UI = (function() {
             var btn = e.target.closest('[data-action]');
             if (!btn) return;
             var action = btn.getAttribute('data-action');
-            handleAction(action, btn.dataset);
+            try {
+                handleAction(action, btn.dataset);
+            } catch (err) {
+                console.error('Action error (' + action + '):', err);
+                alert('Error in action "' + action + '": ' + err.message);
+            }
             e.preventDefault();
         });
 
@@ -73,24 +78,29 @@ var UI = (function() {
                 Network.startGame(len ? len.value : 'standard');
                 break;
             case 'startLocalGame':
-                var len2 = document.querySelector('input[name="game-length"]:checked');
-                // Read AI settings
-                GameAI.resetAI();
-                var roles = Config.ROLES;
-                var firstHumanRole = null;
-                for (var ri = 0; ri < roles.length; ri++) {
-                    var r = roles[ri];
-                    var modeEl = document.getElementById('ai-mode-' + r);
-                    var persEl = document.getElementById('ai-personality-' + r);
-                    var isAI = modeEl && modeEl.value === 'ai';
-                    if (isAI) {
-                        var persName = persEl ? persEl.value : 'random';
-                        GameAI.setAI(r, true, persName);
+                try {
+                    var len2 = document.querySelector('input[name="game-length"]:checked');
+                    // Read AI settings
+                    GameAI.resetAI();
+                    var roles = Config.ROLES;
+                    var firstHumanRole = null;
+                    for (var ri = 0; ri < roles.length; ri++) {
+                        var r = roles[ri];
+                        var modeEl = document.getElementById('ai-mode-' + r);
+                        var persEl = document.getElementById('ai-personality-' + r);
+                        var isAI = modeEl && modeEl.value === 'ai';
+                        if (isAI) {
+                            var persName = persEl ? persEl.value : 'random';
+                            GameAI.setAI(r, true, persName);
+                        }
+                        if (!isAI && !firstHumanRole) firstHumanRole = r;
                     }
-                    if (!isAI && !firstHumanRole) firstHumanRole = r;
+                    Network.startLocalGame(len2 ? len2.value : 'standard');
+                    currentRole = firstHumanRole || 'president';
+                } catch (err) {
+                    console.error('Start game error:', err);
+                    alert('Error starting game: ' + err.message);
                 }
-                Network.startLocalGame(len2 ? len2.value : 'standard');
-                currentRole = firstHumanRole || 'president';
                 break;
             case 'connectToGame':
                 var code = document.getElementById('room-code-input').value.trim();
