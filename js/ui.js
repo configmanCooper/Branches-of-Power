@@ -662,7 +662,7 @@ var UI = (function() {
                         console.error('AI turn error:', aiErr);
                         alert('AI error for ' + aiTurnRole + ': ' + aiErr.message + '\n' + aiErr.stack);
                     }
-                }, 400);
+                }, 5000);
             }
         }
         } catch (renderErr) {
