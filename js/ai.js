@@ -214,6 +214,15 @@ var GameAI = (function() {
         if (ids.indexOf('earmark') !== -1 && pc >= 8)
             priorities.push({ id: 'earmark', params: {}, weight: 6 });
 
+        if (ids.indexOf('caucusMeeting') !== -1)
+            priorities.push({ id: 'caucusMeeting', params: {}, weight: pc < 4 ? 8 : 4 });
+
+        if (ids.indexOf('subpoena') !== -1)
+            priorities.push({ id: 'subpoena', params: {}, weight: p.aggressiveness * 6 + 3 });
+
+        if (ids.indexOf('powerOfPurse') !== -1 && p.aggressiveness > 0.5 && p.riskLevel > 0.5)
+            priorities.push({ id: 'powerOfPurse', params: {}, weight: p.aggressiveness * 7 + p.riskLevel * 5 });
+
         if (ids.indexOf('housePassBill') !== -1 && bill && p.riskLevel > 0.5)
             priorities.push({ id: 'housePassBill', params: { pcToUse: Math.min(pc, 2) }, weight: p.riskLevel * 4 });
 

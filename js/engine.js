@@ -81,7 +81,10 @@ var Engine = (function() {
                 initiatedLegislationThisRound: false,
                 uniqueActionsThisRound: [],
                 speakersGavelGranted: false,
-                billsPassedTotal: 0
+                billsPassedTotal: 0,
+                caucusMeetingUsedThisRound: false,
+                subpoenaUsedThisRound: false,
+                powerOfPurseUsed: false
             },
 
             senate: {
@@ -982,6 +985,38 @@ var Engine = (function() {
         addLog('house', 'Earmark', '-6 PC, +4 VP.');
         advanceTurn();
         return { success: true, message: 'Earmark! -6 PC, +4 VP.' };
+    }
+
+    function houseCaucusMeeting() {
+        if (state.house.caucusMeetingUsedThisRound) return { success: false, message: 'Already used this round.' };
+        state.house.caucusMeetingUsedThisRound = true;
+        state.house.pc += 3;
+        addLog('house', 'Caucus Meeting', '+3 PC.');
+        advanceTurn();
+        return { success: true, message: 'Caucus Meeting! +3 PC.' };
+    }
+
+    function houseSubpoena() {
+        if (state.house.subpoenaUsedThisRound) return { success: false, message: 'Already used this round.' };
+        state.house.subpoenaUsedThisRound = true;
+        state.president.popularity = clampPopularity(state.president.popularity - 2);
+        state.house.vp += 2;
+        addLog('house', 'Subpoena Power', '-2 President Popularity, +2 VP.');
+        advanceTurn();
+        return { success: true, message: 'Subpoena issued! -2 Pres Pop, +2 VP.' };
+    }
+
+    function housePowerOfPurse() {
+        if (state.house.powerOfPurseUsed) return { success: false, message: 'Already used (once per game).' };
+        if (state.house.vp < 4) return { success: false, message: 'Need 4 VP.' };
+        state.house.powerOfPurseUsed = true;
+        state.house.vp -= 4;
+        state.president.actionsRemaining = Math.max(0, state.president.actionsRemaining - 1);
+        state.senate.actionsRemaining = Math.max(0, state.senate.actionsRemaining - 1);
+        state.purseDebuffNextRound = true;
+        addLog('house', 'Power of the Purse', '-4 VP. President and Senate lose 1 action this round and next round.');
+        advanceTurn();
+        return { success: true, message: 'Power of the Purse! President and Senate lose 1 action.' };
     }
 
     // --- Senate Actions ---
@@ -2204,6 +2239,14 @@ var Engine = (function() {
         state.senate.actionsRemaining = 4;
         state.supremeCourt.actionsRemaining = state.supremeCourt.baseActionsPerRound;
 
+        // Power of the Purse carry-over: President and Senate lose 1 action next round too
+        if (state.purseDebuffNextRound) {
+            state.president.actionsRemaining = Math.max(1, state.president.actionsRemaining - 1);
+            state.senate.actionsRemaining = Math.max(1, state.senate.actionsRemaining - 1);
+            state.purseDebuffNextRound = false;
+            addLog('house', 'Power of the Purse', 'Continued budget pressure — President and Senate have 1 fewer action this round.');
+        }
+
         // Court Calendar bonus (Feature #10): 5+ justices of same leaning = +1 action
         var leanCounts = { liberal: 0, conservative: 0, moderate: 0 };
         for (var ci = 0; ci < state.supremeCourt.justices.length; ci++) {
@@ -2225,6 +2268,8 @@ var Engine = (function() {
         state.house.initiatedLegislationThisRound = false;
         state.house.uniqueActionsThisRound = [];
         state.house.speakersGavelGranted = false;
+        state.house.caucusMeetingUsedThisRound = false;
+        state.house.subpoenaUsedThisRound = false;
 
         state.senate.governmentShutdownUsedThisRound = false;
         state.senate.filibusterUsedThisRound = false;
@@ -2342,6 +2387,15 @@ var Engine = (function() {
                 }
                 if (state.house.pc >= 6) {
                     actions.push({ id: 'earmark', label: 'Earmark', cost: '6PC', description: '-6 PC, +4 VP' });
+                }
+                if (!state.house.caucusMeetingUsedThisRound) {
+                    actions.push({ id: 'caucusMeeting', label: 'Caucus Meeting', cost: 1, description: '+3 PC' });
+                }
+                if (!state.house.subpoenaUsedThisRound) {
+                    actions.push({ id: 'subpoena', label: 'Subpoena Power', cost: 1, description: '-2 Pres Pop, +2 VP' });
+                }
+                if (!state.house.powerOfPurseUsed && state.house.vp >= 4) {
+                    actions.push({ id: 'powerOfPurse', label: 'Power of the Purse', cost: '1 + 4VP', description: 'Pres & Senate lose 1 action this round & next' });
                 }
                 if (state.currentBill && !state.house.popularizeUsedThisRound && state.house.pc >= 1) {
                     actions.push({ id: 'popularizeBill', label: 'Popularize Bill', cost: '1 + 1PC', description: '+5 Pop, -4 Leg, +3 Part' });
@@ -2535,6 +2589,9 @@ var Engine = (function() {
             case 'packCourts': actionResult = housePackCourts(); break;
             case 'riderAmendment': actionResult = houseRiderAmendment(); break;
             case 'earmark': actionResult = houseEarmark(); break;
+            case 'caucusMeeting': actionResult = houseCaucusMeeting(); break;
+            case 'subpoena': actionResult = houseSubpoena(); break;
+            case 'powerOfPurse': actionResult = housePowerOfPurse(); break;
 
             // Senate
             case 'confirmJustice': actionResult = senateJusticeNomination(true); break;
