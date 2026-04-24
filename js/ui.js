@@ -662,7 +662,7 @@ var UI = (function() {
                         console.error('AI turn error:', aiErr);
                         alert('AI error for ' + aiTurnRole + ': ' + aiErr.message + '\n' + aiErr.stack);
                     }
-                }, 5000);
+                }, 3000);
             }
         }
         } catch (renderErr) {
@@ -674,19 +674,12 @@ var UI = (function() {
     function playAITurn(role) {
         var state = JSON.parse(JSON.stringify(Engine.getState()));
         var actions = Engine.getAvailableActions(role);
-        console.log('AI Turn: ' + role + ', actions available: ' + actions.length);
-        if (actions.length === 0) {
-            console.warn('AI has no actions for role: ' + role + ', current engine role: ' + Engine.getCurrentRole());
-            return;
-        }
+        if (actions.length === 0) return;
 
         var decision = GameAI.getAIDecision(role, state, actions);
         if (!decision) {
-            console.warn('AI returned no decision for role: ' + role);
-            return;
+            decision = { id: actions[0].id, params: {} };
         }
-
-        console.log('AI decision: ' + role + ' -> ' + decision.id);
 
         // Verify the chosen action is actually available
         var valid = false;
@@ -696,7 +689,30 @@ var UI = (function() {
         if (!valid) decision = { id: actions[0].id, params: {} };
 
         var result = Network.localAction(role, decision.id, decision.params);
-        console.log('AI action result:', decision.id, result ? result.success : 'no result');
+
+        // If action failed, try other actions before giving up
+        if (!result || !result.success) {
+            var tried = {};
+            tried[decision.id] = true;
+            var succeeded = false;
+            for (var j = 0; j < actions.length; j++) {
+                if (tried[actions[j].id]) continue;
+                tried[actions[j].id] = true;
+                var fallbackResult = Network.localAction(role, actions[j].id, {});
+                if (fallbackResult && fallbackResult.success) {
+                    succeeded = true;
+                    break;
+                }
+            }
+            // If all actions failed, force skip this role's remaining actions
+            if (!succeeded) {
+                Engine.skipRemainingActions(role);
+                // Manually trigger state update since we bypassed localAction
+                var updatedState = JSON.parse(JSON.stringify(Engine.getState()));
+                Engine.setState(updatedState);
+                renderGame(updatedState);
+            }
+        }
     }
 
     function renderPlayerStats(state) {

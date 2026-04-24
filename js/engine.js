@@ -390,6 +390,14 @@ var Engine = (function() {
         endRound();
     }
 
+    function skipRemainingActions(role) {
+        if (state[role]) {
+            state[role].actionsRemaining = 0;
+            addLog(role, 'Skip', 'No valid actions — skipping remaining actions.');
+            advanceTurnNoDecrement();
+        }
+    }
+
     // --- President Actions ---
     function presidentExecutiveOrder() {
         var vpGain = (state.president.popularity >= 18) ? 2 : 1;
@@ -2403,7 +2411,7 @@ var Engine = (function() {
                 if (rs.actionsRemaining >= 2 && state.house.pc >= 2) {
                     actions.push({ id: 'changeBill', label: 'Change Bill Now', cost: '2 + 2PC', description: 'New bill on floor' });
                 }
-                if (state.currentBill && !state.billKilledThisRound) {
+                if (state.currentBill && !state.billKilledThisRound && !state.currentBill.passedByHouse) {
                     actions.push({ id: 'housePassBill', label: 'Pass Bill', cost: 1, description: 'Vote on bill' });
                 }
                 if (!state.house.initiatedLegislationThisRound) {
@@ -2446,7 +2454,7 @@ var Engine = (function() {
                 if (!state.senate.conferenceUsedThisRound) {
                     actions.push({ id: 'conference', label: 'Conference', cost: 1, description: '+1 PC for both chambers' });
                 }
-                if (state.currentBill && !state.billKilledThisRound) {
+                if (state.currentBill && !state.billKilledThisRound && !state.currentBill.passedBySenate) {
                     actions.push({ id: 'senatePassBill', label: 'Pass Bill', cost: 1, description: 'Vote on bill' });
                 }
                 if (state.passedBills.length > 0) {
@@ -2681,6 +2689,7 @@ var Engine = (function() {
             state = s;
         },
         getCurrentRole: getCurrentRole,
+        skipRemainingActions: skipRemainingActions,
         getAvailableActions: getAvailableActions,
         executeAction: executeAction,
         getWinner: getWinner,
