@@ -2124,9 +2124,8 @@ var Engine = (function() {
             state.president.popularity = clampPopularity(state.president.popularity + 1);
             state.president.termsServed++;
             state.president.roundsInCurrentTerm = 0;
-            state.president.vp += 5;
             result.winner = 'same';
-            addLog('election', 'Presidential Election', 'Incumbent wins! +5 VP. Rolled ' + roll + ' vs ' + effectivePop + '.');
+            addLog('election', 'Presidential Election', 'Incumbent wins! Rolled ' + roll + ' vs ' + effectivePop + '.');
         } else if (roll <= effectivePop && !canRunAgain) {
             // Same party, new president
             var newPop = state.president.popularity > 15 ? 11 : 10;
@@ -2134,9 +2133,8 @@ var Engine = (function() {
             state.president.termsServed = 1;
             state.president.roundsInCurrentTerm = 0;
             state.president.executiveOrdersTotal = 0;
-            state.president.vp += 5;
             result.winner = 'sameParty';
-            addLog('election', 'Presidential Election', 'Same party wins! +5 VP. New president. Rolled ' + roll + '.');
+            addLog('election', 'Presidential Election', 'Same party wins! New president. Rolled ' + roll + '.');
         } else {
             // Different party wins
             state.president.party = state.president.party === 'democrat' ? 'republican' : 'democrat';
@@ -2157,12 +2155,6 @@ var Engine = (function() {
         if (state.president.popularity > 15) {
             state.president.vp += 1;
             addLog('passive', 'President Bonus', 'Popularity > 15. +1 VP.');
-        }
-
-        // President: Rally the Base — bonus VP for very high popularity
-        if (state.president.popularity > 17) {
-            state.president.vp += 1;
-            addLog('passive', 'Rally the Base', 'Popularity > 17. +1 VP.');
         }
 
         // Supreme Court: Precedent Dividends — each precedent gives +1 VP per round
