@@ -3270,6 +3270,11 @@ var Engine = (function() {
                 }
                 break;
 
+            case 'skipRemainingActions':
+                skipRemainingActions(role);
+                actionResult = { success: true, message: 'Skipped remaining actions.', freeAction: true };
+                break;
+
             default: actionResult = { success: false, message: 'Unknown action: ' + actionId };
         }
 

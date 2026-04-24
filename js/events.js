@@ -2505,7 +2505,7 @@ var GameEvents = (function() {
                 }
                 // Shift seats from majority to minority faction
                 if (hs.chaos) {
-                    var hFactions = ['democrat', 'republican', 'independent'];
+                    var hFactions = Object.keys(state.house.composition);
                     var majorityIdx = 0;
                     var minorityIdx = 0;
                     for (var hi = 1; hi < hFactions.length; hi++) {
