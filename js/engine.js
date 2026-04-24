@@ -1559,6 +1559,65 @@ var Engine = (function() {
         return { success: true, message: 'Constitutional crisis declared!' };
     }
 
+    // Writ of Certiorari — target a passed bill, legality -3, +1 VP. Once per bill.
+    function courtCertiorari(billIndex) {
+        if (billIndex < 0 || billIndex >= state.passedBills.length) {
+            return { success: false, message: 'Invalid bill index.' };
+        }
+        if (state.supremeCourt.jp < 1) return { success: false, message: 'Need 1 JP.' };
+        var bill = state.passedBills[billIndex];
+        if (bill.certiorariUsed) return { success: false, message: 'Certiorari already granted for this bill.' };
+
+        state.supremeCourt.jp -= 1;
+        bill.certiorariUsed = true;
+        bill.legality = clampBillStat(bill.legality - 3);
+        state.supremeCourt.vp += 1;
+        addLog('supremeCourt', 'Writ of Certiorari', 'Cert granted for "' + bill.name + '". Legality -3 (now ' + bill.legality + '). +1 VP.');
+        advanceTurn();
+        return { success: true, message: 'Certiorari granted!' };
+    }
+
+    // Oral Arguments — current bill partisanship moves 2 toward center, +2 VP. Once per round.
+    function courtOralArguments() {
+        if (!state.currentBill) return { success: false, message: 'No bill on the floor.' };
+        if (state.supremeCourt.oralArgumentsUsedThisRound) return { success: false, message: 'Already used this round.' };
+
+        state.supremeCourt.oralArgumentsUsedThisRound = true;
+        var bill = state.currentBill;
+        var shift = bill.partisanship > 10 ? -2 : (bill.partisanship < 10 ? 2 : 0);
+        bill.partisanship = clampBillStat(bill.partisanship + shift);
+        state.supremeCourt.vp += 2;
+        addLog('supremeCourt', 'Oral Arguments', 'Bill partisanship shifted ' + shift + ' toward center (now ' + bill.partisanship + '). +2 VP.');
+        advanceTurn();
+        return { success: true, message: 'Oral arguments concluded.' };
+    }
+
+    // Injunction — block bill from being voted on rest of round. Once per game, 3 JP.
+    function courtInjunction() {
+        if (!state.currentBill) return { success: false, message: 'No bill on the floor.' };
+        if (state.supremeCourt.injunctionUsed) return { success: false, message: 'Already used this game.' };
+        if (state.supremeCourt.jp < 3) return { success: false, message: 'Need 3 JP.' };
+
+        state.supremeCourt.jp -= 3;
+        state.supremeCourt.injunctionUsed = true;
+        state.billKilledThisRound = true;
+        state.supremeCourt.vp += 1;
+        addLog('supremeCourt', 'Injunction', 'Bill blocked from votes this round! +1 VP.');
+        advanceTurn();
+        return { success: true, message: 'Injunction issued!' };
+    }
+
+    // Clerks Research — gain +2 JP. Once per round.
+    function courtClerksResearch() {
+        if (state.supremeCourt.clerksResearchUsedThisRound) return { success: false, message: 'Already used this round.' };
+
+        state.supremeCourt.clerksResearchUsedThisRound = true;
+        state.supremeCourt.jp += 2;
+        addLog('supremeCourt', 'Clerks Research', '+2 JP (now ' + state.supremeCourt.jp + ').');
+        advanceTurn();
+        return { success: true, message: 'Clerks completed research.' };
+    }
+
     function courtRecusal(leaning) {
         if (state.supremeCourt.recusalUsedThisRound) {
             return { success: false, message: 'Recusal already used this round.' };
@@ -2189,6 +2248,8 @@ var Engine = (function() {
         state.supremeCourt.partisanRulingUsedThisRound = false;
         state.supremeCourt.billReviewUsedThisRound = false;
         state.supremeCourt.amicusBriefUsedThisRound = false;
+        state.supremeCourt.oralArgumentsUsedThisRound = false;
+        state.supremeCourt.clerksResearchUsedThisRound = false;
         state.supremeCourt.recusedJusticeIndex = null;
         state.supremeCourt.recusalUsedThisRound = false;
 
@@ -2406,6 +2467,25 @@ var Engine = (function() {
                 if (!state.supremeCourt.landmarkRulingUsed && rs.actionsRemaining >= 2 && state.supremeCourt.jp >= 6) {
                     actions.push({ id: 'landmarkRuling', label: 'Landmark Ruling', cost: '2 + 6JP', description: 'Once-per-game powerful effect' });
                 }
+                // Writ of Certiorari — target a passed bill, legality -3
+                if (state.passedBills.length > 0 && state.supremeCourt.jp >= 1) {
+                    var hasCertTarget = state.passedBills.some(function(b) { return !b.certiorariUsed; });
+                    if (hasCertTarget) {
+                        actions.push({ id: 'certiorari', label: 'Writ of Certiorari', cost: '1 + 1JP', description: 'Target bill legality -3, +1 VP' });
+                    }
+                }
+                // Oral Arguments — bill partisanship toward center, +2 VP
+                if (state.currentBill && !state.supremeCourt.oralArgumentsUsedThisRound) {
+                    actions.push({ id: 'oralArguments', label: 'Oral Arguments', cost: 1, description: 'Bill partisanship toward center, +2 VP' });
+                }
+                // Injunction — block bill votes this round, once per game
+                if (state.currentBill && !state.supremeCourt.injunctionUsed && state.supremeCourt.jp >= 3 && !state.billKilledThisRound) {
+                    actions.push({ id: 'injunction', label: 'Injunction', cost: '1 + 3JP', description: 'Block bill votes this round, +1 VP (once/game)' });
+                }
+                // Clerks Research — +2 JP
+                if (!state.supremeCourt.clerksResearchUsedThisRound) {
+                    actions.push({ id: 'clerksResearch', label: 'Clerks Research', cost: 1, description: '+2 JP' });
+                }
                 break;
         }
 
@@ -2494,6 +2574,10 @@ var Engine = (function() {
             case 'partisanRuling': actionResult = courtPartisanRuling(params.direction || 1); break;
             case 'constitutionalCrisis': actionResult = courtConstitutionalCrisis(); break;
             case 'amicusBrief': actionResult = courtAmicusBrief(); break;
+            case 'certiorari': actionResult = courtCertiorari(params.billIndex || 0); break;
+            case 'oralArguments': actionResult = courtOralArguments(); break;
+            case 'injunction': actionResult = courtInjunction(); break;
+            case 'clerksResearch': actionResult = courtClerksResearch(); break;
             case 'recusal': actionResult = courtRecusal(params.leaning || 'moderate'); break;
             case 'landmarkRuling': actionResult = courtLandmarkRuling(params.effect || 'extraAction'); break;
 

@@ -394,6 +394,29 @@ var GameAI = (function() {
         if (ids.indexOf('advisoryRole') !== -1)
             priorities.push({ id: 'advisoryRole', params: {}, weight: 7 + (1 - p.riskLevel) * 2 });
 
+        // Oral Arguments — good VP action, moves bill toward center
+        if (ids.indexOf('oralArguments') !== -1)
+            priorities.push({ id: 'oralArguments', params: {}, weight: 9 + (1 - p.aggressiveness) * 2 });
+
+        // Certiorari — weaken a passed bill for future overturn
+        if (ids.indexOf('certiorari') !== -1 && s.passedBills) {
+            for (var ci = 0; ci < s.passedBills.length; ci++) {
+                var cb = s.passedBills[ci];
+                if (!cb.certiorariUsed && !(cb.markers && cb.markers.indexOf('C') !== -1)) {
+                    priorities.push({ id: 'certiorari', params: { billIndex: ci }, weight: 10 + p.aggressiveness * 2 });
+                    break;
+                }
+            }
+        }
+
+        // Clerks Research — build JP for future powerful actions
+        if (ids.indexOf('clerksResearch') !== -1)
+            priorities.push({ id: 'clerksResearch', params: {}, weight: 6 + (jp < 3 ? 4 : 0) + (1 - p.riskLevel) * 2 });
+
+        // Injunction — block bill votes (save for misaligned bills)
+        if (ids.indexOf('injunction') !== -1 && bill && !billAlignsWithCourt(bill))
+            priorities.push({ id: 'injunction', params: {}, weight: 11 + p.aggressiveness * 3 });
+
         // Lower priority
         if (ids.indexOf('investigateEO') !== -1)
             priorities.push({ id: 'investigateEO', params: {}, weight: 5 + p.aggressiveness * 4 });
