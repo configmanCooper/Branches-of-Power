@@ -120,12 +120,23 @@ var GameAI = (function() {
         return { id: actions[0].id, params: {} };
     }
 
+    // Helper to get active bill from state (works with both old currentBill and new bills array)
+    function getStateBill(s) {
+        if (s.bills && s.bills.length > 0) {
+            for (var i = 0; i < s.bills.length; i++) {
+                if (s.bills[i].id === s.activeBillId) return s.bills[i];
+            }
+            return s.bills[0];
+        }
+        return s.currentBill || null;
+    }
+
     // --- AI Decision Functions ---
 
     function presidentAI(s, actions, p) {
         var party = s.president.party;
         var pop = s.president.popularity;
-        var bill = s.currentBill;
+        var bill = getStateBill(s);
         var ids = actions.map(function(a) { return a.id; });
 
         if (ids.indexOf('signBill') !== -1) return { id: 'signBill', params: {} };
@@ -170,7 +181,7 @@ var GameAI = (function() {
 
     function houseAI(s, actions, p) {
         var party = s.house.majorityParty;
-        var bill = s.currentBill;
+        var bill = getStateBill(s);
         var pc = s.house.pc;
         var ids = actions.map(function(a) { return a.id; });
 
@@ -231,7 +242,7 @@ var GameAI = (function() {
 
     function senateAI(s, actions, p) {
         var party = s.senate.majorityParty;
-        var bill = s.currentBill;
+        var bill = getStateBill(s);
         var pc = s.senate.pc;
         var ids = actions.map(function(a) { return a.id; });
 
@@ -288,7 +299,7 @@ var GameAI = (function() {
         var vp = s.supremeCourt.vp;
         var jp = s.supremeCourt.jp;
         var ids = actions.map(function(a) { return a.id; });
-        var bill = s.currentBill;
+        var bill = getStateBill(s);
 
         function simReview(testBill, skipIdx) {
             var votesU = 0, votesC = 0;
@@ -461,6 +472,44 @@ var GameAI = (function() {
         if (!config || !config.enabled) return null;
         var p = config.personality;
 
+        // Prioritize event resolution when stability is low or events are active
+        var eventActions = actions.filter(function(a) { return a.id === 'resolveEvent' || a.id === 'eventSpecialAction'; });
+        if (eventActions.length > 0 && state.stability !== undefined) {
+            // Always try to resolve events when stability <= 4, or with cooperation-weighted chance otherwise
+            var resolveChance = state.stability <= 2 ? 0.95 : (state.stability <= 4 ? 0.8 : (0.4 + p.cooperation * 0.4));
+            if (Math.random() < resolveChance) {
+                // Pick the best resolution (prefer non-cooperative solo actions for simplicity)
+                var soloActions = eventActions.filter(function(a) { return a.id === 'resolveEvent'; });
+                if (soloActions.length > 0) {
+                    var pick = soloActions[Math.floor(Math.random() * soloActions.length)];
+                    return { id: pick.id, params: pick.params || {} };
+                }
+                // Try special actions
+                var specials = eventActions.filter(function(a) { return a.id === 'eventSpecialAction'; });
+                if (specials.length > 0) {
+                    return { id: specials[0].id, params: specials[0].params || {} };
+                }
+            }
+        }
+
+        // Unity Summit: agree if stability is low, or with cooperation chance
+        var unitySummitActions = actions.filter(function(a) { return a.id === 'agreeUnitySummit' || a.id === 'proposeUnitySummit'; });
+        if (unitySummitActions.length > 0 && state.stability !== undefined) {
+            var agreeAction = unitySummitActions.filter(function(a) { return a.id === 'agreeUnitySummit'; });
+            if (agreeAction.length > 0) {
+                var agreeChance = state.stability <= 3 ? 0.95 : (state.stability <= 5 ? 0.7 : (0.3 + p.cooperation * 0.4));
+                if (Math.random() < agreeChance) {
+                    return { id: 'agreeUnitySummit', params: {} };
+                }
+            }
+            var proposeAction = unitySummitActions.filter(function(a) { return a.id === 'proposeUnitySummit'; });
+            if (proposeAction.length > 0 && state.stability <= 4 && p.cooperation >= 0.5) {
+                if (Math.random() < 0.4) {
+                    return { id: 'proposeUnitySummit', params: {} };
+                }
+            }
+        }
+
         switch (role) {
             case 'president': return presidentAI(state, actions, p);
             case 'house': return houseAI(state, actions, p);
@@ -468,6 +517,151 @@ var GameAI = (function() {
             case 'supremeCourt': return supremeCourtAI(state, actions, p);
         }
         return null;
+    }
+
+    // AI deal response: decides whether to accept a deal from a player
+    function respondToDeal(aiRole, fromRole, askType, offerType, state) {
+        var conf = aiConfig[aiRole];
+        if (!conf || !conf.personality) return Math.random() > 0.5;
+        var p = conf.personality;
+
+        // Base acceptance from cooperation trait
+        var acceptChance = p.cooperation * 0.5 + 0.2;
+
+        // Trust modifier
+        var trust = state.trust && state.trust[aiRole] ? state.trust[aiRole][fromRole] || 5 : 5;
+        acceptChance += (trust - 5) * 0.05;
+
+        // If they're asking something hard, less likely
+        var hardAsks = ['filibuster', 'killBill', 'vetoBill', 'reviewBill', 'dontResolveEvent'];
+        if (hardAsks.indexOf(askType) !== -1) acceptChance -= 0.15;
+
+        // If offer is good, more likely
+        var goodOffers = ['passBillHouse', 'passBillSenate', 'signBill', 'confirmJustice', 'nominateJustice',
+                          'resolveEvent', 'commitToEvent', 'agreeUnitySummit'];
+        if (goodOffers.indexOf(offerType) !== -1) acceptChance += 0.15;
+
+        // Event-specific logic
+        var stab = state.stability !== undefined ? state.stability : 5;
+
+        // If they ask us to resolve/commit to event and stability is low, very likely to agree
+        if ((askType === 'resolveEvent' || askType === 'commitToEvent') && stab <= 4) {
+            acceptChance += 0.3;
+        }
+        // If they offer to resolve event, we like that
+        if ((offerType === 'resolveEvent' || offerType === 'commitToEvent') && stab <= 5) {
+            acceptChance += 0.2;
+        }
+        // If they ask us NOT to resolve, depends on whether it benefits us strategically
+        if (askType === 'dontResolveEvent') {
+            if (stab <= 3) {
+                acceptChance -= 0.4; // Too dangerous to let it fail
+            } else {
+                acceptChance += p.aggressiveness * 0.2 - 0.1; // Aggressive AIs more open to chaos
+            }
+        }
+        // Unity summit deals — cooperative AIs love these
+        if (askType === 'agreeUnitySummit' || offerType === 'agreeUnitySummit') {
+            acceptChance += p.cooperation * 0.2;
+            if (stab <= 4) acceptChance += 0.2;
+        }
+
+        // Aggressive personalities less likely to cooperate
+        acceptChance -= p.aggressiveness * 0.2;
+
+        return Math.random() < Math.max(0.1, Math.min(0.9, acceptChance));
+    }
+
+    // AI proactively proposes deals to the player
+    function getAIDealProposal(aiRole, playerRole, state) {
+        var conf = aiConfig[aiRole];
+        if (!conf || !conf.personality) return null;
+        var p = conf.personality;
+
+        // Only propose if negotiation rate is high enough
+        if (Math.random() > (p.negotiationRate || 0.3)) return null;
+
+        // Don't spam deals
+        var existingDeals = (state.deals || []).filter(function(d) {
+            return d.from === aiRole && d.to === playerRole && (d.status === 'pending' || d.status === 'accepted');
+        });
+        if (existingDeals.length > 0) return null;
+
+        var bill = getStateBill(state);
+        var proposals = [];
+        var stab = state.stability !== undefined ? state.stability : 5;
+
+        // Event-related deal proposals (high priority when events are active)
+        if (state.activeEvent && !state.activeEvent.resolved) {
+            var evt = state.activeEvent;
+            var evtName = evt.name;
+
+            // Ask player to help resolve event
+            if (stab <= 5 || p.cooperation >= 0.5) {
+                proposals.push({ ask: 'resolveEvent', offer: 'resolveEvent', msg: 'Let\'s both work to resolve "' + evtName + '"!' });
+                proposals.push({ ask: 'commitToEvent', offer: 'commitToEvent', msg: 'We need to cooperate on "' + evtName + '" — commit together?' });
+            }
+
+            // If stability is critical, urgently ask for help
+            if (stab <= 3) {
+                proposals.push({ ask: 'resolveEvent', offer: 'general', msg: '⚠️ Stability is critical! Please help resolve "' + evtName + '"!' });
+                proposals.push({ ask: 'commitToEvent', offer: 'general', msg: '⚠️ We MUST resolve "' + evtName + '" or we all lose!' });
+            }
+
+            // Aggressive AI might propose letting events fail for strategic gain
+            if (p.aggressiveness >= 0.6 && stab >= 5 && evt.failPenalty) {
+                var pen = evt.failPenalty;
+                // If failure would hurt opponents more than us
+                var myLoss = (pen.vp && pen.vp[aiRole]) ? pen.vp[aiRole] : 0;
+                var theirLoss = (pen.vp && pen.vp[playerRole]) ? pen.vp[playerRole] : 0;
+                if (theirLoss < myLoss - 1 || pen.houseShift || pen.senateShift || (pen.justiceEffect && aiRole !== 'supremeCourt')) {
+                    proposals.push({ ask: 'dontResolveEvent', offer: 'dontResolveEvent', msg: 'Let "' + evtName + '" fail — the chaos benefits us both.' });
+                }
+            }
+
+            // Offer to use event special action in exchange for something
+            if (evt.specialActions && evt.specialActions.length > 0) {
+                proposals.push({ ask: 'general', offer: 'eventSpecialAction', msg: 'I\'ll use a special action on "' + evtName + '" if you help me out.' });
+            }
+        }
+
+        // Unity Summit deals
+        if (state.pendingUnitySummit && state.pendingUnitySummit.needed.indexOf(playerRole) !== -1) {
+            proposals.push({ ask: 'agreeUnitySummit', offer: 'general', msg: 'Please join the Unity Summit — we need your support!' });
+        }
+        if (!state.pendingUnitySummit && stab <= 4 && p.cooperation >= 0.4) {
+            proposals.push({ ask: 'proposeUnitySummit', offer: 'agreeUnitySummit', msg: 'Propose a Unity Summit and I\'ll agree to it.' });
+            proposals.push({ ask: 'agreeUnitySummit', offer: 'proposeUnitySummit', msg: 'I\'ll propose a Unity Summit if you agree to join.' });
+        }
+
+        // Role-specific deal proposals
+        if (aiRole === 'house' && bill) {
+            if (bill.passedByHouse) {
+                proposals.push({ ask: 'signBill', offer: 'passBillHouse', msg: 'We passed the bill — will you sign it?' });
+            } else {
+                proposals.push({ ask: 'signBill', offer: 'passBillHouse', msg: 'Pass this bill if you sign it.' });
+            }
+        }
+        if (aiRole === 'senate' && bill) {
+            proposals.push({ ask: 'signBill', offer: 'passBillSenate', msg: 'We\'ll pass the bill if you sign it.' });
+            if (playerRole === 'house') {
+                proposals.push({ ask: 'passBillHouse', offer: 'passBillSenate', msg: 'Let\'s both pass this bill.' });
+            }
+        }
+        if (aiRole === 'president') {
+            proposals.push({ ask: 'passBillHouse', offer: 'signBill', msg: 'Pass the bill and I\'ll sign it.' });
+            proposals.push({ ask: 'passBillSenate', offer: 'signBill', msg: 'Get the Senate to pass it, I\'ll sign.' });
+        }
+        if (aiRole === 'supremeCourt') {
+            proposals.push({ ask: 'general', offer: 'reviewBill', msg: 'Support our judicial review efforts.' });
+        }
+
+        // General proposals
+        proposals.push({ ask: 'general', offer: 'general', msg: 'Let\'s cooperate this round.' });
+
+        if (proposals.length === 0) return null;
+        var pick = proposals[Math.floor(Math.random() * proposals.length)];
+        return { to: playerRole, askType: pick.ask, offerType: pick.offer, message: pick.msg };
     }
 
     return {
@@ -478,7 +672,9 @@ var GameAI = (function() {
         isAI: isAI,
         getAIConfig: getAIConfig,
         resetAI: resetAI,
-        getAIDecision: getAIDecision
+        getAIDecision: getAIDecision,
+        respondToDeal: respondToDeal,
+        getAIDealProposal: getAIDealProposal
     };
 })();
 

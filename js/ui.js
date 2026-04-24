@@ -130,6 +130,62 @@ var UI = (function() {
                 executeGameAction(dataset.actionId, dataset);
                 break;
 
+            // Select active bill
+            case 'selectBill':
+                Network.localAction(currentRole, 'setActiveBill', { billId: parseInt(dataset.billId) });
+                break;
+
+            // Passed Laws viewer
+            case 'showPassedLaws':
+                showPassedLawsModal();
+                break;
+
+            // Deal Actions
+            case 'showProposeDeal':
+                showProposeDealModal();
+                break;
+            case 'sendDeal':
+                var target = document.getElementById('deal-target');
+                var ask = document.getElementById('deal-ask');
+                var offer = document.getElementById('deal-offer');
+                var msg = document.getElementById('deal-message');
+                var askBill = document.getElementById('deal-ask-bill');
+                var offerBill = document.getElementById('deal-offer-bill');
+                if (target && ask && offer) {
+                    var askBillId = (askBill && askBill.value) ? parseInt(askBill.value) : null;
+                    var offerBillId = (offerBill && offerBill.value) ? parseInt(offerBill.value) : null;
+                    Network.localAction(currentRole, 'proposeDeal', {
+                        to: target.value,
+                        askType: ask.value,
+                        offerType: offer.value,
+                        message: msg ? msg.value : '',
+                        askBillId: askBillId,
+                        offerBillId: offerBillId
+                    });
+                    closeModal();
+                    // AI responds to deals immediately
+                    if (GameAI.isAI(target.value)) {
+                        var aiAccepts = GameAI.respondToDeal(target.value, currentRole, ask.value, offer.value, Engine.getState());
+                        var latestDeal = Engine.getState().deals[Engine.getState().deals.length - 1];
+                        Network.localAction(target.value, 'respondDeal', { dealId: latestDeal.id, accept: aiAccepts });
+                    }
+                }
+                break;
+            case 'acceptDeal':
+                Network.localAction(currentRole, 'respondDeal', { dealId: parseInt(dataset.dealId), accept: true });
+                break;
+            case 'rejectDeal':
+                Network.localAction(currentRole, 'respondDeal', { dealId: parseInt(dataset.dealId), accept: false });
+                break;
+            case 'fulfillDeal':
+                Network.localAction(currentRole, 'fulfillDeal', { dealId: parseInt(dataset.dealId) });
+                showToast('Promise fulfilled! Trust increased.', 'success');
+                break;
+            case 'breakDeal':
+                Network.localAction(currentRole, 'breakDeal', { dealId: parseInt(dataset.dealId) });
+                showToast('Promise broken! Trust damaged.', 'error');
+                break;
+
             // Modal actions
             case 'closeModal':
                 closeModal();
@@ -194,6 +250,12 @@ var UI = (function() {
             case 'proposeAmendment':
                 showProposeAmendmentModal();
                 return;
+            case 'resolveEvent':
+                params.resolutionId = dataset.resolutionId;
+                break;
+            case 'eventSpecialAction':
+                params.actionIndex = parseInt(dataset.actionIndex);
+                break;
         }
 
         // Direct actions
@@ -269,7 +331,7 @@ var UI = (function() {
     }
 
     function showUpdateBillModal() {
-        var bill = currentState.currentBill;
+        var bill = Engine.getActiveBill();
         var html = '<p>Current bill: Part ' + bill.partisanship + ', Pop ' + bill.popularity + ', Leg ' + bill.legality + '</p>';
         html += '<p>Adjust up to 3 points total (1 PC per 2 extra points):</p>';
         html += '<div class="bill-adjust">';
@@ -553,6 +615,19 @@ var UI = (function() {
             html += '<span class="vp-score" style="color:' + Config.ROLE_COLORS[vr] + '">' + Config.ROLE_ICONS[vr] + ' ' + state[vr].vp + '</span>';
         }
         html += '</div>';
+        // Stability gauge
+        if (state.stability !== undefined) {
+            var stab = state.stability;
+            var stabColor = stab >= 8 ? '#4CAF50' : (stab >= 5 ? '#2196F3' : (stab >= 3 ? '#FF9800' : '#f44336'));
+            var stabLabel = stab >= 8 ? 'Prosperous' : (stab >= 5 ? 'Stable' : (stab >= 3 ? 'Unstable' : (stab >= 1 ? 'Crisis' : 'COLLAPSE')));
+            html += '<div class="stability-gauge" style="display:flex;align-items:center;gap:6px;margin-left:12px">';
+            html += '<span style="font-size:0.8em;color:#aaa">🏛️ Stability:</span>';
+            html += '<div style="width:80px;height:10px;background:#333;border-radius:5px;overflow:hidden;border:1px solid #555">';
+            html += '<div style="width:' + (stab * 10) + '%;height:100%;background:' + stabColor + ';transition:width 0.3s"></div>';
+            html += '</div>';
+            html += '<span style="font-size:0.85em;font-weight:bold;color:' + stabColor + '">' + stab + '/10 ' + stabLabel + '</span>';
+            html += '</div>';
+        }
         html += '<div class="header-right">';
         if (Network.getRoomCode() !== 'LOCAL') {
             html += '<span class="room-code">Room: ' + Network.getRoomCode() + '</span>';
@@ -570,7 +645,64 @@ var UI = (function() {
 
         // Center: Bill + composition + actions
         html += '<div class="center-panel">';
-        html += renderBillCard(state);
+        html += renderBillsPanel(state);
+
+        // Active Event banner
+        if (state.activeEvent && !state.activeEvent.resolved) {
+            var evt = state.activeEvent;
+            var sevColors = { 1: '#2196F3', 2: '#FF9800', 3: '#f44336' };
+            var sevLabels = { 1: 'Minor', 2: 'Major', 3: 'Critical' };
+            var sevColor = sevColors[evt.severity] || '#FF9800';
+            html += '<div class="event-banner" style="background:rgba(255,193,7,0.1);border:2px solid ' + sevColor + ';border-radius:10px;padding:10px 14px;margin:8px 0;position:relative">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+            html += '<span style="font-weight:bold;font-size:1.05em;color:' + sevColor + '">⚡ ' + escapeHtml(evt.name) + '</span>';
+            html += '<span style="font-size:0.8em;padding:2px 8px;border-radius:10px;background:' + sevColor + ';color:white">' + sevLabels[evt.severity] + ' | ' + evt.roundsRemaining + ' rounds left</span>';
+            html += '</div>';
+            html += '<p style="margin:4px 0;font-size:0.9em;color:#ccc;font-style:italic">' + escapeHtml(evt.flavor) + '</p>';
+
+            // Failure warning
+            // Failure effects warning
+            var pen = evt.failPenalty;
+            if (pen) {
+                var failWarnings = [];
+                if (pen.stability) failWarnings.push('Stability ' + pen.stability);
+                if (pen.popularity) failWarnings.push('Popularity ' + pen.popularity);
+                if (pen.houseShift) failWarnings.push('🏛️ House composition shift!');
+                if (pen.senateShift) failWarnings.push('🏛️ Senate composition shift!');
+                if (pen.justiceEffect && pen.justiceEffect.resign) failWarnings.push('⚖️ Justice resigns!');
+                if (pen.justiceEffect && pen.justiceEffect.switchPartisanship) failWarnings.push('⚖️ Justice partisanship changes!');
+                if (pen.presidentLosesElection) failWarnings.push('🗳️ President loses next election!');
+                if (failWarnings.length > 0) {
+                    html += '<p style="margin:2px 0;font-size:0.8em;color:#f44336">⚠️ Failure: ' + failWarnings.join(' | ') + '</p>';
+                }
+            }
+
+            // Resolution options with cooperative progress
+            html += '<div style="margin-top:6px;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px">';
+            for (var ri = 0; ri < evt.resolutions.length; ri++) {
+                var res = evt.resolutions[ri];
+                var roleNames = res.roles.map(function(r) { return Config.ROLE_LABELS[r]; }).join(' + ');
+                html += '<div style="margin:4px 0;padding:4px 8px;background:rgba(255,255,255,0.05);border-radius:6px;font-size:0.85em">';
+                html += '<strong>' + escapeHtml(res.label) + '</strong>';
+                html += ' <span style="color:#888">(' + roleNames + ')</span>';
+                if (res.cooperative && res.agreedRoles) {
+                    var committed = res.agreedRoles.length;
+                    var needed = res.roles.length;
+                    html += ' <span style="color:#FFC107">[' + committed + '/' + needed + ' committed]</span>';
+                    if (res.agreedRoles.length > 0) {
+                        html += ' <span style="font-size:0.8em;color:#aaa">' + res.agreedRoles.map(function(r) { return Config.ROLE_ICONS[r]; }).join(' ') + '</span>';
+                    }
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // Queued event indicator
+            if (state.queuedEvent) {
+                html += '<div style="margin-top:4px;font-size:0.8em;color:#FF9800">📋 Queued: ' + escapeHtml(state.queuedEvent.name) + '</div>';
+            }
+            html += '</div>';
+        }
 
         // Pending Amendment banner
         if (state.pendingAmendment) {
@@ -581,7 +713,27 @@ var UI = (function() {
             html += '</div>';
         }
 
+        // Pending Unity Summit banner
+        if (state.pendingUnitySummit) {
+            var us = state.pendingUnitySummit;
+            html += '<div class="unity-banner" style="background:rgba(76,175,80,0.15);border:1px solid #4CAF50;border-radius:8px;padding:8px 12px;margin:6px 0;text-align:center;">';
+            html += '<strong>🕊️ National Unity Summit</strong>';
+            html += '<br><small>Proposed by ' + Config.ROLE_LABELS[us.proposedBy] + '. Agreed: ' + us.agreed.map(function(r) { return Config.ROLE_ICONS[r]; }).join(' ') + ' (' + us.agreed.length + '/4)';
+            if (us.needed.length > 0) {
+                html += ' | Waiting: ' + us.needed.map(function(r) { return Config.ROLE_LABELS[r]; }).join(', ');
+            }
+            html += '</small></div>';
+        }
+
         html += renderCompositionBars(state);
+
+        // Passed Laws button
+        var lawCount = (state.passedBills || []).length;
+        var unconCount = (state.unconstitutionalBills || []).length;
+        html += '<button class="btn" data-action="showPassedLaws" style="margin:6px 0;width:100%;padding:6px;background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:6px;color:#ccc;cursor:pointer;text-align:center">';
+        html += '📚 Passed Laws (' + lawCount + ')';
+        if (unconCount > 0) html += ' | ⚖️ Unconstitutional (' + unconCount + ')';
+        html += '</button>';
 
         // Role switcher for local mode
         if (isLocal) {
@@ -608,6 +760,10 @@ var UI = (function() {
 
         // Actions
         html += renderActions(state, isLocal ? currentTurnRole : currentRole);
+
+        // Deals panel
+        html += renderDealsPanel(state, currentRole, isLocal);
+
         html += '</div>';
 
         // Right: Action log
@@ -675,6 +831,32 @@ var UI = (function() {
         var state = JSON.parse(JSON.stringify(Engine.getState()));
         var actions = Engine.getAvailableActions(role);
         if (actions.length === 0) return;
+
+        // AI may propose a deal to the human player
+        if (currentRole && !GameAI.isAI(currentRole)) {
+            var dealProposal = GameAI.getAIDealProposal(role, currentRole, state);
+            if (dealProposal) {
+                Network.localAction(role, 'proposeDeal', {
+                    to: dealProposal.to,
+                    askType: dealProposal.askType,
+                    offerType: dealProposal.offerType,
+                    message: dealProposal.message
+                });
+            }
+        }
+
+        // AI also fulfills or breaks accepted deals
+        var aiDeals = Engine.getAcceptedDealsForRole(role);
+        for (var d = 0; d < aiDeals.length; d++) {
+            var deal = aiDeals[d];
+            var conf = GameAI.getAIConfig(role);
+            var lieRate = conf.personality ? conf.personality.baseLieRate || 0.2 : 0.2;
+            if (Math.random() < lieRate) {
+                Network.localAction(role, 'breakDeal', { dealId: deal.id });
+            } else {
+                Network.localAction(role, 'fulfillDeal', { dealId: deal.id });
+            }
+        }
 
         var decision = GameAI.getAIDecision(role, state, actions);
         if (!decision) {
@@ -766,8 +948,44 @@ var UI = (function() {
         return html;
     }
 
-    function renderBillCard(state) {
-        var bill = state.currentBill;
+    function renderBillsPanel(state) {
+        var bills = state.bills || [];
+        if (bills.length === 0) {
+            return '<div class="bill-card empty-bill"><p>No bills on the floor</p></div>';
+        }
+
+        var html = '';
+
+        // Bill tabs (only show if multiple bills)
+        if (bills.length > 1) {
+            html += '<div class="bill-tabs" style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">';
+            for (var t = 0; t < bills.length; t++) {
+                var b = bills[t];
+                var isActive = b.id === state.activeBillId;
+                var tabColor = getPartisanColor(b.partisanship);
+                var tabStyle = isActive
+                    ? 'background:' + tabColor + ';color:white;font-weight:bold;border:2px solid white'
+                    : 'background:rgba(255,255,255,0.08);color:#aaa;border:2px solid ' + tabColor;
+                html += '<button class="bill-tab" data-action="selectBill" data-bill-id="' + b.id + '" style="' + tabStyle + ';padding:4px 10px;border-radius:6px 6px 0 0;cursor:pointer;font-size:0.8em;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">';
+                html += b.name;
+                if (b.passedByHouse) html += ' ✅H';
+                if (b.passedBySenate) html += ' ✅S';
+                if (b.killed) html += ' 💀';
+                if (b.stalled) html += ' ⏸️';
+                html += '</button>';
+            }
+            html += '</div>';
+        }
+
+        // Render active bill card
+        var activeBill = Engine.getActiveBill();
+        if (!activeBill) activeBill = bills[0];
+        html += renderBillCard(state, activeBill);
+
+        return html;
+    }
+
+    function renderBillCard(state, bill) {
         if (!bill) {
             return '<div class="bill-card empty-bill"><p>No bill on the floor</p></div>';
         }
@@ -886,7 +1104,12 @@ var UI = (function() {
             html += '<div class="action-grid">';
             for (var i = 0; i < actions.length; i++) {
                 var a = actions[i];
-                html += '<button class="action-btn" data-action="gameAction" data-action-id="' + a.id + '">';
+                var extraData = '';
+                if (a.params) {
+                    if (a.params.resolutionId) extraData += ' data-resolution-id="' + a.params.resolutionId + '"';
+                    if (a.params.actionIndex !== undefined) extraData += ' data-action-index="' + a.params.actionIndex + '"';
+                }
+                html += '<button class="action-btn" data-action="gameAction" data-action-id="' + a.id + '"' + extraData + '>';
                 html += '<span class="action-name">' + escapeHtml(a.label) + '</span>';
                 html += '<span class="action-desc">' + escapeHtml(a.description) + '</span>';
                 html += '<span class="action-cost">Cost: ' + a.cost + ' action' + (a.cost !== 1 ? 's' : '') + '</span>';
@@ -896,6 +1119,284 @@ var UI = (function() {
         }
         html += '</div>';
         return html;
+    }
+
+    function renderDealsPanel(state, myRole, isLocal) {
+        if (!isLocal) return '';
+        var html = '<div class="deals-panel" style="margin-top:12px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid #333">';
+        html += '<h3 style="margin:0 0 8px 0">🤝 Deals & Trust</h3>';
+
+        // Trust display
+        html += '<div class="trust-display" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
+        var roles = Config.ROLES;
+        for (var i = 0; i < roles.length; i++) {
+            var r = roles[i];
+            if (r === myRole) continue;
+            var trustVal = state.trust[myRole] ? state.trust[myRole][r] : 5;
+            var trustColor = trustVal >= 7 ? '#4CAF50' : (trustVal >= 4 ? '#FF9800' : '#f44336');
+            var trustLabel = trustVal >= 7 ? '👍' : (trustVal >= 4 ? '🤝' : '👎');
+            html += '<span style="font-size:0.8em;color:' + Config.ROLE_COLORS[r] + '">' + Config.ROLE_ICONS[r] + ' ' + trustLabel + ' ' + trustVal.toFixed(1) + '</span>';
+        }
+        html += '</div>';
+
+        // Propose deal button
+        html += '<button class="btn btn-small" data-action="showProposeDeal" style="margin-bottom:8px;background:#2196F3;color:white;padding:4px 12px;border-radius:4px;border:none;cursor:pointer">📜 Propose Deal</button>';
+
+        // Pending deals TO the player
+        var pendingDeals = Engine.getPendingDealsForRole(myRole);
+        if (pendingDeals.length > 0) {
+            html += '<div class="pending-deals" style="margin-top:6px">';
+            html += '<h4 style="margin:4px 0;color:#FFC107">📨 Incoming Deals</h4>';
+            for (var j = 0; j < pendingDeals.length; j++) {
+                var pd = pendingDeals[j];
+                html += '<div class="deal-card" style="background:rgba(255,193,7,0.1);border:1px solid #FFC107;border-radius:6px;padding:8px;margin:4px 0">';
+                html += '<div style="color:' + Config.ROLE_COLORS[pd.from] + ';font-weight:bold">' + Config.ROLE_ICONS[pd.from] + ' ' + Config.ROLE_LABELS[pd.from] + ' proposes:</div>';
+                html += '<div style="margin:4px 0"><strong>Asks you to:</strong> ' + getDealTypeLabel(pd.askType, pd.askBillName) + '</div>';
+                html += '<div style="margin:4px 0"><strong>Offers to:</strong> ' + getDealTypeLabel(pd.offerType, pd.offerBillName) + '</div>';
+                if (pd.message) html += '<div style="font-style:italic;color:#aaa">"' + escapeHtml(pd.message) + '"</div>';
+                html += '<div style="margin-top:6px">';
+                html += '<button class="btn btn-small" data-action="acceptDeal" data-deal-id="' + pd.id + '" style="background:#4CAF50;color:white;padding:3px 10px;border-radius:4px;border:none;cursor:pointer;margin-right:6px">✅ Accept</button>';
+                html += '<button class="btn btn-small" data-action="rejectDeal" data-deal-id="' + pd.id + '" style="background:#f44336;color:white;padding:3px 10px;border-radius:4px;border:none;cursor:pointer">❌ Reject</button>';
+                html += '</div></div>';
+            }
+            html += '</div>';
+        }
+
+        // Active deals the player has accepted (promises they made)
+        var acceptedDeals = Engine.getAcceptedDealsForRole(myRole);
+        if (acceptedDeals.length > 0) {
+            html += '<div class="active-deals" style="margin-top:6px">';
+            html += '<h4 style="margin:4px 0;color:#4CAF50">📋 Your Promises</h4>';
+            for (var k = 0; k < acceptedDeals.length; k++) {
+                var ad = acceptedDeals[k];
+                html += '<div class="deal-card" style="background:rgba(76,175,80,0.1);border:1px solid #4CAF50;border-radius:6px;padding:8px;margin:4px 0">';
+                html += '<div>Promised ' + Config.ROLE_LABELS[ad.to] + ': <strong>' + getDealTypeLabel(ad.offerType, ad.offerBillName) + '</strong></div>';
+                html += '<div style="font-size:0.8em;color:#888">They will: ' + getDealTypeLabel(ad.askType, ad.askBillName) + '</div>';
+                html += '<div style="margin-top:6px">';
+                html += '<button class="btn btn-small" data-action="fulfillDeal" data-deal-id="' + ad.id + '" style="background:#4CAF50;color:white;padding:3px 10px;border-radius:4px;border:none;cursor:pointer;margin-right:6px">✅ Fulfill</button>';
+                html += '<button class="btn btn-small" data-action="breakDeal" data-deal-id="' + ad.id + '" style="background:#f44336;color:white;padding:3px 10px;border-radius:4px;border:none;cursor:pointer">💔 Break Promise</button>';
+                html += '</div></div>';
+            }
+            html += '</div>';
+        }
+
+        // Deals waiting on others (deals player proposed that were accepted)
+        var waitingDeals = state.deals.filter(function(d) {
+            return d.to !== myRole && d.from === myRole && d.status === 'accepted';
+        });
+        if (waitingDeals.length > 0) {
+            html += '<div style="margin-top:6px">';
+            html += '<h4 style="margin:4px 0;color:#2196F3">⏳ Waiting On Others</h4>';
+            for (var w = 0; w < waitingDeals.length; w++) {
+                var wd = waitingDeals[w];
+                html += '<div style="font-size:0.85em;padding:4px;border-left:2px solid ' + Config.ROLE_COLORS[wd.to] + '">';
+                html += Config.ROLE_LABELS[wd.to] + ' promised: ' + getDealTypeLabel(wd.askType, wd.askBillName);
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    function getDealTypeLabel(type, billName) {
+        var label = (Engine.DEAL_TYPES && Engine.DEAL_TYPES[type]) ? Engine.DEAL_TYPES[type].label : (type || 'General favor');
+        if (billName) label += ' <span style="color:#FFC107">"' + escapeHtml(billName) + '"</span>';
+        return label;
+    }
+
+    function showProposeDealModal() {
+        var myRole2 = currentRole;
+        var roles = Config.ROLES;
+        var dealTypes = Engine.DEAL_TYPES;
+        var state = currentState;
+        var bills = state.bills || [];
+
+        // Get first non-self role as default target
+        var defaultTarget = '';
+        for (var d = 0; d < roles.length; d++) {
+            if (roles[d] !== myRole2) { defaultTarget = roles[d]; break; }
+        }
+
+        // Build bill options HTML
+        var billOptionsHtml = '<option value="">-- Any/No specific bill --</option>';
+        for (var bi = 0; bi < bills.length; bi++) {
+            billOptionsHtml += '<option value="' + bills[bi].id + '">' + escapeHtml(bills[bi].name) + '</option>';
+        }
+
+        var html = '<div style="padding:10px">';
+        html += '<h4>Who do you want to make a deal with?</h4>';
+        html += '<select id="deal-target" style="width:100%;padding:8px;margin:6px 0;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px">';
+        for (var i = 0; i < roles.length; i++) {
+            if (roles[i] === myRole2) continue;
+            html += '<option value="' + roles[i] + '">' + Config.ROLE_ICONS[roles[i]] + ' ' + Config.ROLE_LABELS[roles[i]] + '</option>';
+        }
+        html += '</select>';
+
+        html += '<h4>What do you ask them to do?</h4>';
+        html += '<select id="deal-ask" style="width:100%;padding:8px;margin:6px 0;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px">';
+        html += '</select>';
+        html += '<div id="deal-ask-bill-row" style="display:none;margin:4px 0">';
+        html += '<label style="font-size:0.85em;color:#aaa">Which bill?</label>';
+        html += '<select id="deal-ask-bill" style="width:100%;padding:6px;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px">' + billOptionsHtml + '</select>';
+        html += '</div>';
+
+        html += '<h4>What do you offer in return?</h4>';
+        html += '<select id="deal-offer" style="width:100%;padding:8px;margin:6px 0;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px">';
+        for (var key2 in dealTypes) {
+            if (dealTypes[key2].roles.indexOf(myRole2) !== -1) {
+                html += '<option value="' + key2 + '">' + dealTypes[key2].label + '</option>';
+            }
+        }
+        html += '</select>';
+        html += '<div id="deal-offer-bill-row" style="display:none;margin:4px 0">';
+        html += '<label style="font-size:0.85em;color:#aaa">Which bill?</label>';
+        html += '<select id="deal-offer-bill" style="width:100%;padding:6px;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px">' + billOptionsHtml + '</select>';
+        html += '</div>';
+
+        html += '<h4>Message (optional)</h4>';
+        html += '<input type="text" id="deal-message" placeholder="Add a message..." style="width:100%;padding:8px;margin:6px 0;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px">';
+
+        html += '</div>';
+
+        showModal('📜 Propose a Deal', html, [
+            { label: '📜 Send Deal', action: 'sendDeal', className: 'btn-green' },
+            { label: 'Cancel', action: 'closeModal', className: 'btn-red' }
+        ]);
+
+        // Show/hide bill selector based on deal type
+        function updateBillVisibility() {
+            var askEl = document.getElementById('deal-ask');
+            var offerEl = document.getElementById('deal-offer');
+            var askBillRow = document.getElementById('deal-ask-bill-row');
+            var offerBillRow = document.getElementById('deal-offer-bill-row');
+            if (askEl && askBillRow) {
+                var askType = dealTypes[askEl.value];
+                askBillRow.style.display = (askType && askType.billRelated && bills.length > 0) ? 'block' : 'none';
+            }
+            if (offerEl && offerBillRow) {
+                var offerType = dealTypes[offerEl.value];
+                offerBillRow.style.display = (offerType && offerType.billRelated && bills.length > 0) ? 'block' : 'none';
+            }
+        }
+
+        // Populate ask dropdown based on target, and update when target changes
+        function updateAskOptions() {
+            var targetEl = document.getElementById('deal-target');
+            var askEl = document.getElementById('deal-ask');
+            if (!targetEl || !askEl) return;
+            var targetRole = targetEl.value;
+            var opts = '';
+            for (var k in dealTypes) {
+                if (dealTypes[k].roles.indexOf(targetRole) !== -1) {
+                    opts += '<option value="' + k + '">' + dealTypes[k].label + '</option>';
+                }
+            }
+            askEl.innerHTML = opts;
+            updateBillVisibility();
+        }
+        updateAskOptions();
+        var targetSelect = document.getElementById('deal-target');
+        if (targetSelect) {
+            targetSelect.addEventListener('change', updateAskOptions);
+        }
+        var askSelect = document.getElementById('deal-ask');
+        if (askSelect) askSelect.addEventListener('change', updateBillVisibility);
+        var offerSelect = document.getElementById('deal-offer');
+        if (offerSelect) offerSelect.addEventListener('change', updateBillVisibility);
+        updateBillVisibility();
+    }
+
+    function showPassedLawsModal() {
+        var state = currentState;
+        var passed = state.passedBills || [];
+        var uncon = state.unconstitutionalBills || [];
+        var html = '<div style="padding:10px;max-height:400px;overflow-y:auto">';
+
+        if (passed.length === 0 && uncon.length === 0) {
+            html += '<p style="color:#888;text-align:center">No laws have been passed yet.</p>';
+        }
+
+        // Passed Bills (Laws)
+        if (passed.length > 0) {
+            html += '<h4 style="margin:0 0 8px 0;color:#4CAF50">✅ Enacted Laws (' + passed.length + ')</h4>';
+            for (var i = passed.length - 1; i >= 0; i--) {
+                var b = passed[i];
+                var partColor = getPartisanColor(b.partisanship);
+                var partLabel = b.partisanship <= 7 ? 'Conservative' : (b.partisanship >= 14 ? 'Liberal' : 'Moderate');
+                html += '<div style="background:rgba(76,175,80,0.08);border:1px solid #4CAF50;border-left:4px solid ' + partColor + ';border-radius:6px;padding:8px 10px;margin:4px 0">';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+                html += '<strong style="color:white">' + escapeHtml(b.name) + '</strong>';
+                // Markers
+                var badges = '';
+                if (b.markers && b.markers.indexOf('C') !== -1) badges += '<span style="background:#4CAF50;color:white;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:4px">Constitutional ✅</span>';
+                if (b.signed) badges += '<span style="background:#2196F3;color:white;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:4px">Signed ✍️</span>';
+                if (b.isImpeachment) badges += '<span style="background:#f44336;color:white;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:4px">Impeachment</span>';
+                if (b.isPackCourts) badges += '<span style="background:#9C27B0;color:white;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:4px">Pack Courts</span>';
+                if (b.isTaxCuts) badges += '<span style="background:#FF9800;color:white;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:4px">Tax Cuts</span>';
+                if (b.isRepeal) badges += '<span style="background:#795548;color:white;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:4px">Repeal</span>';
+                if (b.certiorariUsed) badges += '<span style="background:#FF5722;color:white;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:4px">Cert Granted</span>';
+                html += '<div>' + badges + '</div>';
+                html += '</div>';
+                html += '<div style="display:flex;gap:12px;margin-top:4px;font-size:0.85em;color:#aaa">';
+                html += '<span style="color:' + partColor + '">Part: ' + b.partisanship + ' (' + partLabel + ')</span>';
+                html += '<span>Pop: ' + b.popularity + '</span>';
+                html += '<span>Leg: ' + b.legality + '</span>';
+                html += '</div>';
+                if (b.vpEarned) {
+                    var vpParts = [];
+                    if (b.vpEarned.president) vpParts.push('🏛️ Pres ' + (b.vpEarned.president > 0 ? '+' : '') + b.vpEarned.president);
+                    if (b.vpEarned.house) vpParts.push('🏠 House ' + (b.vpEarned.house > 0 ? '+' : '') + b.vpEarned.house);
+                    if (b.vpEarned.senate) vpParts.push('🏢 Senate ' + (b.vpEarned.senate > 0 ? '+' : '') + b.vpEarned.senate);
+                    if (b.vpEarned.supremeCourt) vpParts.push('⚖️ SC ' + (b.vpEarned.supremeCourt > 0 ? '+' : '') + b.vpEarned.supremeCourt);
+                    if (vpParts.length > 0) {
+                        html += '<div style="font-size:0.8em;color:#888;margin-top:2px">VP: ' + vpParts.join(' | ') + '</div>';
+                    }
+                }
+                html += '</div>';
+            }
+        }
+
+        // Unconstitutional Bills
+        if (uncon.length > 0) {
+            html += '<h4 style="margin:12px 0 8px 0;color:#f44336">❌ Struck Down — Unconstitutional (' + uncon.length + ')</h4>';
+            for (var u = uncon.length - 1; u >= 0; u--) {
+                var ub = uncon[u];
+                var uPartColor = getPartisanColor(ub.partisanship);
+                var uPartLabel = ub.partisanship <= 7 ? 'Conservative' : (ub.partisanship >= 14 ? 'Liberal' : 'Moderate');
+                html += '<div style="background:rgba(244,67,54,0.08);border:1px solid #f44336;border-left:4px solid ' + uPartColor + ';border-radius:6px;padding:8px 10px;margin:4px 0">';
+                html += '<strong style="color:#f44336">' + escapeHtml(ub.name) + '</strong>';
+                html += '<span style="background:#f44336;color:white;padding:1px 6px;border-radius:3px;font-size:0.75em;margin-left:8px">Unconstitutional ❌</span>';
+                html += '<div style="display:flex;gap:12px;margin-top:4px;font-size:0.85em;color:#aaa">';
+                html += '<span style="color:' + uPartColor + '">Part: ' + ub.partisanship + ' (' + uPartLabel + ')</span>';
+                html += '<span>Pop: ' + ub.popularity + '</span>';
+                html += '<span>Leg: ' + ub.legality + '</span>';
+                html += '</div></div>';
+            }
+        }
+
+        html += '</div>';
+        showModal('📚 Passed Laws & Rulings', html, [
+            { label: 'Close', action: 'closeModal', className: '' }
+        ]);
+    }
+
+    function showModal(title, bodyHtml, buttons) {
+        var overlay = document.getElementById('modal-overlay');
+        var modalTitle = document.getElementById('modal-title');
+        var modalBody = document.getElementById('modal-body');
+        var modalFooter = document.getElementById('modal-footer');
+        if (!overlay || !modalTitle || !modalBody || !modalFooter) return;
+        modalTitle.textContent = title;
+        modalBody.innerHTML = bodyHtml;
+        var footerHtml = '';
+        for (var i = 0; i < buttons.length; i++) {
+            var b = buttons[i];
+            footerHtml += '<button class="btn ' + (b.className || '') + '" data-action="' + b.action + '">' + b.label + '</button>';
+        }
+        modalFooter.innerHTML = footerHtml;
+        overlay.style.display = 'flex';
     }
 
     function renderActionLog(state) {
@@ -917,14 +1418,24 @@ var UI = (function() {
     }
 
     function renderGameOver(state) {
-        var winner = Engine.getWinner();
         var content = document.getElementById('game-content');
         var html = '<div class="game-over">';
-        html += '<h1>🏛️ Game Over!</h1>';
-        html += '<div class="winner-display" style="border-color:' + Config.ROLE_COLORS[winner.role] + '">';
-        html += '<h2>' + Config.ROLE_ICONS[winner.role] + ' ' + Config.ROLE_LABELS[winner.role] + ' Wins!</h2>';
-        html += '<p class="winner-vp">' + winner.vp + ' Victory Points</p>';
-        html += '</div>';
+
+        if (state.stabilityCollapse) {
+            html += '<h1 style="color:#f44336">💥 Government Collapse!</h1>';
+            html += '<div class="winner-display" style="border-color:#f44336;text-align:center">';
+            html += '<h2>🏚️ Nobody Wins</h2>';
+            html += '<p style="color:#ccc;margin:8px 0">Country stability reached 0. The government has collapsed.</p>';
+            html += '<p style="color:#f44336;font-style:italic">All players lose — the nation falls into chaos.</p>';
+            html += '</div>';
+        } else {
+            var winner = Engine.getWinner();
+            html += '<h1>🏛️ Game Over!</h1>';
+            html += '<div class="winner-display" style="border-color:' + Config.ROLE_COLORS[winner.role] + '">';
+            html += '<h2>' + Config.ROLE_ICONS[winner.role] + ' ' + Config.ROLE_LABELS[winner.role] + ' Wins!</h2>';
+            html += '<p class="winner-vp">' + winner.vp + ' Victory Points</p>';
+            html += '</div>';
+        }
         html += '<div class="final-scores">';
         html += '<h3>Final Scores</h3>';
         var roles = Config.ROLES;

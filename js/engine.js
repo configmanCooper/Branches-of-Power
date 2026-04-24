@@ -128,11 +128,14 @@ var Engine = (function() {
                 judicialReviewBonus: 0
             },
 
-            currentBill: null,
+            bills: [],
+            activeBillId: null,
+            billIdCounter: 0,
             passedBills: [],
             precedents: [],
             unconstitutionalBills: [],
             pendingAmendment: null,
+            pendingUnitySummit: null,
             billPassedThisRound: false,
             billPassedByHouse: false,
             billPassedBySenate: false,
@@ -148,11 +151,30 @@ var Engine = (function() {
             diceHistory: [],
             electionLog: [],
 
-            perGameLimits: JSON.parse(JSON.stringify(Config.PER_GAME_LIMITS))
+            // Trust & Negotiation System
+            trust: {
+                president: { house: 5, senate: 5, supremeCourt: 5 },
+                house: { president: 5, senate: 5, supremeCourt: 5 },
+                senate: { president: 5, house: 5, supremeCourt: 5 },
+                supremeCourt: { president: 5, house: 5, senate: 5 }
+            },
+            deals: [],       // active deals: { id, from, to, type, ask, offer, round, status: 'pending'|'accepted'|'fulfilled'|'broken'|'rejected' }
+            dealCounter: 0,
+
+            perGameLimits: JSON.parse(JSON.stringify(Config.PER_GAME_LIMITS)),
+
+            // Stability & Events
+            stability: 5,
+            stabilityMax: 10,
+            activeEvent: null,
+            queuedEvent: null,
+            eventHistory: [],
+            eventCooldown: 0,
+            stabilityCollapse: false
         };
 
         // Generate first bill
-        state.currentBill = generateBill();
+        addBillToFloor(generateBill());
 
         return state;
     }
@@ -216,6 +238,10 @@ var Engine = (function() {
     function generateBill() {
         var partisanship = clampBillStat(rollD(16) + 2); // 3-18 range
         var popularity = clampBillStat(rollD(14) + 3); // 4-17 range
+        // Unstable penalty
+        if (state.stability <= 4) {
+            popularity = clampBillStat(popularity - 2);
+        }
         var legality = clampBillStat(rollD(10) + 5 + state.supremeCourt.legalityModifier);
         var name = Config.BILL_NAMES[Math.floor(Math.random() * Config.BILL_NAMES.length)];
         return {
@@ -235,6 +261,43 @@ var Engine = (function() {
             houseVotes: 0,
             senateVotes: 0
         };
+    }
+
+    // --- Multi-Bill Helpers ---
+    function getActiveBill() {
+        if (!state.activeBillId && state.bills.length > 0) {
+            state.activeBillId = state.bills[0].id;
+        }
+        for (var i = 0; i < state.bills.length; i++) {
+            if (state.bills[i].id === state.activeBillId) return state.bills[i];
+        }
+        return state.bills.length > 0 ? state.bills[0] : null;
+    }
+
+    function addBillToFloor(bill) {
+        bill.id = ++state.billIdCounter;
+        state.bills.push(bill);
+        state.activeBillId = bill.id;
+        return bill;
+    }
+
+    function removeBillFromFloor(billId) {
+        for (var i = 0; i < state.bills.length; i++) {
+            if (state.bills[i].id === billId) {
+                state.bills.splice(i, 1);
+                break;
+            }
+        }
+        if (state.activeBillId === billId) {
+            state.activeBillId = state.bills.length > 0 ? state.bills[0].id : null;
+        }
+    }
+
+    function getBillById(billId) {
+        for (var i = 0; i < state.bills.length; i++) {
+            if (state.bills[i].id === billId) return state.bills[i];
+        }
+        return null;
     }
 
     // --- Voting Calculations ---
@@ -398,6 +461,221 @@ var Engine = (function() {
         }
     }
 
+    // --- Trust & Negotiation ---
+    var DEAL_TYPES = {
+        // President actions
+        signBill: { label: 'Sign the bill', roles: ['president'], billRelated: true },
+        vetoBill: { label: 'Veto the bill', roles: ['president'], billRelated: true },
+        executiveOrder: { label: 'Issue an Executive Order', roles: ['president'] },
+        nominateJustice: { label: 'Nominate a justice', roles: ['president'] },
+        advocate: { label: 'Advocate for legislation', roles: ['president'], billRelated: true },
+        admonish: { label: 'Admonish legislation', roles: ['president'], billRelated: true },
+        campaign: { label: 'Go on Campaign Trail', roles: ['president'] },
+        taxCuts: { label: 'Propose Tax Cuts bill', roles: ['president'] },
+        sueBill: { label: 'Sue (send bill to SC review)', roles: ['president'], billRelated: true },
+        stateDinner: { label: 'Host a State Dinner', roles: ['president'] },
+        executivePrivilege: { label: 'Use Executive Privilege', roles: ['president'] },
+
+        // House actions
+        passBillHouse: { label: 'Pass the bill in the House', roles: ['house'], billRelated: true },
+        killBill: { label: 'Kill the bill in committee', roles: ['house'], billRelated: true },
+        supportBill: { label: 'Support the bill (+popularity)', roles: ['house'], billRelated: true },
+        attackBill: { label: 'Attack the bill (-popularity)', roles: ['house'], billRelated: true },
+        popularizeBill: { label: 'Popularize the bill', roles: ['house'], billRelated: true },
+        changeBill: { label: 'Change Bill Now (new bill)', roles: ['house'] },
+        initiateLegislation: { label: 'Initiate new legislation', roles: ['house'] },
+        riderAmendment: { label: 'Attach a Rider Amendment', roles: ['house'], billRelated: true },
+        impeach: { label: 'Impeach the President', roles: ['house'] },
+        packCourts: { label: 'Pack the Courts', roles: ['house'] },
+        hostHearing: { label: 'Host a Hearing', roles: ['house'] },
+        whipHouse: { label: 'Whip the House', roles: ['house'] },
+        earmark: { label: 'Earmark (+4 VP)', roles: ['house'] },
+        caucusMeeting: { label: 'Caucus Meeting (+PC)', roles: ['house'] },
+        subpoena: { label: 'Subpoena Power', roles: ['house'] },
+        powerOfPurse: { label: 'Power of the Purse', roles: ['house'] },
+
+        // Senate actions
+        passBillSenate: { label: 'Pass the bill in the Senate', roles: ['senate'], billRelated: true },
+        filibuster: { label: 'Filibuster the bill', roles: ['senate'], billRelated: true },
+        updateBill: { label: 'Update bill stats', roles: ['senate'], billRelated: true },
+        stallBill: { label: 'Stall the bill (keep next round)', roles: ['senate'], billRelated: true },
+        debate: { label: 'Debate legislation (+PC)', roles: ['senate'] },
+        conference: { label: 'Conference with House (+PC)', roles: ['senate'] },
+        confirmJustice: { label: 'Confirm/reject justice nominee', roles: ['senate'] },
+        nominations: { label: 'Pass/Block nominations', roles: ['senate'] },
+        reviveBill: { label: 'Revive a passed bill', roles: ['senate'] },
+        repealBill: { label: 'Repeal a passed bill', roles: ['senate'] },
+        governmentShutdown: { label: 'Government Shutdown', roles: ['senate'] },
+
+        // Supreme Court actions
+        reviewBill: { label: 'Judicial Review', roles: ['supremeCourt'], billRelated: true },
+        investigateBill: { label: 'Investigate bill legality', roles: ['supremeCourt'], billRelated: true },
+        billReview: { label: 'Bill Review (+legality)', roles: ['supremeCourt'], billRelated: true },
+        investigateEO: { label: 'Investigate Executive Orders', roles: ['supremeCourt'] },
+        amicusBrief: { label: 'File Amicus Brief', roles: ['supremeCourt'], billRelated: true },
+        oralArguments: { label: 'Oral Arguments (center bill)', roles: ['supremeCourt'], billRelated: true },
+        injunction: { label: 'Issue an Injunction', roles: ['supremeCourt'], billRelated: true },
+        partisanRuling: { label: 'Partisan Ruling', roles: ['supremeCourt'] },
+        constitutionalCrisis: { label: 'Declare Constitutional Crisis', roles: ['supremeCourt'] },
+        certiorari: { label: 'Writ of Certiorari', roles: ['supremeCourt'], billRelated: true },
+        generalCourt: { label: 'General Court (+VP)', roles: ['supremeCourt'] },
+        advisoryRole: { label: 'Advisory Role (+VP)', roles: ['supremeCourt'] },
+        disapproveJustice: { label: 'Disapprove justice nominee', roles: ['supremeCourt'] },
+
+        // Any role
+        proposeAmendment: { label: 'Propose Constitutional Amendment', roles: ['president', 'house', 'senate'] },
+        proposeUnitySummit: { label: 'Propose National Unity Summit', roles: ['president', 'house', 'senate', 'supremeCourt'] },
+        agreeUnitySummit: { label: 'Agree to Unity Summit', roles: ['president', 'house', 'senate', 'supremeCourt'] },
+        rejectUnitySummit: { label: 'Reject Unity Summit', roles: ['president', 'house', 'senate', 'supremeCourt'] },
+
+        // Event-related actions
+        resolveEvent: { label: 'Help resolve the active event', roles: ['president', 'house', 'senate', 'supremeCourt'] },
+        commitToEvent: { label: 'Commit to cooperative event resolution', roles: ['president', 'house', 'senate', 'supremeCourt'] },
+        dontResolveEvent: { label: 'Let the event fail (don\'t resolve it)', roles: ['president', 'house', 'senate', 'supremeCourt'] },
+        eventSpecialAction: { label: 'Use event special action', roles: ['president', 'house', 'senate', 'supremeCourt'] },
+
+        general: { label: 'General favor', roles: ['president', 'house', 'senate', 'supremeCourt'] }
+    };
+
+    function clampTrust(val) { return Math.max(0, Math.min(10, val)); }
+
+    function adjustTrust(from, to, amount) {
+        if (state.trust[from] && state.trust[from][to] !== undefined) {
+            state.trust[from][to] = clampTrust(state.trust[from][to] + amount);
+        }
+    }
+
+    function proposeDeal(from, to, askType, offerType, message, askBillId, offerBillId) {
+        // Build description with bill names
+        var askLabel = DEAL_TYPES[askType] ? DEAL_TYPES[askType].label : askType;
+        var offerLabel = DEAL_TYPES[offerType] ? DEAL_TYPES[offerType].label : offerType;
+
+        // Attach bill names to bill-related deals
+        var askBillName = '';
+        var offerBillName = '';
+        if (askBillId && state.bills) {
+            for (var i = 0; i < state.bills.length; i++) {
+                if (state.bills[i].id === askBillId) { askBillName = state.bills[i].name; break; }
+            }
+        }
+        if (offerBillId && state.bills) {
+            for (var j = 0; j < state.bills.length; j++) {
+                if (state.bills[j].id === offerBillId) { offerBillName = state.bills[j].name; break; }
+            }
+        }
+
+        var deal = {
+            id: ++state.dealCounter,
+            from: from,
+            to: to,
+            askType: askType,
+            offerType: offerType,
+            askBillId: askBillId || null,
+            offerBillId: offerBillId || null,
+            askBillName: askBillName,
+            offerBillName: offerBillName,
+            message: message || '',
+            round: state.round,
+            status: 'pending'
+        };
+        state.deals.push(deal);
+        var dealDesc = askLabel + (askBillName ? ' ("' + askBillName + '")' : '') + ' for ' + offerLabel + (offerBillName ? ' ("' + offerBillName + '")' : '');
+        addLog(from, 'Propose Deal', 'Proposed deal to ' + Config.ROLE_LABELS[to] + ': ' + dealDesc);
+        return deal;
+    }
+
+    function respondToDeal(dealId, accept) {
+        var deal = null;
+        for (var i = 0; i < state.deals.length; i++) {
+            if (state.deals[i].id === dealId) { deal = state.deals[i]; break; }
+        }
+        if (!deal || deal.status !== 'pending') return { success: false, message: 'Deal not found or already resolved.' };
+
+        if (accept) {
+            deal.status = 'accepted';
+            adjustTrust(deal.from, deal.to, 0.5);
+            adjustTrust(deal.to, deal.from, 0.5);
+            addLog(deal.to, 'Accept Deal', 'Accepted deal from ' + Config.ROLE_LABELS[deal.from] + '.');
+        } else {
+            deal.status = 'rejected';
+            adjustTrust(deal.from, deal.to, -0.5);
+            addLog(deal.to, 'Reject Deal', 'Rejected deal from ' + Config.ROLE_LABELS[deal.from] + '.');
+        }
+        return { success: true, deal: deal };
+    }
+
+    function fulfillDeal(dealId) {
+        var deal = null;
+        for (var i = 0; i < state.deals.length; i++) {
+            if (state.deals[i].id === dealId) { deal = state.deals[i]; break; }
+        }
+        if (!deal || deal.status !== 'accepted') return { success: false, message: 'Deal not active.' };
+        deal.status = 'fulfilled';
+        adjustTrust(deal.to, deal.from, 1.5);
+        adjustTrust(deal.from, deal.to, 1);
+        addLog(deal.from, 'Deal Fulfilled', 'Kept promise to ' + Config.ROLE_LABELS[deal.to] + '.');
+        return { success: true };
+    }
+
+    function breakDeal(dealId) {
+        var deal = null;
+        for (var i = 0; i < state.deals.length; i++) {
+            if (state.deals[i].id === dealId) { deal = state.deals[i]; break; }
+        }
+        if (!deal || deal.status !== 'accepted') return { success: false, message: 'Deal not active.' };
+        deal.status = 'broken';
+        adjustTrust(deal.to, deal.from, -2);
+        // Reputation damage — others lose trust too
+        var roles = ['president', 'house', 'senate', 'supremeCourt'];
+        for (var i = 0; i < roles.length; i++) {
+            if (roles[i] !== deal.from && roles[i] !== deal.to) {
+                adjustTrust(roles[i], deal.from, -0.5);
+            }
+        }
+        addLog(deal.from, 'Deal Broken', 'Broke promise to ' + Config.ROLE_LABELS[deal.to] + '! Trust damaged.');
+        return { success: true };
+    }
+
+    function getActiveDeals(role) {
+        return state.deals.filter(function(d) {
+            return (d.from === role || d.to === role) && (d.status === 'pending' || d.status === 'accepted');
+        });
+    }
+
+    function getPendingDealsForRole(role) {
+        return state.deals.filter(function(d) {
+            return d.to === role && d.status === 'pending';
+        });
+    }
+
+    function getAcceptedDealsForRole(role) {
+        return state.deals.filter(function(d) {
+            return d.from === role && d.status === 'accepted';
+        });
+    }
+
+    function expireOldDeals() {
+        for (var i = 0; i < state.deals.length; i++) {
+            var d = state.deals[i];
+            if (d.status === 'accepted' && d.round < state.round - 1) {
+                breakDeal(d.id);
+            }
+            if (d.status === 'pending' && d.round < state.round) {
+                d.status = 'expired';
+            }
+        }
+        // Trust regression toward neutral
+        var roles = ['president', 'house', 'senate', 'supremeCourt'];
+        for (var i = 0; i < roles.length; i++) {
+            for (var j = 0; j < roles.length; j++) {
+                if (i === j) continue;
+                var t = state.trust[roles[i]][roles[j]];
+                if (t > 5) state.trust[roles[i]][roles[j]] = Math.max(5, t - 0.25);
+                else if (t < 5) state.trust[roles[i]][roles[j]] = Math.min(5, t + 0.25);
+            }
+        }
+    }
+
     // --- President Actions ---
     function presidentExecutiveOrder() {
         var vpGain = (state.president.popularity >= 18) ? 2 : 1;
@@ -426,8 +704,9 @@ var Engine = (function() {
             addLog('president', amount > 0 ? 'Advocate Legislation' : 'Admonish Legislation',
                 (adj2 > 0 ? '+' : '') + adj2 + ' PC to ' + target + '. -5 Bill Popularity.');
         }
-        if (state.currentBill) {
-            state.currentBill.popularity = clampBillStat(state.currentBill.popularity - 5);
+        var activeBill = getActiveBill();
+        if (activeBill) {
+            activeBill.popularity = clampBillStat(activeBill.popularity - 5);
         }
         advanceTurn();
         return { success: true, message: 'Legislation ' + (amount > 0 ? 'advocated' : 'admonished') + '.' };
@@ -445,7 +724,7 @@ var Engine = (function() {
         bill.passedByHouse = false;
         bill.passedBySenate = false;
         bill.requiresSupermajority = true;
-        state.currentBill = bill;
+        addBillToFloor(bill);
         state.billPassedThisRound = false;
         state.billPassedByHouse = false;
         state.billPassedBySenate = false;
@@ -497,7 +776,7 @@ var Engine = (function() {
             houseVotes: 0,
             senateVotes: 0
         };
-        state.currentBill = taxBill;
+        addBillToFloor(taxBill);
         state.president.actionsRemaining -= 2; // will lose 1 more in advanceTurn
         addLog('president', 'Tax Cuts', 'Tax Cuts bill on the floor! Partisanship ' + partisanship + ', Popularity 20, Legality 10.');
         advanceTurn();
@@ -534,8 +813,11 @@ var Engine = (function() {
         bill.signed = true;
         // SC already penalized in completeBillPassage; no duplicate penalty
 
-        // Generate new bill
-        state.currentBill = generateBill();
+        // Remove signed bill from floor; generate new if none left
+        removeBillFromFloor(bill.id);
+        if (state.bills.length === 0) {
+            addBillToFloor(generateBill());
+        }
         addLog('president', 'Sign Bill', 'Bill signed! +4 VP, +Pop bonus, new bill on floor.');
         advanceTurn();
         return { success: true, message: 'Bill signed into law!' };
@@ -689,8 +971,8 @@ var Engine = (function() {
     }
 
     function houseSupportAttackBill(support) {
-        if (!state.currentBill) return { success: false, message: 'No bill on floor.' };
-        var bill = state.currentBill;
+        if (!getActiveBill()) return { success: false, message: 'No bill on floor.' };
+        var bill = getActiveBill();
         if (support) {
             bill.popularity = clampBillStat(bill.popularity + 5);
         } else {
@@ -712,7 +994,7 @@ var Engine = (function() {
     }
 
     function houseKillBill() {
-        if (!state.currentBill) return { success: false, message: 'No bill on floor.' };
+        if (!getActiveBill()) return { success: false, message: 'No bill on floor.' };
         if (state.house.killBillUsedThisRound) return { success: false, message: 'Already used Kill Bill this round.' };
         if (state.house.pc < 1) return { success: false, message: 'Need 1 PC.' };
 
@@ -720,6 +1002,7 @@ var Engine = (function() {
         state.house.vp += 1;
         state.house.killBillUsedThisRound = true;
         state.billKilledThisRound = true;
+        getActiveBill().killed = true;
         addLog('house', 'Kill Bill', 'Bill sent to committee. +1 VP. Cannot pass this round.');
         advanceTurn();
         return { success: true, message: 'Bill killed in committee.' };
@@ -747,13 +1030,13 @@ var Engine = (function() {
     }
 
     function housePopularizeBill() {
-        if (!state.currentBill) return { success: false, message: 'No bill on floor.' };
+        if (!getActiveBill()) return { success: false, message: 'No bill on floor.' };
         if (state.house.popularizeUsedThisRound) return { success: false, message: 'Already used this round.' };
         if (state.house.pc < 1) return { success: false, message: 'Need 1 PC.' };
 
         state.house.pc -= 1;
         state.house.popularizeUsedThisRound = true;
-        var bill = state.currentBill;
+        var bill = getActiveBill();
         bill.popularity = clampBillStat(bill.popularity + 5);
         bill.legality = clampBillStat(bill.legality - 4);
         if (bill.partisanship < 10) {
@@ -790,18 +1073,18 @@ var Engine = (function() {
             houseVotes: 0,
             senateVotes: 0
         };
-        state.currentBill = bill;
+        addBillToFloor(bill);
         addLog('house', 'Change Bill Now', 'New bill on floor (10/10/10). Cost 2 PC, 2 actions.');
         advanceTurn();
         return { success: true, message: 'New bill placed on floor.' };
     }
 
     function housePassBill(pcToUse) {
-        if (!state.currentBill) return { success: false, message: 'No bill on floor.' };
+        if (!getActiveBill()) return { success: false, message: 'No bill on floor.' };
         if (state.billKilledThisRound) return { success: false, message: 'Bill was killed this round.' };
-        if (state.currentBill.passedByHouse) return { success: false, message: 'Bill already passed the House.' };
+        if (getActiveBill().passedByHouse) return { success: false, message: 'Bill already passed the House.' };
 
-        var bill = state.currentBill;
+        var bill = getActiveBill();
         var pcUsed = Math.min(pcToUse || 0, state.house.pc);
         var votes = calculateHouseVotes(bill, pcUsed);
 
@@ -906,7 +1189,7 @@ var Engine = (function() {
             houseVotes: 0,
             senateVotes: 0
         };
-        state.currentBill = bill;
+        addBillToFloor(bill);
         addLog('house', 'Articles of Impeachment', 'Impeachment proceedings begun! Part: ' + partisanship + ', Leg: ' + legality);
         advanceTurn();
         return { success: true, message: 'Impeachment proceedings initiated!' };
@@ -939,7 +1222,7 @@ var Engine = (function() {
             houseVotes: 0,
             senateVotes: 0
         };
-        state.currentBill = bill;
+        addBillToFloor(bill);
         addLog('house', 'Pack the Courts', 'Pack the Courts bill on floor! 4 new justices if passed.');
         advanceTurn();
         return { success: true, message: 'Pack the Courts bill placed.' };
@@ -954,8 +1237,9 @@ var Engine = (function() {
         popAdj = clamp(popAdj || 0, -1, 1);
         var legPenalty = Math.abs(partAdj) * 2 + Math.abs(popAdj);
         state.house.initiatedLegislationThisRound = true;
+        var billName = 'HB: ' + Config.BILL_NAMES[Math.floor(Math.random() * Config.BILL_NAMES.length)];
         var bill = {
-            name: 'House Bill',
+            name: billName,
             partisanship: clampBillStat(10 + partAdj),
             popularity: clampBillStat(10 + popAdj),
             legality: clampBillStat(10 + state.supremeCourt.legalityModifier - legPenalty),
@@ -971,17 +1255,18 @@ var Engine = (function() {
             houseVotes: 0,
             senateVotes: 0
         };
-        state.currentBill = bill;
+        addBillToFloor(bill);
         addLog('house', 'Initiate Legislation', 'New bill: Part ' + bill.partisanship + ', Pop ' + bill.popularity + ', Leg ' + bill.legality);
         // Free action — don't advance turn
         return { success: true, message: 'New legislation initiated.', freeAction: true };
     }
 
     function houseRiderAmendment() {
-        if (!state.currentBill) return { success: false, message: 'No bill on floor.' };
-        if (state.currentBill.riderForHouse) return { success: false, message: 'Rider already attached to this bill.' };
-        state.currentBill.riderForHouse = true;
-        addLog('house', 'Rider Amendment', 'Attached +3 VP rider to "' + state.currentBill.name + '". House earns bonus if bill passes both chambers.');
+        if (!getActiveBill()) return { success: false, message: 'No bill on floor.' };
+        var bill = getActiveBill();
+        if (bill.riderForHouse) return { success: false, message: 'Rider already attached to this bill.' };
+        bill.riderForHouse = true;
+        addLog('house', 'Rider Amendment', 'Attached +3 VP rider to "' + bill.name + '". House earns bonus if bill passes both chambers.');
         advanceTurn();
         return { success: true, message: 'Rider amendment attached!' };
     }
@@ -1108,7 +1393,7 @@ var Engine = (function() {
     }
 
     function senateUpdateBill(changes) {
-        if (!state.currentBill) return { success: false, message: 'No bill on floor.' };
+        if (!getActiveBill()) return { success: false, message: 'No bill on floor.' };
         // changes = { partisanship: +/-X, popularity: +/-Y, legality: +/-Z }
         var total = Math.abs(changes.partisanship || 0) + Math.abs(changes.popularity || 0) + Math.abs(changes.legality || 0);
         var maxChange = 3;
@@ -1117,7 +1402,7 @@ var Engine = (function() {
             if (state.senate.pc < extraNeeded) return { success: false, message: 'Need ' + extraNeeded + ' PC for extra changes.' };
             state.senate.pc -= extraNeeded;
         }
-        var bill = state.currentBill;
+        var bill = getActiveBill();
         bill.partisanship = clampBillStat(bill.partisanship + (changes.partisanship || 0));
         bill.popularity = clampBillStat(bill.popularity + (changes.popularity || 0));
         bill.legality = clampBillStat(bill.legality + (changes.legality || 0));
@@ -1140,7 +1425,9 @@ var Engine = (function() {
         state.president.popularity = clampPopularity(state.president.popularity - 1);
         state.president.vp -= 1;
         state.supremeCourt.vp += 1; // SC passive: bill removed without passing
-        state.currentBill = generateBill();
+        var filibusteredBill = getActiveBill();
+        if (filibusteredBill) removeBillFromFloor(filibusteredBill.id);
+        addBillToFloor(generateBill());
         addLog('senate', 'Filibuster', 'Bill killed! +1 VP Senate, +2 PC House, -1 Pres Pop/VP. New bill.');
         advanceTurn();
         return { success: true, message: 'Filibuster successful!' };
@@ -1151,7 +1438,8 @@ var Engine = (function() {
         if (state.senate.pc < 2) return { success: false, message: 'Need 2 PC.' };
         state.senate.pc -= 2;
         state.senate.stallUsedThisRound = true;
-        state.billStalledNextRound = true;
+        var stalledBill = getActiveBill();
+        if (stalledBill) stalledBill.stalled = true;
         addLog('senate', 'Stall Bill', 'Bill will remain on floor next round.');
         advanceTurn();
         return { success: true, message: 'Bill stalled.' };
@@ -1168,11 +1456,11 @@ var Engine = (function() {
     }
 
     function senatePassBill(pcToUse) {
-        if (!state.currentBill) return { success: false, message: 'No bill on floor.' };
+        if (!getActiveBill()) return { success: false, message: 'No bill on floor.' };
         if (state.billKilledThisRound) return { success: false, message: 'Bill was killed this round.' };
-        if (state.currentBill.passedBySenate) return { success: false, message: 'Bill already passed the Senate.' };
+        if (getActiveBill().passedBySenate) return { success: false, message: 'Bill already passed the Senate.' };
 
-        var bill = state.currentBill;
+        var bill = getActiveBill();
         var pcUsed = Math.min(pcToUse || 0, state.senate.pc);
         var votes = calculateSenateVotes(bill, pcUsed);
 
@@ -1231,7 +1519,7 @@ var Engine = (function() {
         var bill = state.passedBills.splice(billIndex, 1)[0];
         bill.passedByHouse = false;
         bill.passedBySenate = false;
-        state.currentBill = bill;
+        addBillToFloor(bill);
         addLog('senate', 'Revive Bill', 'Bill "' + bill.name + '" returned to floor.');
         advanceTurn();
         return { success: true, message: 'Bill revived.' };
@@ -1259,7 +1547,7 @@ var Engine = (function() {
             houseVotes: 0,
             senateVotes: 0
         };
-        state.currentBill = repealBill;
+        addBillToFloor(repealBill);
         addLog('senate', 'Repeal Bill', 'Repeal bill for "' + origBill.name + '" on floor.');
         advanceTurn();
         return { success: true, message: 'Repeal bill placed.' };
@@ -1310,7 +1598,7 @@ var Engine = (function() {
             bill.passedBySenate = false;
             bill.markers = bill.markers || [];
             bill.markers.push('REMAND');
-            state.currentBill = bill;
+            addBillToFloor(bill);
             state.supremeCourt.vp += 3;
             state.supremeCourt.jp += 1;
             addLog('supremeCourt', 'Judicial Review', '"' + bill.name + '" REMANDED to floor. Legality=10, partisanship shifted toward center, -3 pop. +3 VP, +1 JP.');
@@ -1415,19 +1703,21 @@ var Engine = (function() {
     }
 
     function courtInvestigateBill() {
-        if (!state.currentBill) return { success: false, message: 'No bill on floor.' };
-        if (state.currentBill.isPackCourts) return { success: false, message: 'Cannot investigate Pack the Courts.' };
-        state.currentBill.legality = clampBillStat(state.currentBill.legality - 2);
-        addLog('supremeCourt', 'Investigate Bill', 'Bill legality -2. Now: ' + state.currentBill.legality);
+        if (!getActiveBill()) return { success: false, message: 'No bill on floor.' };
+        var bill = getActiveBill();
+        if (bill.isPackCourts) return { success: false, message: 'Cannot investigate Pack the Courts.' };
+        bill.legality = clampBillStat(bill.legality - 2);
+        addLog('supremeCourt', 'Investigate Bill', 'Bill legality -2. Now: ' + bill.legality);
         advanceTurn();
         return { success: true, message: 'Bill investigated.' };
     }
 
     function courtBillReview(partAdj, popAdj) {
-        if (!state.currentBill) return { success: false, message: 'No bill on floor.' };
+        if (!getActiveBill()) return { success: false, message: 'No bill on floor.' };
         if (state.supremeCourt.billReviewUsedThisRound) return { success: false, message: 'Already used this round.' };
         state.supremeCourt.billReviewUsedThisRound = true;
-        state.currentBill.legality = clampBillStat(state.currentBill.legality + 2);
+        var bill = getActiveBill();
+        bill.legality = clampBillStat(bill.legality + 2);
         // 2 points total adjustment across partisanship and popularity
         partAdj = clamp(partAdj || 0, -2, 2);
         popAdj = clamp(popAdj || 0, -2, 2);
@@ -1437,8 +1727,8 @@ var Engine = (function() {
             partAdj = Math.round(partAdj * scale);
             popAdj = Math.round(popAdj * scale);
         }
-        state.currentBill.partisanship = clampBillStat(state.currentBill.partisanship + partAdj);
-        state.currentBill.popularity = clampBillStat(state.currentBill.popularity + popAdj);
+        bill.partisanship = clampBillStat(bill.partisanship + partAdj);
+        bill.popularity = clampBillStat(bill.popularity + popAdj);
         state.supremeCourt.vp += 2;
         state.supremeCourt.jp += 1;
         addLog('supremeCourt', 'Bill Review', 'Bill legality +2, partisanship ' + (partAdj >= 0 ? '+' : '') + partAdj + ', popularity ' + (popAdj >= 0 ? '+' : '') + popAdj + '. +2 VP, +1 JP.');
@@ -1555,8 +1845,9 @@ var Engine = (function() {
         state.supremeCourt.actionsRemaining -= 1;
         // Permanently shift all partisanship
         // direction: 1 = more liberal (increase), -1 = more conservative (decrease)
-        if (state.currentBill) {
-            state.currentBill.partisanship = clampBillStat(state.currentBill.partisanship + direction);
+        var activeBill = getActiveBill();
+        if (activeBill) {
+            activeBill.partisanship = clampBillStat(activeBill.partisanship + direction);
         }
         addLog('supremeCourt', 'Partisan Ruling', 'All future bills shift partisanship by ' + direction + '.');
         advanceTurn();
@@ -1564,15 +1855,16 @@ var Engine = (function() {
     }
 
     function courtAmicusBrief() {
-        if (!state.currentBill) return { success: false, message: 'No bill on the floor.' };
+        if (!getActiveBill()) return { success: false, message: 'No bill on the floor.' };
         if (state.supremeCourt.amicusBriefUsedThisRound) return { success: false, message: 'Already used this round.' };
         if (state.supremeCourt.jp < 2) return { success: false, message: 'Need 2 JP.' };
 
         state.supremeCourt.jp -= 2;
         state.supremeCourt.amicusBriefUsedThisRound = true;
         state.supremeCourt.vp += 2;
-        state.currentBill.legality = clampBillStat(state.currentBill.legality - 4);
-        addLog('supremeCourt', 'Amicus Brief', '+2 VP, current bill legality -4 (now ' + state.currentBill.legality + ').');
+        var bill = getActiveBill();
+        bill.legality = clampBillStat(bill.legality - 4);
+        addLog('supremeCourt', 'Amicus Brief', '+2 VP, current bill legality -4 (now ' + bill.legality + ').');
         advanceTurn();
         return { success: true, message: 'Amicus brief filed! +2 VP, legality -4.' };
     }
@@ -1593,8 +1885,9 @@ var Engine = (function() {
         for (var i = 0; i < state.passedBills.length; i++) {
             state.passedBills[i].legality = clampBillStat(state.passedBills[i].legality - 2);
         }
-        if (state.currentBill) {
-            state.currentBill.legality = clampBillStat(state.currentBill.legality - 2);
+        var activeBill = getActiveBill();
+        if (activeBill) {
+            activeBill.legality = clampBillStat(activeBill.legality - 2);
         }
 
         addLog('supremeCourt', 'Constitutional Crisis', 'All legality permanently -2!');
@@ -1622,11 +1915,11 @@ var Engine = (function() {
 
     // Oral Arguments — current bill partisanship moves 2 toward center, +2 VP. Once per round.
     function courtOralArguments() {
-        if (!state.currentBill) return { success: false, message: 'No bill on the floor.' };
+        if (!getActiveBill()) return { success: false, message: 'No bill on the floor.' };
         if (state.supremeCourt.oralArgumentsUsedThisRound) return { success: false, message: 'Already used this round.' };
 
         state.supremeCourt.oralArgumentsUsedThisRound = true;
-        var bill = state.currentBill;
+        var bill = getActiveBill();
         var shift = bill.partisanship > 10 ? -2 : (bill.partisanship < 10 ? 2 : 0);
         bill.partisanship = clampBillStat(bill.partisanship + shift);
         state.supremeCourt.vp += 2;
@@ -1637,13 +1930,14 @@ var Engine = (function() {
 
     // Injunction — block bill from being voted on rest of round. Once per game, 3 JP.
     function courtInjunction() {
-        if (!state.currentBill) return { success: false, message: 'No bill on the floor.' };
+        if (!getActiveBill()) return { success: false, message: 'No bill on the floor.' };
         if (state.supremeCourt.injunctionUsed) return { success: false, message: 'Already used this game.' };
         if (state.supremeCourt.jp < 3) return { success: false, message: 'Need 3 JP.' };
 
         state.supremeCourt.jp -= 3;
         state.supremeCourt.injunctionUsed = true;
         state.billKilledThisRound = true;
+        getActiveBill().killed = true;
         state.supremeCourt.vp += 1;
         addLog('supremeCourt', 'Injunction', 'Bill blocked from votes this round! +1 VP.');
         advanceTurn();
@@ -1834,7 +2128,7 @@ var Engine = (function() {
         bill.passedBySenate = false;
 
         if (amendment.destination === 'floor') {
-            state.currentBill = bill;
+            addBillToFloor(bill);
             addLog('system', 'Constitutional Amendment', '"' + bill.name + '" restored to floor as constitutional!');
         } else {
             // "Draw pile" — bill goes away, generate new bill next time
@@ -1849,6 +2143,95 @@ var Engine = (function() {
         state.pendingAmendment = null;
         advanceTurn();
         return { success: true, message: 'Constitutional Amendment passed! "' + bill.name + '" declared constitutional.' };
+    }
+
+    // --- National Unity Summit Co-Action ---
+    function proposeUnitySummit(role) {
+        if (state.pendingUnitySummit) {
+            return { success: false, message: 'A Unity Summit is already pending.' };
+        }
+        if (state.stability >= 8) {
+            return { success: false, message: 'Stability is already high (≥8). No summit needed.' };
+        }
+        var rs = state[role];
+        if (rs.actionsRemaining < 2) return { success: false, message: 'Need 2 actions to propose.' };
+        if (rs.vp < 2) return { success: false, message: 'Need 2 VP to propose summit.' };
+
+        rs.actionsRemaining -= 1; // 1 action now, 1 from advanceTurn
+        rs.vp -= 2;
+
+        state.pendingUnitySummit = {
+            proposedBy: role,
+            agreed: [role],
+            needed: Config.ROLES.filter(function(r) { return r !== role; }),
+            round: state.round
+        };
+
+        addLog(role, 'Unity Summit', '🕊️ Proposed National Unity Summit! Needs 3/4 roles to agree. (4/4 = +3 stability)');
+        advanceTurn();
+        return { success: true, message: 'Unity Summit proposed! Other players must agree.' };
+    }
+
+    function agreeUnitySummit(role) {
+        if (!state.pendingUnitySummit) {
+            return { success: false, message: 'No pending Unity Summit.' };
+        }
+        var summit = state.pendingUnitySummit;
+        if (summit.agreed.indexOf(role) !== -1) {
+            return { success: false, message: 'Already agreed to this summit.' };
+        }
+        if (summit.needed.indexOf(role) === -1) {
+            return { success: false, message: 'Not needed for this summit.' };
+        }
+
+        var rs = state[role];
+        if (rs.actionsRemaining < 1) return { success: false, message: 'Need 1 action to agree.' };
+        if (rs.vp < 1) return { success: false, message: 'Need 1 VP to agree.' };
+
+        rs.vp -= 1;
+        summit.agreed.push(role);
+        summit.needed = summit.needed.filter(function(r) { return r !== role; });
+        addLog(role, 'Unity Summit', 'Agreed to National Unity Summit.');
+
+        // Check if 3/4 have agreed (minimum threshold)
+        if (summit.agreed.length >= 3 && summit.needed.length <= 1) {
+            return resolveUnitySummit(role);
+        }
+
+        advanceTurn();
+        return { success: true, message: 'Agreed to Unity Summit. Waiting for others.' };
+    }
+
+    function rejectUnitySummit(role) {
+        if (!state.pendingUnitySummit) {
+            return { success: false, message: 'No pending Unity Summit.' };
+        }
+        var summitProposer = state.pendingUnitySummit.proposedBy;
+        state.pendingUnitySummit = null;
+        addLog(role, 'Unity Summit', '❌ Rejected Unity Summit. Summit cancelled.');
+        advanceTurn();
+        return { success: true, message: 'Unity Summit rejected and cancelled.' };
+    }
+
+    function resolveUnitySummit(triggerRole) {
+        var summit = state.pendingUnitySummit;
+        var allAgreed = summit.agreed.length === 4;
+        var stabilityGain = allAgreed ? 3 : 2;
+
+        state.stability = Math.min(10, state.stability + stabilityGain);
+
+        var vpReward = allAgreed ? 2 : 1;
+        for (var i = 0; i < summit.agreed.length; i++) {
+            state[summit.agreed[i]].vp += vpReward;
+        }
+
+        addLog('system', 'Unity Summit', '🕊️ National Unity Summit succeeded! ' +
+            summit.agreed.length + '/4 roles participated. Stability +' + stabilityGain +
+            ' (now ' + state.stability + '). Participants +' + vpReward + ' VP.');
+
+        state.pendingUnitySummit = null;
+        advanceTurn();
+        return { success: true, message: 'Unity Summit passed! Stability +' + stabilityGain + '.' };
     }
 
     // --- Bill Passage Completion ---
@@ -1962,7 +2345,10 @@ var Engine = (function() {
 
         // Generate new bill for next action
         if (!bill.isTaxCuts) {
-            state.currentBill = generateBill();
+            removeBillFromFloor(bill.id);
+            if (state.bills.length === 0) {
+                addBillToFloor(generateBill());
+            }
         }
     }
 
@@ -2160,9 +2546,25 @@ var Engine = (function() {
         var roll = rollD20();
         var effectivePop = pop + bonus;
 
+        // If president is forced to lose due to event failure
+        var forcedLoss = state.presidentLosesNextElection;
+        if (forcedLoss) {
+            state.presidentLosesNextElection = false; // consume the flag
+        }
+
         var result = { type: 'president', roll: roll, effectivePop: effectivePop };
 
-        if (roll <= effectivePop && canRunAgain) {
+        if (forcedLoss) {
+            // President automatically loses — opposing party wins
+            state.president.party = state.president.party === 'democrat' ? 'republican' : 'democrat';
+            state.president.popularity = 10;
+            state.president.vp -= 3;
+            state.president.termsServed = 1;
+            state.president.roundsInCurrentTerm = 0;
+            state.president.executiveOrdersTotal = 0;
+            result.winner = 'oppositeParty';
+            addLog('election', 'Presidential Election', '🚨 President forced out by national crisis! Opposing ' + state.president.party + ' party wins.');
+        } else if (roll <= effectivePop && canRunAgain) {
             // Same president/party wins
             state.president.popularity = clampPopularity(state.president.popularity + 1);
             state.president.termsServed++;
@@ -2194,6 +2596,9 @@ var Engine = (function() {
 
     // --- Round Management ---
     function endRound() {
+        // Expire old deals and regress trust
+        expireOldDeals();
+
         // President passive: VP for high popularity
         if (state.president.popularity > 15) {
             state.president.vp += 1;
@@ -2215,7 +2620,7 @@ var Engine = (function() {
         var electionResults = processElections();
 
         // Check if bill on floor wasn't passed — SC gets VP
-        if (state.currentBill && !state.billPassedThisRound) {
+        if (state.bills.length > 0 && !state.billPassedThisRound) {
             state.supremeCourt.vp += 1;
         }
 
@@ -2316,11 +2721,93 @@ var Engine = (function() {
             state.pendingAmendment = null;
         }
 
-        // New bill unless stalled
-        if (!state.billStalledNextRound) {
-            state.currentBill = generateBill();
+        // Cancel pending Unity Summit if not completed by round end
+        if (state.pendingUnitySummit) {
+            addLog('system', 'Unity Summit', '🕊️ Unity Summit expired — not enough support before round end.');
+            state.pendingUnitySummit = null;
         }
-        state.billStalledNextRound = false;
+
+        // Clear all bills from floor except stalled ones
+        var stalledBills = [];
+        for (var bi = 0; bi < state.bills.length; bi++) {
+            if (state.bills[bi].stalled) {
+                state.bills[bi].stalled = false; // only stalls for one round
+                stalledBills.push(state.bills[bi]);
+            }
+        }
+        state.bills = stalledBills;
+        if (state.bills.length > 0) {
+            state.activeBillId = state.bills[0].id;
+        }
+        // Always generate a fresh bill
+        addBillToFloor(generateBill());
+
+        // Stability decay: -1 every 3 rounds
+        if (state.round % 3 === 0 && state.round > 1) {
+            state.stability = Math.max(0, state.stability - 1);
+            addLog('system', 'Stability Decay', 'National stability declined. Now: ' + state.stability);
+        }
+
+        // Check if stability hit 0 — game over, everyone loses
+        if (state.stability <= 0) {
+            state.phase = 'gameOver';
+            state.stabilityCollapse = true;
+            addLog('system', 'COLLAPSE', 'National stability has collapsed! All players lose!');
+            return;
+        }
+
+        // Stability threshold effects
+        if (state.stability >= 8) {
+            Config.ROLES.forEach(function(r) { state[r].vp += 1; });
+            addLog('passive', 'Prosperity Bonus', 'Stability 8+. All players +1 VP.');
+        } else if (state.stability <= 2) {
+            Config.ROLES.forEach(function(r) {
+                state[r].actionsRemaining = Math.max(1, state[r].actionsRemaining - 1);
+            });
+            addLog('passive', 'Crisis Penalty', 'Stability \u2264 2. All players lose 1 action.');
+        }
+
+        // Event deadline check
+        if (state.activeEvent && !state.activeEvent.resolved) {
+            state.activeEvent.roundsRemaining--;
+            if (state.activeEvent.roundsRemaining <= 0) {
+                var failEvt = state.activeEvent;
+                var pen = failEvt.failPenalty || {};
+                GameEvents.applyFailure(failEvt, state);
+                addLog('system', 'Event Failed', '💥 "' + failEvt.name + '" was not resolved in time!');
+                if (pen.houseShift) addLog('system', 'Drastic Effect', '🏛️ House composition drastically shifted!');
+                if (pen.senateShift) addLog('system', 'Drastic Effect', '🏛️ Senate composition drastically shifted!');
+                if (pen.justiceEffect && pen.justiceEffect.resign) addLog('system', 'Drastic Effect', '⚖️ A Supreme Court justice has resigned!');
+                if (pen.justiceEffect && pen.justiceEffect.switchPartisanship) addLog('system', 'Drastic Effect', '⚖️ ' + pen.justiceEffect.switchPartisanship + ' justice(s) changed partisanship!');
+                if (pen.presidentLosesElection) addLog('system', 'Drastic Effect', '🗳️ President will automatically lose the next election!');
+                state.eventHistory.push(failEvt.id);
+                state.activeEvent = null;
+                if (state.queuedEvent) {
+                    state.activeEvent = state.queuedEvent;
+                    state.queuedEvent = null;
+                }
+            }
+        }
+
+        // Check for new event trigger
+        if (typeof GameEvents !== 'undefined' && (!state.activeEvent || !state.queuedEvent)) {
+            var newEvent = GameEvents.checkEventTrigger(state);
+            if (newEvent) {
+                newEvent.roundsRemaining = newEvent.deadline;
+                newEvent.roundTriggered = state.round;
+                newEvent.resolved = false;
+                newEvent.resolutions = newEvent.resolutions.map(function(r) {
+                    return Object.assign({}, r, { agreedRoles: [] });
+                });
+                if (!state.activeEvent) {
+                    state.activeEvent = newEvent;
+                    addLog('system', 'EVENT', '\u26A1 ' + newEvent.name + '! (' + newEvent.deadline + ' rounds to resolve)');
+                } else if (!state.queuedEvent) {
+                    state.queuedEvent = newEvent;
+                    addLog('system', 'EVENT QUEUED', '\u26A1 ' + newEvent.name + ' is incoming!');
+                }
+            }
+        }
     }
 
     // --- Get Available Actions ---
@@ -2375,6 +2862,14 @@ var Engine = (function() {
                 if (!state.pendingAmendment && state.unconstitutionalBills && state.unconstitutionalBills.length > 0 && rs.popularity >= 15 && rs.actionsRemaining >= 2 && rs.vp >= 1) {
                     actions.push({ id: 'proposeAmendment', label: 'Propose Amendment', cost: '2 + 1VP + 1Pop', description: 'Restore an unconstitutional bill' });
                 }
+                // National Unity Summit
+                if (state.pendingUnitySummit && state.pendingUnitySummit.needed.indexOf('president') !== -1) {
+                    actions.push({ id: 'agreeUnitySummit', label: '🕊️ Agree to Unity Summit', cost: '1 + 1VP', description: 'Support stability summit' });
+                    actions.push({ id: 'rejectUnitySummit', label: 'Reject Unity Summit', cost: 1, description: 'Cancel pending summit' });
+                }
+                if (!state.pendingUnitySummit && state.stability < 8 && rs.actionsRemaining >= 2 && rs.vp >= 2) {
+                    actions.push({ id: 'proposeUnitySummit', label: '🕊️ Propose Unity Summit', cost: '2 + 2VP', description: 'All branches unite for stability (+2/+3)' });
+                }
                 break;
 
             case 'house':
@@ -2382,15 +2877,15 @@ var Engine = (function() {
                     actions.push({ id: 'stateOfUnion', label: 'State of the Union', cost: 1, description: 'Various effects' });
                 }
                 actions.push({ id: 'whipHouse', label: 'Whip the House', cost: 1, description: 'Convert 20 reps' });
-                if (state.currentBill) {
+                if (getActiveBill()) {
                     actions.push({ id: 'supportBill', label: 'Support Bill', cost: 1, description: '+5 Pop, more extreme' });
                     actions.push({ id: 'attackBill', label: 'Attack Bill', cost: 1, description: '-5 Pop, more extreme' });
                 }
-                if (state.currentBill && !state.house.killBillUsedThisRound && state.house.pc >= 1) {
+                if (getActiveBill() && !state.house.killBillUsedThisRound && state.house.pc >= 1) {
                     actions.push({ id: 'killBill', label: 'Kill Bill', cost: '1 + 1PC', description: '+1 VP, bill dead this round' });
                 }
                 actions.push({ id: 'hostHearing', label: 'Host Hearing', cost: 1, description: 'PC/VP/Pres Pop options' });
-                if (state.currentBill && !state.currentBill.riderForHouse) {
+                if (getActiveBill() && !getActiveBill().riderForHouse) {
                     actions.push({ id: 'riderAmendment', label: 'Rider Amendment', cost: 1, description: 'Attach +3 VP rider to bill' });
                 }
                 if (state.house.pc >= 6) {
@@ -2405,13 +2900,13 @@ var Engine = (function() {
                 if (!state.house.powerOfPurseUsed && state.house.vp >= 4) {
                     actions.push({ id: 'powerOfPurse', label: 'Power of the Purse', cost: '1 + 4VP', description: 'Pres & Senate lose 1 action this round & next' });
                 }
-                if (state.currentBill && !state.house.popularizeUsedThisRound && state.house.pc >= 1) {
+                if (getActiveBill() && !state.house.popularizeUsedThisRound && state.house.pc >= 1) {
                     actions.push({ id: 'popularizeBill', label: 'Popularize Bill', cost: '1 + 1PC', description: '+5 Pop, -4 Leg, +3 Part' });
                 }
                 if (rs.actionsRemaining >= 2 && state.house.pc >= 2) {
                     actions.push({ id: 'changeBill', label: 'Change Bill Now', cost: '2 + 2PC', description: 'New bill on floor' });
                 }
-                if (state.currentBill && !state.billKilledThisRound && !state.currentBill.passedByHouse) {
+                if (getActiveBill() && !state.billKilledThisRound && !getActiveBill().killed && !getActiveBill().passedByHouse) {
                     actions.push({ id: 'housePassBill', label: 'Pass Bill', cost: 1, description: 'Vote on bill' });
                 }
                 if (!state.house.initiatedLegislationThisRound) {
@@ -2431,6 +2926,14 @@ var Engine = (function() {
                 if (!state.pendingAmendment && state.unconstitutionalBills && state.unconstitutionalBills.length > 0 && state.president.popularity >= 15 && rs.actionsRemaining >= 2 && rs.vp >= 1 && rs.pc >= 1) {
                     actions.push({ id: 'proposeAmendment', label: 'Propose Amendment', cost: '2 + 1VP + 1PC', description: 'Restore an unconstitutional bill' });
                 }
+                // National Unity Summit (House)
+                if (state.pendingUnitySummit && state.pendingUnitySummit.needed.indexOf('house') !== -1) {
+                    actions.push({ id: 'agreeUnitySummit', label: '🕊️ Agree to Unity Summit', cost: '1 + 1VP', description: 'Support stability summit' });
+                    actions.push({ id: 'rejectUnitySummit', label: 'Reject Unity Summit', cost: 1, description: 'Cancel pending summit' });
+                }
+                if (!state.pendingUnitySummit && state.stability < 8 && rs.actionsRemaining >= 2 && rs.vp >= 2) {
+                    actions.push({ id: 'proposeUnitySummit', label: '🕊️ Propose Unity Summit', cost: '2 + 2VP', description: 'All branches unite for stability (+2/+3)' });
+                }
                 break;
 
             case 'senate':
@@ -2441,7 +2944,7 @@ var Engine = (function() {
                     actions.push({ id: 'nominations', label: 'Pass/Block Nominations', cost: 1, description: '+4 PC or +1 VP' });
                 }
                 actions.push({ id: 'debate', label: 'Debate Legislation', cost: 1, description: '+2 PC, shift senators' });
-                if (state.currentBill) {
+                if (getActiveBill()) {
                     actions.push({ id: 'updateBill', label: 'Update Bill', cost: 1, description: 'Change bill stats' });
                 }
                 var filibusterCostDisplay = state.senate.filibustersUsedTotal >= 2 ? 5 : 4;
@@ -2454,7 +2957,7 @@ var Engine = (function() {
                 if (!state.senate.conferenceUsedThisRound) {
                     actions.push({ id: 'conference', label: 'Conference', cost: 1, description: '+1 PC for both chambers' });
                 }
-                if (state.currentBill && !state.billKilledThisRound && !state.currentBill.passedBySenate) {
+                if (getActiveBill() && !state.billKilledThisRound && !getActiveBill().killed && !getActiveBill().passedBySenate) {
                     actions.push({ id: 'senatePassBill', label: 'Pass Bill', cost: 1, description: 'Vote on bill' });
                 }
                 if (state.passedBills.length > 0) {
@@ -2472,6 +2975,14 @@ var Engine = (function() {
                 if (!state.pendingAmendment && state.unconstitutionalBills && state.unconstitutionalBills.length > 0 && state.president.popularity >= 15 && rs.actionsRemaining >= 2 && rs.vp >= 1 && rs.pc >= 1) {
                     actions.push({ id: 'proposeAmendment', label: 'Propose Amendment', cost: '2 + 1VP + 1PC', description: 'Restore an unconstitutional bill' });
                 }
+                // National Unity Summit (Senate)
+                if (state.pendingUnitySummit && state.pendingUnitySummit.needed.indexOf('senate') !== -1) {
+                    actions.push({ id: 'agreeUnitySummit', label: '🕊️ Agree to Unity Summit', cost: '1 + 1VP', description: 'Support stability summit' });
+                    actions.push({ id: 'rejectUnitySummit', label: 'Reject Unity Summit', cost: 1, description: 'Cancel pending summit' });
+                }
+                if (!state.pendingUnitySummit && state.stability < 8 && rs.actionsRemaining >= 2 && rs.vp >= 2) {
+                    actions.push({ id: 'proposeUnitySummit', label: '🕊️ Propose Unity Summit', cost: '2 + 2VP', description: 'All branches unite for stability (+2/+3)' });
+                }
                 break;
 
             case 'supremeCourt':
@@ -2483,13 +2994,13 @@ var Engine = (function() {
                 if (!state.supremeCourt.investigateEOUsedThisRound && state.president.executiveOrdersThisRound >= 2 && !state.president.witchhuntProtectedNextRound) {
                     actions.push({ id: 'investigateEO', label: 'Investigate EO', cost: 1, description: 'Pres -2VP/-2Pop' });
                 }
-                if (state.currentBill && !state.currentBill.isPackCourts) {
+                if (getActiveBill() && !getActiveBill().isPackCourts) {
                     actions.push({ id: 'investigateBill', label: 'Investigate Bill', cost: 1, description: 'Bill legality -2' });
                 }
-                if (state.currentBill && !state.supremeCourt.billReviewUsedThisRound) {
+                if (getActiveBill() && !state.supremeCourt.billReviewUsedThisRound) {
                     actions.push({ id: 'billReview', label: 'Bill Review', cost: 1, description: 'Legality +2, adjust Part/Pop ±2, +2 VP' });
                 }
-                if (state.currentBill && !state.supremeCourt.amicusBriefUsedThisRound && state.supremeCourt.jp >= 2) {
+                if (getActiveBill() && !state.supremeCourt.amicusBriefUsedThisRound && state.supremeCourt.jp >= 2) {
                     actions.push({ id: 'amicusBrief', label: 'Amicus Brief', cost: '1 + 2JP', description: '+2 VP, bill legality -4' });
                 }
                 if (state.justiceNominated) {
@@ -2529,18 +3040,34 @@ var Engine = (function() {
                     }
                 }
                 // Oral Arguments — bill partisanship toward center, +2 VP
-                if (state.currentBill && !state.supremeCourt.oralArgumentsUsedThisRound) {
+                if (getActiveBill() && !state.supremeCourt.oralArgumentsUsedThisRound) {
                     actions.push({ id: 'oralArguments', label: 'Oral Arguments', cost: 1, description: 'Bill partisanship toward center, +2 VP' });
                 }
                 // Injunction — block bill votes this round, once per game
-                if (state.currentBill && !state.supremeCourt.injunctionUsed && state.supremeCourt.jp >= 3 && !state.billKilledThisRound) {
+                if (getActiveBill() && !state.supremeCourt.injunctionUsed && state.supremeCourt.jp >= 3 && !state.billKilledThisRound) {
                     actions.push({ id: 'injunction', label: 'Injunction', cost: '1 + 3JP', description: 'Block bill votes this round, +1 VP (once/game)' });
                 }
                 // Clerks Research — +2 JP
                 if (!state.supremeCourt.clerksResearchUsedThisRound) {
                     actions.push({ id: 'clerksResearch', label: 'Clerks Research', cost: 1, description: '+2 JP' });
                 }
+                // National Unity Summit (Supreme Court)
+                if (state.pendingUnitySummit && state.pendingUnitySummit.needed.indexOf('supremeCourt') !== -1) {
+                    actions.push({ id: 'agreeUnitySummit', label: '🕊️ Agree to Unity Summit', cost: '1 + 1VP', description: 'Support stability summit' });
+                    actions.push({ id: 'rejectUnitySummit', label: 'Reject Unity Summit', cost: 1, description: 'Cancel pending summit' });
+                }
+                if (!state.pendingUnitySummit && state.stability < 8 && rs.actionsRemaining >= 2 && rs.vp >= 2) {
+                    actions.push({ id: 'proposeUnitySummit', label: '🕊️ Propose Unity Summit', cost: '2 + 2VP', description: 'All branches unite for stability (+2/+3)' });
+                }
                 break;
+        }
+
+        // Event resolution actions
+        if (state.activeEvent && typeof GameEvents !== 'undefined') {
+            var eventActions = GameEvents.getAvailableEventActions(role, state);
+            for (var ei = 0; ei < eventActions.length; ei++) {
+                actions.push(eventActions[ei]);
+            }
         }
 
         return actions;
@@ -2553,11 +3080,13 @@ var Engine = (function() {
         if (actionLock) {
             return { success: false, message: 'Action in progress.' };
         }
+        // Deal actions are free and don't require it to be your turn
+        var dealActions = ['proposeDeal', 'respondDeal', 'fulfillDeal', 'breakDeal'];
         if (actionId === 'initiateLegislation') {
             if (role !== 'house') {
                 return { success: false, message: 'Only the House can initiate legislation.' };
             }
-        } else if (getCurrentRole() !== role) {
+        } else if (dealActions.indexOf(actionId) === -1 && getCurrentRole() !== role) {
             return { success: false, message: 'Not your turn.' };
         }
         params = params || {};
@@ -2643,6 +3172,104 @@ var Engine = (function() {
             case 'agreeAmendment': actionResult = agreeAmendment(role); break;
             case 'rejectAmendment': actionResult = rejectAmendment(role); break;
 
+            // National Unity Summit (available to all roles)
+            case 'proposeUnitySummit': actionResult = proposeUnitySummit(role); break;
+            case 'agreeUnitySummit': actionResult = agreeUnitySummit(role); break;
+            case 'rejectUnitySummit': actionResult = rejectUnitySummit(role); break;
+
+            // Bill selection (free action)
+            case 'setActiveBill':
+                if (params.billId) {
+                    state.activeBillId = params.billId;
+                    actionResult = { success: true, message: 'Selected bill.', freeAction: true };
+                } else {
+                    actionResult = { success: false, message: 'No bill ID provided.' };
+                }
+                break;
+
+            // Deals (free actions — don't consume a turn)
+            case 'proposeDeal':
+                actionResult = proposeDeal(role, params.to, params.askType, params.offerType, params.message, params.askBillId || null, params.offerBillId || null);
+                if (actionResult) actionResult = { success: true, deal: actionResult, message: 'Deal proposed.' };
+                break;
+            case 'respondDeal':
+                actionResult = respondToDeal(params.dealId, params.accept);
+                break;
+            case 'fulfillDeal':
+                actionResult = fulfillDeal(params.dealId);
+                break;
+            case 'breakDeal':
+                actionResult = breakDeal(params.dealId);
+                break;
+
+            case 'resolveEvent':
+                if (!state.activeEvent) {
+                    actionResult = { success: false, message: 'No active event.' };
+                } else {
+                    var resId = params.resolutionId;
+                    var resolution = null;
+                    for (var ri = 0; ri < state.activeEvent.resolutions.length; ri++) {
+                        if (state.activeEvent.resolutions[ri].id === resId) {
+                            resolution = state.activeEvent.resolutions[ri];
+                            break;
+                        }
+                    }
+                    if (!resolution) {
+                        actionResult = { success: false, message: 'Invalid resolution.' };
+                    } else {
+                        actionResult = GameEvents.resolveEvent(resolution, role, state);
+                        if (actionResult.resolved) {
+                            addLog('system', 'Event Resolved', '"' + state.activeEvent.name + '" resolved via "' + resolution.label + '"!');
+                            state.eventHistory.push(state.activeEvent.id);
+                            state.activeEvent = null;
+                            if (state.queuedEvent) {
+                                state.activeEvent = state.queuedEvent;
+                                state.queuedEvent = null;
+                                addLog('system', 'EVENT', '\u26A1 ' + state.activeEvent.name + ' is now active!');
+                            }
+                        }
+                        if (actionResult.success) advanceTurn();
+                    }
+                }
+                break;
+            case 'eventSpecialAction':
+                if (!state.activeEvent) {
+                    actionResult = { success: false, message: 'No active event.' };
+                } else {
+                    var specId = params.specialActionId;
+                    var specAction = null;
+                    var specs = state.activeEvent.specialActions || [];
+                    for (var si = 0; si < specs.length; si++) {
+                        if (specs[si].id === specId) { specAction = specs[si]; break; }
+                    }
+                    if (!specAction || specAction.usesRemaining <= 0) {
+                        actionResult = { success: false, message: 'Special action not available.' };
+                    } else if (specAction.role !== role && specAction.role !== 'any') {
+                        actionResult = { success: false, message: 'Wrong role for this action.' };
+                    } else {
+                        specAction.usesRemaining--;
+                        if (specAction.effect) {
+                            if (specAction.effect.pc) state[role].pc += specAction.effect.pc;
+                            if (specAction.effect.popularity) state.president.popularity = Math.max(1, Math.min(20, state.president.popularity + specAction.effect.popularity));
+                            if (specAction.effect.jp) state.supremeCourt.jp += specAction.effect.jp;
+                            if (specAction.effect.vp) state[role].vp += specAction.effect.vp;
+                            if (specAction.effect.vpAll) {
+                                Config.ROLES.forEach(function(r) { state[r].vp += specAction.effect.vpAll; });
+                            }
+                            if (specAction.effect.extendDeadline) {
+                                state.activeEvent.roundsRemaining += specAction.effect.extendDeadline;
+                            }
+                            if (specAction.effect.rollBonus) {
+                                state.activeEvent.rollBonus = (state.activeEvent.rollBonus || 0) + specAction.effect.rollBonus;
+                            }
+                        }
+                        addLog(role, 'Event Action', specAction.label + ' used.');
+                        if (specAction.cost && specAction.cost.actions > 0) advanceTurn();
+                        actionResult = { success: true, message: specAction.label + ' applied!' };
+                    }
+                }
+                break;
+
             default: actionResult = { success: false, message: 'Unknown action: ' + actionId };
         }
 
@@ -2690,6 +3317,15 @@ var Engine = (function() {
         },
         getCurrentRole: getCurrentRole,
         skipRemainingActions: skipRemainingActions,
+        proposeDeal: proposeDeal,
+        respondToDeal: respondToDeal,
+        fulfillDeal: fulfillDeal,
+        breakDeal: breakDeal,
+        getActiveDeals: getActiveDeals,
+        getPendingDealsForRole: getPendingDealsForRole,
+        getAcceptedDealsForRole: getAcceptedDealsForRole,
+        adjustTrust: adjustTrust,
+        DEAL_TYPES: DEAL_TYPES,
         getAvailableActions: getAvailableActions,
         executeAction: executeAction,
         getWinner: getWinner,
@@ -2697,11 +3333,19 @@ var Engine = (function() {
         calculateHouseVotes: calculateHouseVotes,
         calculateJudicialReview: calculateJudicialReview,
         generateBill: generateBill,
+        getActiveBill: getActiveBill,
+        addBillToFloor: addBillToFloor,
+        removeBillFromFloor: removeBillFromFloor,
+        getBillById: getBillById,
+        setActiveBill: function(billId) { state.activeBillId = billId; },
         getSenateMajority: getSenateMajority,
         getHouseMajority: getHouseMajority,
         getCourtMajority: getCourtMajority,
         rollD20: rollD20,
-        rollD6: rollD6
+        rollD6: rollD6,
+        getStability: function() { return state ? state.stability : 0; },
+        getActiveEvent: function() { return state ? state.activeEvent : null; },
+        getQueuedEvent: function() { return state ? state.queuedEvent : null; }
     };
 })();
 
