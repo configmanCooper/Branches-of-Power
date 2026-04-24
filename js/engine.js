@@ -426,7 +426,7 @@ var Engine = (function() {
         if (!state.billPassedThisRound) {
             return { success: false, message: 'No bill was passed this round to veto.' };
         }
-        state.president.vp += 2;
+        state.president.vp -= 1;
 
         // Undo all VP gained/lost from this bill
         // The bill goes back on the floor with 2/3 requirement
@@ -439,7 +439,7 @@ var Engine = (function() {
         state.billPassedByHouse = false;
         state.billPassedBySenate = false;
 
-        addLog('president', 'Veto', 'Bill vetoed! Returns to floor requiring 2/3 vote. +2 VP.');
+        addLog('president', 'Veto', 'Bill vetoed! Returns to floor requiring 2/3 vote. -1 VP.');
         advanceTurn();
         return { success: true, message: 'Bill vetoed and returned to Congress.' };
     }
