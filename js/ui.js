@@ -656,7 +656,12 @@ var UI = (function() {
             var aiTurnRole = Engine.getCurrentRole();
             if (GameAI.isAI(aiTurnRole)) {
                 setTimeout(function() {
-                    playAITurn(aiTurnRole);
+                    try {
+                        playAITurn(aiTurnRole);
+                    } catch (aiErr) {
+                        console.error('AI turn error:', aiErr);
+                        alert('AI error for ' + aiTurnRole + ': ' + aiErr.message + '\n' + aiErr.stack);
+                    }
                 }, 400);
             }
         }
@@ -669,10 +674,19 @@ var UI = (function() {
     function playAITurn(role) {
         var state = JSON.parse(JSON.stringify(Engine.getState()));
         var actions = Engine.getAvailableActions(role);
-        if (actions.length === 0) return;
+        console.log('AI Turn: ' + role + ', actions available: ' + actions.length);
+        if (actions.length === 0) {
+            console.warn('AI has no actions for role: ' + role + ', current engine role: ' + Engine.getCurrentRole());
+            return;
+        }
 
         var decision = GameAI.getAIDecision(role, state, actions);
-        if (!decision) return;
+        if (!decision) {
+            console.warn('AI returned no decision for role: ' + role);
+            return;
+        }
+
+        console.log('AI decision: ' + role + ' -> ' + decision.id);
 
         // Verify the chosen action is actually available
         var valid = false;
@@ -681,7 +695,8 @@ var UI = (function() {
         }
         if (!valid) decision = { id: actions[0].id, params: {} };
 
-        Network.localAction(role, decision.id, decision.params);
+        var result = Network.localAction(role, decision.id, decision.params);
+        console.log('AI action result:', decision.id, result ? result.success : 'no result');
     }
 
     function renderPlayerStats(state) {

@@ -407,6 +407,7 @@ var Network = (function() {
     function startLocalGame(gameLength) {
         isHost = true;
         myRole = 'president'; // default, can switch
+        roomCode = 'LOCAL';
         Engine.init(gameLength);
         lobby = {
             players: {
