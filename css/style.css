@@ -607,7 +607,7 @@ body {
     .player-card { min-width: 120px; padding: 6px; }
     .player-role-name { font-size: 0.75em; }
     .stat { padding: 2px 5px; min-width: 32px; }
-    .stat-label { font-size: 0.6em; }
+    .stat-label { font-size: 0.7em; }
     .stat-value { font-size: 0.85em; }
 
     /* Center panel: tighter padding */
@@ -643,7 +643,7 @@ body {
     .role-switch-btn { 
         padding: 6px 8px;
         font-size: 0.75em;
-        min-height: 36px;
+        min-height: 44px;
     }
 
     /* Composition bars */
@@ -679,7 +679,7 @@ body {
 
     /* Log panel */
     .log-panel { max-height: 150px; padding: 8px; }
-    .log-entry { font-size: 0.72em; padding: 3px 6px; }
+    .log-entry { font-size: 0.78em; padding: 3px 6px; }
 
     /* Toast */
     .toast-container { top: 8px; right: 8px; left: 8px; }
@@ -695,6 +695,88 @@ body {
     .lobby { padding: 20px 12px; }
     .room-code-display { font-size: 1.1em; padding: 10px 20px; }
     .role-card { padding: 10px 12px; min-height: 44px; }
+}
+
+/* Mobile visibility fixes (Critical + High) */
+@media (max-width: 600px) {
+    /* C1: Bill card - full visibility fix */
+    .bill-card { 
+        overflow: visible !important;
+        border-width: 2px;
+        margin-bottom: 6px;
+    }
+    .bill-card.empty-bill {
+        padding: 16px;
+        font-size: 0.95em;
+        border: 2px dashed var(--border-color);
+    }
+    .bill-header { min-height: 32px; }
+    .bill-header h3 { font-size: 0.9em !important; word-break: break-word; white-space: normal; }
+    .bill-stats { gap: 6px !important; }
+    .bill-stat { min-height: 28px; }
+    .bill-stat-label { font-size: 0.8em; }
+    .bill-stat-bar { height: 8px; }
+
+    /* C2: Bill tabs - override inline styles */
+    .bill-tab {
+        max-width: none !important;
+        white-space: normal !important;
+        min-height: 44px !important;
+        padding: 8px 10px !important;
+        font-size: 0.8em !important;
+    }
+
+    /* C3/C4: Deal buttons touch targets */
+    .deals-panel button,
+    .deal-card button,
+    .pending-deals button,
+    .active-deals button {
+        min-height: 44px !important;
+        padding: 8px 12px !important;
+        font-size: 0.85em !important;
+    }
+
+    /* C5: Passed Laws button touch target */
+    [data-action="showPassedLaws"] {
+        min-height: 44px !important;
+        padding: 10px 6px !important;
+    }
+
+    /* H3: Composition numbers readability */
+    .comp-numbers {
+        font-size: 0.78em;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+    }
+
+    /* H4: AI setup rows wrap on mobile */
+    .ai-role-setup {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+
+    /* H5: Event banner text overflow */
+    .event-banner {
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    .event-banner p,
+    .event-banner div {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* H7: Stability gauge responsive */
+    .stability-gauge {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+
+    /* M3: Propose Deal button */
+    [data-action="showProposeDeal"] {
+        min-height: 44px !important;
+        padding: 8px 12px !important;
+    }
 }
 
 /* Small phone breakpoint */

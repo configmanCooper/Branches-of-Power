@@ -5,6 +5,27 @@ Uses [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.2.0] — 2026-04-24
+
+### Fixed
+- **CRITICAL: Bill cards invisible on mobile** — overflow:hidden was clipping content. Added overflow:visible, enhanced bill sizing, word-break for long names
+- **CRITICAL: Bill tabs too small to tap** — overrode inline max-width:150px; tabs now 44px touch targets
+- **CRITICAL: Deal buttons untappable** — all deal buttons now 44px min-height
+- **CRITICAL: Passed Laws button too small** — increased to 44px min-height
+- **Game stall bug** — skipRemainingActions added to executeAction switch (55% of AI games were freezing)
+- **House shift bug** — event failure used wrong hardcoded faction names
+
+### Improved
+- Stat labels enlarged (0.6em to 0.7em) for mobile readability
+- Log entries enlarged (0.72em to 0.78em)
+- Composition numbers word-wrap on narrow screens
+- Role switcher buttons enlarged to 44px touch targets
+- Event banner text wraps instead of overflowing
+- Stability gauge responsive with flex-wrap
+- AI setup rows wrap on mobile
+- Comprehensive mobile visibility audit (19 findings, all addressed)
+
+---
 ## [2.1.0] — 2025-07-14
 
 ### Added
