@@ -181,6 +181,7 @@ body {
     padding: 12px;
     border-right: 1px solid var(--border-color);
     overflow-y: auto;
+    min-height: 0;
 }
 .player-panel h3 { color: var(--text-secondary); font-size: 0.9em; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
 .player-card {
@@ -223,6 +224,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-height: 0;
 }
 
 /* Bill Card */
@@ -230,7 +232,8 @@ body {
     background: var(--bg-panel);
     border-radius: 8px;
     border: 2px solid var(--border-color);
-    overflow: hidden;
+    overflow: visible;
+    flex-shrink: 0;
 }
 .bill-card.empty-bill { padding: 30px; text-align: center; color: var(--text-secondary); }
 .bill-header {
@@ -243,16 +246,17 @@ body {
 }
 .bill-header h3 { font-size: 1em; }
 .bill-markers { font-size: 0.9em; font-weight: 700; }
-.bill-stats { padding: 10px 14px; display: flex; gap: 12px; }
+.bill-stats { padding: 10px 14px; display: flex; gap: 12px; flex-shrink: 0; }
 .bill-stat { flex: 1; }
 .bill-stat-label { font-size: 0.75em; color: var(--text-secondary); display: block; }
-.bill-stat-value { font-size: 1.3em; font-weight: 700; }
+.bill-stat-value { font-size: 1.3em; font-weight: 700; display: block; color: var(--text-primary); }
 .bill-stat-bar {
-    height: 6px;
+    height: 8px;
     background: var(--bg-dark);
     border-radius: 3px;
     margin-top: 4px;
     overflow: hidden;
+    min-height: 8px;
 }
 .bill-stat-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
 .bill-status {
@@ -278,7 +282,7 @@ body {
 }
 
 /* Composition Bars */
-.composition-section { display: flex; flex-direction: column; gap: 8px; }
+.composition-section { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
 .comp-bar-container { background: var(--bg-panel); padding: 8px 12px; border-radius: 6px; }
 .comp-label { font-size: 0.8em; color: var(--text-secondary); font-weight: 600; display: block; margin-bottom: 4px; }
 .comp-bar {
@@ -363,6 +367,7 @@ body {
     padding: 12px;
     border-left: 1px solid var(--border-color);
     overflow-y: auto;
+    min-height: 0;
 }
 .log-panel h3 { font-size: 0.9em; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
 .log-entries { display: flex; flex-direction: column; gap: 4px; }
