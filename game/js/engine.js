@@ -23,22 +23,6 @@ var Engine = (function() {
     function clampPopularity(val) { return clamp(val, Config.POPULARITY_MIN, Config.POPULARITY_MAX); }
 
     // Centralized VP granting with leader tax for non-bill VP
-    function grantVP(role, amount, source) {
-        if (amount <= 0) { state[role].vp += amount; return amount; }
-        // Leader tax: if role is 15+ VP ahead of lowest, reduce by 1 (min 1)
-        var lowestVP = Infinity;
-        for (var i = 0; i < Config.ROLES.length; i++) {
-            if (Config.ROLES[i] !== role && state[Config.ROLES[i]].vp < lowestVP) {
-                lowestVP = state[Config.ROLES[i]].vp;
-            }
-        }
-        var adjusted = amount;
-        if (state[role].vp - lowestVP >= 15) {
-            adjusted = Math.max(1, amount - 1);
-        }
-        state[role].vp += adjusted;
-        return adjusted;
-    }
 
     // --- Initialization ---
     function createInitialState(gameLength) {
@@ -2674,34 +2658,6 @@ var Engine = (function() {
         if (state.billPassedByHouse && !state.billPassedBySenate) {
             state.senate.vp -= 1;
             addLog('passive', 'Senate Inaction', 'House passed bill but Senate did not. Senate -1 VP.');
-        }
-
-        // Underdog Bonus: last place +2 VP, 3rd place +1 VP
-        var vpList = Config.ROLES.map(function(r) { return { role: r, vp: state[r].vp }; });
-        vpList.sort(function(a, b) { return a.vp - b.vp; });
-        // Last place (lowest VP) — all tied at lowest get +3
-        var lastPlaceVP = vpList[0].vp;
-        var thirdPlaceVP = vpList[1].vp; // 3rd place = 2nd lowest
-        for (var ui = 0; ui < vpList.length; ui++) {
-            if (vpList[ui].vp === lastPlaceVP) {
-                state[vpList[ui].role].vp += 3;
-                addLog('passive', 'Underdog Bonus', Config.ROLE_LABELS[vpList[ui].role] + ' is trailing. +3 VP.');
-            } else if (vpList[ui].vp === thirdPlaceVP && thirdPlaceVP !== lastPlaceVP) {
-                state[vpList[ui].role].vp += 2;
-                addLog('passive', 'Underdog Bonus', Config.ROLE_LABELS[vpList[ui].role] + ' is behind. +2 VP.');
-            }
-        }
-
-        // Leader Tax: if a player is 10+ VP ahead of lowest, they lose 3 VP per round
-        var leaderTaxMin = vpList[0].vp; // lowest VP (from underdog sort above)
-        var firstPlaceVP = vpList[vpList.length - 1].vp;
-        if (firstPlaceVP - leaderTaxMin >= 10) {
-            for (var li = 0; li < vpList.length; li++) {
-                if (vpList[li].vp === firstPlaceVP && vpList[li].vp - leaderTaxMin >= 10) {
-                    state[vpList[li].role].vp -= 3;
-                    addLog('passive', 'Leader Tax', Config.ROLE_LABELS[vpList[li].role] + ' is far ahead. -3 VP.');
-                }
-            }
         }
 
         // Advance round
