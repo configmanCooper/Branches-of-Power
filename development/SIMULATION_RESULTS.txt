@@ -1,0 +1,2112 @@
+=== BRANCHES OF POWER SIMULATION ===
+Game Length: Standard (10 rounds)
+Date: 2026-04-23
+
+=== INITIAL STATE ===
+President Party: democrat
+Senate Composition: Dem 25, Mod-Dem 18, Mod-Rep 34, Rep 23 (Majority: republican)
+House Composition: Far-D 36, Dem 98, Rep 118, Far-R 183 (Majority: republican)
+Supreme Court: Lib 1, Mod 6, Con 2
+Starting Bill: Mental Health Funding Bill (Part: 13, Pop: 17, Leg: 8)
+
+=== ROUND 1 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 10
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign]
+  Action: taxCuts (Params: none)
+  Result: ✓ Tax Cuts bill placed on floor.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 1 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 1 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+  Action: initiateLegislation (Params: {"partAdj":-1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 1 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 1 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [nominations, debate, updateBill, conference, senatePassBill]
+  Action: senatePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill passed the Senate!
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 0
+Available: [inquiryPresident, inquiryChamber, investigateBill, billReview, generalCourt, advisoryRole]
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 1
+Popularity: 10
+Available: [executiveOrder, advocate, admonish]
+  Action: executiveOrder (Params: none)
+  Result: ✓ Executive Order issued. +1 VP, +1 Popularity.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 1 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 1 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 0
+Available: [nominations, debate, updateBill, conference, senatePassBill]
+  Tried: senatePassBill → FAILED: Bill already passed the Senate.
+  Action: conference (Params: none)
+  Result: ✓ Conference with House.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 2
+Available: [inquiryPresident, inquiryChamber, investigateBill, billReview, advisoryRole, recusal]
+  Action: advisoryRole (Params: none)
+  Result: ✓ Advisory role taken.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill]
+[NEGOTIATION] Round 1 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 1 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 2
+Available: [nominations, debate, updateBill, stallBill, senatePassBill]
+  Tried: senatePassBill → FAILED: Bill already passed the Senate.
+  Action: debate (Params: {"direction":"right"})
+  Result: ✓ Debate concluded.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 4
+Available: [inquiryPresident, inquiryChamber, investigateBill, billReview, internalInquiry, recusal]
+  Action: billReview (Params: {"partAdj":-1,"popAdj":-1})
+  Result: ✓ Bill reviewed.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 1 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 1 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 4
+Available: [nominations, debate, updateBill, filibuster, stallBill, senatePassBill]
+  Tried: senatePassBill → FAILED: Bill already passed the Senate.
+  Action: nominations (Params: {"pass":false})
+  Result: ✓ Nominations blocked.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 1
+VP: 5
+Available: [inquiryPresident, inquiryChamber, investigateBill, internalInquiry, recusal]
+  Action: investigateBill (Params: none)
+  Result: ✓ Bill investigated.
+
+--- End of Round 1 ---
+VP Standings: President 1 | House 0 | Senate 9 | Supreme Court 6
+President Popularity: 9
+House PC: 0 | Senate PC: 4
+Current Bill: Financial Regulation Act (Part: 12, Pop: 17, Leg: 12)
+Elections:
+Supreme Court: Lib 1, Mod 6, Con 2 | JP: 3
+
+Trust Matrix (Round 1):
+                Pres  House  Sen   SC
+Pres trusts:    —       5     5     5
+House trusts:     5   —       6     5
+Sen trusts:       5     5   —       5
+SC trusts:        5     5     5   —  
+Promises: 4 active, 1 kept, 0 broken (this round)
+
+=== ROUND 2 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 9
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign]
+  Action: taxCuts (Params: none)
+  Result: ✓ Tax Cuts bill placed on floor.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 2 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 2 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+  Action: initiateLegislation (Params: {"partAdj":-1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 2 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 2 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 4
+Available: [nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill]
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the Senate!
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 5
+VP: 6
+Available: [inquiryPresident, inquiryChamber, investigateBill, billReview, generalCourt, advisoryRole, internalInquiry, recusal]
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 1
+Popularity: 9
+Available: [executiveOrder, advocate, admonish]
+  Action: executiveOrder (Params: none)
+  Result: ✓ Executive Order issued. +1 VP, +1 Popularity.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 2 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 2 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 2
+Available: [nominations, debate, updateBill, stallBill, conference, senatePassBill]
+  Tried: senatePassBill → FAILED: Bill already passed the Senate.
+  Action: conference (Params: none)
+  Result: ✓ Conference with House.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 8
+Available: [inquiryPresident, inquiryChamber, investigateBill, billReview, advisoryRole, internalInquiry, partisanRuling, recusal]
+  Action: advisoryRole (Params: none)
+  Result: ✓ Advisory role taken.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill]
+[NEGOTIATION] Round 2 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 2 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 4
+Available: [nominations, debate, updateBill, filibuster, stallBill, senatePassBill]
+  Tried: senatePassBill → FAILED: Bill already passed the Senate.
+  Action: nominations (Params: {"pass":false})
+  Result: ✓ Nominations blocked.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 10
+Available: [inquiryPresident, inquiryChamber, investigateBill, billReview, internalInquiry, partisanRuling, recusal]
+  Action: billReview (Params: {"partAdj":-1,"popAdj":-1})
+  Result: ✓ Bill reviewed.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 2 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 2 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 5
+Available: [debate, updateBill, filibuster, stallBill, senatePassBill]
+  Tried: senatePassBill → FAILED: Bill already passed the Senate.
+  Action: updateBill (Params: {"changes":{"partisanship":-1,"popularity":1,"legality":1}})
+  Result: ✓ Bill updated.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 11
+Available: [inquiryPresident, inquiryChamber, investigateBill, internalInquiry, partisanRuling, recusal, landmarkRuling]
+  Action: investigateBill (Params: none)
+  Result: ✓ Bill investigated.
+Available: [inquiryPresident, inquiryChamber, investigateBill, internalInquiry, recusal]
+  Action: internalInquiry (Params: none)
+  Result: ✓ Justice forced to retire!
+
+--- End of Round 2 ---
+VP Standings: President 2 | House 0 | Senate 19 | Supreme Court 12
+President Popularity: 8
+House PC: 0 | Senate PC: 4
+Current Bill: Gun Control Legislation (Part: 9, Pop: 7, Leg: 10)
+Elections:
+  House Election: 34 reps shift 2 away, 60 shift 1 away
+  New House: Far-D 0, Dem 42, Rep 210, Far-R 183 (Majority: republican)
+  Senate Election: 11 senators shifted -1 steps
+  New Senate: Dem 11, Mod-Dem 30, Mod-Rep 36, Rep 23 (Majority: republican)
+Supreme Court: Lib 1, Mod 6, Con 2 | JP: 4
+
+Trust Matrix (Round 2):
+                Pres  House  Sen   SC
+Pres trusts:    —       5     5     5
+House trusts:     5   —     9.8     5
+Sen trusts:       5     5   —       5
+SC trusts:        5     5     5   —  
+Promises: 7 active, 5 kept, 0 broken (this round)
+
+=== ROUND 3 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 8
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice]
+[PROMISE BROKEN] President broke bill_passage to House of Representatives (-2 trust)
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 3 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 3 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: initiateLegislation (Params: {"partAdj":-1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 3 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 3 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill]
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the Senate!
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 5
+VP: 12
+Available: [inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, generalCourt, advisoryRole, internalInquiry, partisanRuling, recusal]
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 3
+Popularity: 8
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice]
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 3 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 3 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 2
+Available: [confirmJustice, nominations, debate, updateBill, stallBill, conference, senatePassBill]
+  Tried: senatePassBill → FAILED: Bill already passed the Senate.
+  Action: conference (Params: none)
+  Result: ✓ Conference with House.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 14
+Available: [inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, advisoryRole, internalInquiry, partisanRuling, recusal]
+  Action: advisoryRole (Params: none)
+  Result: ✓ Advisory role taken.
+
+--- President's Turn ---
+Actions Remaining: 2
+Popularity: 8
+Available: [executiveOrder, advocate, admonish, campaign]
+  Action: campaign (Params: none)
+  Result: ✓ Campaigning! +4 Popularity.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill]
+[NEGOTIATION] Round 3 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 3 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, senatePassBill, reviveBill, repealBill]
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill failed.
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 15
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, internalInquiry, partisanRuling, recusal, landmarkRuling]
+  Action: billReview (Params: {"partAdj":-1,"popAdj":-1})
+  Result: ✓ Bill reviewed.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill]
+[NEGOTIATION] Round 3 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 3 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+  Action: killBill (Params: none)
+  Result: ✓ Bill killed in committee.
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 2
+Available: [confirmJustice, nominations, debate, updateBill, stallBill, reviveBill, repealBill]
+  Action: debate (Params: {"direction":"right"})
+  Result: ✓ Debate concluded.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 16
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, disapproveJustice, internalInquiry, partisanRuling, recusal, landmarkRuling]
+  Action: recusal (Params: {"leaning":"liberal"})
+  Result: ✓ liberal justice recused.
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, disapproveJustice, internalInquiry]
+  Action: judicialReview (Params: {"billIndex":0,"vpSpent":5})
+  Result: ✓ Ruling: constitutional
+
+--- End of Round 3 ---
+VP Standings: President 6 | House 13 | Senate 28 | Supreme Court 16
+President Popularity: 12
+House PC: 0 | Senate PC: 4
+Current Bill: Technology Privacy Act (Part: 14, Pop: 9, Leg: 15)
+Elections:
+Supreme Court: Lib 1, Mod 6, Con 2 | JP: 7
+Precedents Set: 1
+
+Trust Matrix (Round 3):
+                Pres  House  Sen   SC
+Pres trusts:    —       5     5     5
+House trusts:     3   —      10     5
+Sen trusts:     4.5     5   —       5
+SC trusts:      4.5     5     5   —  
+Promises: 7 active, 8 kept, 0 broken (this round)
+
+=== ROUND 4 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 12
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice]
+[PROMISE BROKEN] President broke bill_passage to House of Representatives (-2 trust)
+[PROMISE BROKEN] President broke bill_passage to House of Representatives (-2 trust)
+[PROMISE BROKEN] President broke bill_passage to House of Representatives (-2 trust)
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 4 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 4 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+  Action: initiateLegislation (Params: {"partAdj":-1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 4 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 4 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the Senate!
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 5
+VP: 16
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, generalCourt, advisoryRole, internalInquiry, partisanRuling, recusal, landmarkRuling]
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 3
+Popularity: 12
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice]
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 4 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 4 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill failed.
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 2
+Available: [confirmJustice, nominations, debate, updateBill, stallBill, conference, senatePassBill, reviveBill, repealBill]
+  Tried: senatePassBill → FAILED: Bill already passed the Senate.
+  Action: conference (Params: none)
+  Result: ✓ Conference with House.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 18
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: advisoryRole (Params: none)
+  Result: ✓ Advisory role taken.
+
+--- President's Turn ---
+Actions Remaining: 2
+Popularity: 12
+Available: [executiveOrder, advocate, admonish, campaign]
+  Action: executiveOrder (Params: none)
+  Result: ✓ Executive Order issued. +1 VP, +1 Popularity.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill]
+[NEGOTIATION] Round 4 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 4 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, senatePassBill, reviveBill, repealBill]
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the Senate!
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 20
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: billReview (Params: {"partAdj":-1,"popAdj":-1})
+  Result: ✓ Bill reviewed.
+
+--- President's Turn ---
+Actions Remaining: 1
+Popularity: 13
+Available: [executiveOrder, advocate, admonish, veto, sue, signBill]
+  Action: signBill (Params: none)
+  Result: ✓ Bill signed into law!
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill]
+[NEGOTIATION] Round 4 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 4 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+  Action: whipHouse (Params: {"faction":"democrat","direction":"right"})
+  Result: ✓ House whipped!
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 3
+Available: [confirmJustice, nominations, debate, updateBill, stallBill, senatePassBill, reviveBill, repealBill]
+  Action: debate (Params: {"direction":"right"})
+  Result: ✓ Debate concluded.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 21
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, disapproveJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: recusal (Params: {"leaning":"liberal"})
+  Result: ✓ liberal justice recused.
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, disapproveJustice, internalInquiry]
+  Action: judicialReview (Params: {"billIndex":1,"vpSpent":5})
+  Result: ✓ Ruling: constitutional
+
+--- End of Round 4 ---
+VP Standings: President 13 | House 25 | Senate 45 | Supreme Court 21
+President Popularity: 15
+House PC: 2 | Senate PC: 4
+Current Bill: Environmental Protection Act (Part: 10, Pop: 17, Leg: 13)
+Elections:
+  House Election: 57 shift 2 toward, 78 shift 1 toward
+  New House: Far-D 0, Dem 31, Rep 404, Far-R 0 (Majority: republican)
+  Senate Election: 14 senators shifted 1 steps
+  New Senate: Dem 5, Mod-Dem 32, Mod-Rep 54, Rep 9 (Majority: republican)
+  Presidential Election: same (rolled 1 vs 16)
+  President Party: democrat
+Supreme Court: Lib 1, Mod 6, Con 2 | JP: 11
+Precedents Set: 2
+
+Trust Matrix (Round 4):
+                Pres  House  Sen   SC
+Pres trusts:    —       5     5     5
+House trusts:     6   —      10     5
+Sen trusts:     3.3     5   —       5
+SC trusts:      3.3     5     5   —  
+Promises: 1 active, 13 kept, 0 broken (this round)
+
+=== ROUND 5 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 15
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice, witchhunt]
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 5 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 5 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+  Action: initiateLegislation (Params: {"partAdj":-1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill]
+[NEGOTIATION] Round 5 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 5 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the Senate!
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 5
+VP: 21
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, generalCourt, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 3
+Popularity: 15
+Available: [executiveOrder, advocate, admonish, veto, sue, taxCuts, campaign, signBill, assignJustice, witchhunt]
+  Action: signBill (Params: none)
+  Result: ✓ Bill signed into law!
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill]
+[NEGOTIATION] Round 5 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 5 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":1})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 3
+Available: [confirmJustice, nominations, debate, updateBill, stallBill, conference, senatePassBill, reviveBill, repealBill]
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the Senate!
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 22
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: advisoryRole (Params: none)
+  Result: ✓ Advisory role taken.
+
+--- President's Turn ---
+Actions Remaining: 2
+Popularity: 16
+Available: [executiveOrder, advocate, admonish, veto, sue, campaign, signBill, assignJustice, witchhunt]
+  Action: signBill (Params: none)
+  Result: ✓ Bill signed into law!
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill]
+[NEGOTIATION] Round 5 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 5 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+  Action: killBill (Params: none)
+  Result: ✓ Bill killed in committee.
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 3
+Available: [confirmJustice, nominations, debate, updateBill, stallBill, conference, reviveBill, repealBill]
+  Action: debate (Params: {"direction":"right"})
+  Result: ✓ Debate concluded.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 24
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: billReview (Params: {"partAdj":-1,"popAdj":-1})
+  Result: ✓ Bill reviewed.
+
+--- President's Turn ---
+Actions Remaining: 1
+Popularity: 17
+Available: [executiveOrder, advocate, admonish, veto, sue, signBill, assignJustice]
+  Action: signBill (Params: none)
+  Result: ✓ Bill signed into law!
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, popularizeBill]
+  Action: attackBill (Params: none)
+  Result: ✓ Bill attacked.
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 6
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, reviveBill, repealBill, governmentShutdown]
+  Action: nominations (Params: {"pass":false})
+  Result: ✓ Nominations blocked.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 25
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, disapproveJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: recusal (Params: {"leaning":"liberal"})
+  Result: ✓ liberal justice recused.
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, disapproveJustice, internalInquiry]
+  Action: judicialReview (Params: {"billIndex":3,"vpSpent":5})
+  Result: ✓ Ruling: constitutional
+
+--- End of Round 5 ---
+VP Standings: President 27 | House 46 | Senate 72 | Supreme Court 25
+President Popularity: 16
+House PC: 1 | Senate PC: 4
+Current Bill: Veterans Benefits Act (Part: 6, Pop: 12, Leg: 6)
+Elections:
+Supreme Court: Lib 1, Mod 6, Con 2 | JP: 15
+Precedents Set: 3
+
+Trust Matrix (Round 5):
+                Pres  House  Sen   SC
+Pres trusts:    —       5     5     5
+House trusts:   7.8   —      10     5
+Sen trusts:     3.5     5   —       5
+SC trusts:      3.5     5     5   —  
+Promises: 0 active, 9 kept, 0 broken (this round)
+
+=== ROUND 6 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 16
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice, witchhunt]
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 6 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 6 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: initiateLegislation (Params: {"partAdj":-1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill]
+[NEGOTIATION] Round 6 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 6 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":1})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the Senate!
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 5
+VP: 25
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, generalCourt, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 3
+Popularity: 16
+Available: [executiveOrder, advocate, admonish, veto, sue, taxCuts, campaign, signBill, assignJustice, witchhunt]
+  Action: signBill (Params: none)
+  Result: ✓ Bill signed into law!
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill]
+[NEGOTIATION] Round 6 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 6 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+  Action: killBill (Params: none)
+  Result: ✓ Bill killed in committee.
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 3
+Available: [confirmJustice, nominations, debate, updateBill, stallBill, conference, reviveBill, repealBill]
+  Action: debate (Params: {"direction":"right"})
+  Result: ✓ Debate concluded.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 27
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: advisoryRole (Params: none)
+  Result: ✓ Advisory role taken.
+
+--- President's Turn ---
+Actions Remaining: 2
+Popularity: 17
+Available: [executiveOrder, advocate, admonish, veto, sue, campaign, signBill, assignJustice, witchhunt]
+  Action: signBill (Params: none)
+  Result: ✓ Bill signed into law!
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, popularizeBill]
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 6
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, reviveBill, repealBill, governmentShutdown]
+  Action: nominations (Params: {"pass":false})
+  Result: ✓ Nominations blocked.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 29
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, disapproveJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: billReview (Params: {"partAdj":-1,"popAdj":-1})
+  Result: ✓ Bill reviewed.
+
+--- President's Turn ---
+Actions Remaining: 1
+Popularity: 16
+Available: [executiveOrder, advocate, admonish, veto, sue, signBill, assignJustice]
+  Action: signBill (Params: none)
+  Result: ✓ Bill signed into law!
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, popularizeBill]
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 8
+Available: [confirmJustice, debate, updateBill, filibuster, stallBill, conference, reviveBill, repealBill, governmentShutdown]
+  Action: updateBill (Params: {"changes":{"partisanship":-1,"popularity":1,"legality":1}})
+  Result: ✓ Bill updated.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 30
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, disapproveJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: recusal (Params: {"leaning":"liberal"})
+  Result: ✓ liberal justice recused.
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, disapproveJustice, internalInquiry]
+  Action: judicialReview (Params: {"billIndex":2,"vpSpent":5})
+  Result: ✓ Ruling: constitutional
+
+--- End of Round 6 ---
+VP Standings: President 38 | House 57 | Senate 86 | Supreme Court 30
+President Popularity: 17
+House PC: 2 | Senate PC: 4
+Current Bill: Student Loan Reform (Part: 18, Pop: 4, Leg: 8)
+Elections:
+  House Election: 47 shift 2 toward, 65 shift 1 toward
+  New House: Far-D 0, Dem 190, Rep 245, Far-R 0 (Majority: republican)
+  Senate Election: 23 senators shifted 2 steps
+  New Senate: Dem 0, Mod-Dem 70, Mod-Rep 30, Rep 0 (Majority: democrat)
+Supreme Court: Lib 1, Mod 6, Con 2 | JP: 19
+Precedents Set: 4
+
+Trust Matrix (Round 6):
+                Pres  House  Sen   SC
+Pres trusts:    —       5     5     5
+House trusts:    10   —      10     5
+Sen trusts:     3.8     5   —       5
+SC trusts:      3.8     5     5   —  
+Promises: 0 active, 8 kept, 0 broken (this round)
+
+=== ROUND 7 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 17
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice, witchhunt]
+[NEGOTIATION] Round 7 | President → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → President: "Agreed, let's do it" (trust: 9.75, sincerity: genuine)
+[NEGOTIATION] Round 7 | President → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → President: "I'll pass on that" (trust: 4, sincerity: LYING)
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 7 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "Yes, we will pass it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Action: initiateLegislation (Params: {"partAdj":-1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 2
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill]
+[NEGOTIATION] Round 7 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 7 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 7 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "Deal" (trust: 5, sincerity: genuine)
+  Action: confirmJustice (Params: none)
+  Result: ✓ Justice confirmed.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 5
+VP: 30
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, generalCourt, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+[NEGOTIATION] Round 7 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 3
+Popularity: 17
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice, witchhunt]
+[NEGOTIATION] Round 7 | President → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → President: "Agreed, let's do it" (trust: 9.75, sincerity: genuine)
+[NEGOTIATION] Round 7 | President → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → President: "Agreed, let's do it" (trust: 4, sincerity: genuine)
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 7 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 7 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "No deal" (trust: 5, sincerity: genuine)
+  Action: confirmJustice (Params: none)
+  Result: ✓ Justice confirmed.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 32
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+[NEGOTIATION] Round 7 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "I'll pass on that" (trust: 5, sincerity: LYING)
+  Action: advisoryRole (Params: none)
+  Result: ✓ Advisory role taken.
+
+--- President's Turn ---
+Actions Remaining: 2
+Popularity: 17
+Available: [executiveOrder, advocate, admonish, campaign, witchhunt]
+[NEGOTIATION] Round 7 | President → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → President: "Agreed, let's do it" (trust: 9.75, sincerity: genuine)
+[NEGOTIATION] Round 7 | President → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → President: "I'll pass on that" (trust: 4, sincerity: LYING)
+  Action: executiveOrder (Params: none)
+  Result: ✓ Executive Order issued. +1 VP, +1 Popularity.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 7 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 4
+Available: [nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 7 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "Deal" (trust: 5, sincerity: genuine)
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill failed.
+[PROMISE KEPT] Senate fulfilled bill_passage to House of Representatives
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 34
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+[NEGOTIATION] Round 7 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "I'll pass on that" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 7 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Action: billReview (Params: {"partAdj":1,"popAdj":-1})
+  Result: ✓ Bill reviewed.
+
+--- President's Turn ---
+Actions Remaining: 1
+Popularity: 18
+Available: [executiveOrder, advocate, admonish]
+[NEGOTIATION] Round 7 | President → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → President: "Agreed, let's do it" (trust: 9.75, sincerity: genuine)
+[NEGOTIATION] Round 7 | President → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → President: "I'll pass on that" (trust: 4, sincerity: LYING)
+  Action: executiveOrder (Params: none)
+  Result: ✓ Executive Order issued. +1 VP, +1 Popularity.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 7 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 7 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 2
+Available: [nominations, debate, updateBill, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 7 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "Deal" (trust: 5, sincerity: genuine)
+  Action: conference (Params: none)
+  Result: ✓ Conference with House.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 35
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateEO, investigateBill, suggestJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+[NEGOTIATION] Round 7 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "I'll pass on that" (trust: 5, sincerity: LYING)
+  Action: judicialReview (Params: {"billIndex":4,"vpSpent":5})
+  Result: ✓ Ruling: constitutional
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateEO, investigateBill, suggestJustice, internalInquiry, recusal]
+[NEGOTIATION] Round 7 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 7 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Action: investigateEO (Params: none)
+  Result: ✓ Executive orders investigated.
+
+--- End of Round 7 ---
+VP Standings: President 43 | House 67 | Senate 88 | Supreme Court 36
+President Popularity: 17
+House PC: 3 | Senate PC: 4
+Current Bill: Labor Rights Bill (Part: 4, Pop: 5, Leg: 13)
+Elections:
+  Court: liberal justice died
+Supreme Court: Lib 2, Mod 6, Con 2 | JP: 23
+Precedents Set: 5
+
+Trust Matrix (Round 7):
+                Pres  House  Sen   SC
+Pres trusts:    —       5     5     5
+House trusts:   9.8   —      10     5
+Sen trusts:       4     5   —       5
+SC trusts:        4     5     5   —  
+Promises: 25 active, 6 kept, 0 broken (this round)
+
+=== ROUND 8 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 17
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice, witchhunt]
+[NEGOTIATION] Round 8 | President → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → President: "Agreed, let's do it" (trust: 9.5, sincerity: genuine)
+[NEGOTIATION] Round 8 | President → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → President: "Agreed, let's do it" (trust: 4.25, sincerity: genuine)
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: moderate
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 3
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 8 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+  Action: initiateLegislation (Params: {"partAdj":-1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 3
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, changeBill, housePassBill]
+[NEGOTIATION] Round 8 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 8 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+  Action: housePassBill (Params: {"pcToUse":3})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+  Action: confirmJustice (Params: none)
+  Result: ✓ Justice confirmed.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 5
+VP: 36
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, generalCourt, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+[NEGOTIATION] Round 8 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "I'll pass on that" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 8 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 3
+Popularity: 17
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice, witchhunt]
+[NEGOTIATION] Round 8 | President → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → President: "Agreed, let's do it" (trust: 9.5, sincerity: genuine)
+[NEGOTIATION] Round 8 | President → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → President: "Agreed, let's do it" (trust: 4.25, sincerity: genuine)
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: moderate
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 8 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 8 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+  Action: confirmJustice (Params: none)
+  Result: ✓ Justice confirmed.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 38
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+[NEGOTIATION] Round 8 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "I'll pass on that" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 8 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Tried: advisoryRole → FAILED: At least 2 branches must lean same direction.
+  Action: billReview (Params: {"partAdj":0,"popAdj":-2})
+  Result: ✓ Bill reviewed.
+
+--- President's Turn ---
+Actions Remaining: 2
+Popularity: 17
+Available: [executiveOrder, advocate, admonish, campaign, witchhunt]
+[NEGOTIATION] Round 8 | President → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → President: "I'll pass on that" (trust: 9.5, sincerity: LYING)
+[NEGOTIATION] Round 8 | President → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → President: "Agreed, let's do it" (trust: 4.25, sincerity: genuine)
+  Action: executiveOrder (Params: none)
+  Result: ✓ Executive Order issued. +1 VP, +1 Popularity.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 8 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 8 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 4
+Available: [nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+  Action: nominations (Params: {"pass":false})
+  Result: ✓ Nominations blocked.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 39
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, suggestJustice, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+[NEGOTIATION] Round 8 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "I'll pass on that" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 8 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Tried: advisoryRole → FAILED: At least 2 branches must lean same direction.
+  Action: suggestJustice (Params: {"leaning":"moderate"})
+  Result: ✓ Justice suggested.
+
+--- President's Turn ---
+Actions Remaining: 1
+Popularity: 16
+Available: [executiveOrder, advocate, admonish]
+[NEGOTIATION] Round 8 | President → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → President: "I'll pass on that" (trust: 9.5, sincerity: LYING)
+[NEGOTIATION] Round 8 | President → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → President: "Agreed, let's do it" (trust: 4.25, sincerity: genuine)
+  Action: executiveOrder (Params: none)
+  Result: ✓ Executive Order issued. +1 VP, +1 Popularity.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 8 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 8 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | House of Representatives → Supreme Court: "Let's work together against Senate"
+[RESPONSE] Supreme Court → House of Representatives: "I'll pass on that" (trust: 5, sincerity: LYING)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 5
+Available: [debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+  Action: updateBill (Params: {"changes":{"partisanship":1,"popularity":1,"legality":1}})
+  Result: ✓ Bill updated.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 39
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateEO, investigateBill, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+[NEGOTIATION] Round 8 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 8 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Tried: advisoryRole → FAILED: At least 2 branches must lean same direction.
+  Action: investigateEO (Params: none)
+  Result: ✓ Executive orders investigated.
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, advisoryRole, internalInquiry, recusal]
+[NEGOTIATION] Round 8 | Supreme Court → President: "Let's work together against Senate"
+[RESPONSE] President → Supreme Court: "I'll pass on that" (trust: 5, sincerity: LYING)
+[NEGOTIATION] Round 8 | Supreme Court → House of Representatives: "Let's work together against Senate"
+[RESPONSE] House of Representatives → Supreme Court: "Agreed, let's do it" (trust: 5, sincerity: genuine)
+  Tried: advisoryRole → FAILED: At least 2 branches must lean same direction.
+  Action: investigateBill (Params: none)
+  Result: ✓ Bill investigated.
+
+--- End of Round 8 ---
+VP Standings: President 47 | House 77 | Senate 91 | Supreme Court 40
+President Popularity: 16
+House PC: 1 | Senate PC: 4
+Current Bill: Trade Agreement Act (Part: 7, Pop: 13, Leg: 9)
+Elections:
+  House Election: 44 shift 2 toward, 82 shift 1 toward
+  New House: Far-D 0, Dem 360, Rep 75, Far-R 0 (Majority: democrat)
+  Senate Election: 15 senators shifted 1 steps
+  New Senate: Dem 0, Mod-Dem 85, Mod-Rep 15, Rep 0 (Majority: democrat)
+  Presidential Election: same (rolled 1 vs 17)
+  President Party: democrat
+Supreme Court: Lib 2, Mod 8, Con 2 | JP: 25
+Precedents Set: 5
+
+Trust Matrix (Round 8):
+                Pres  House  Sen   SC
+Pres trusts:    —       5     5     5
+House trusts:   9.5   —     9.8     5
+Sen trusts:     4.3     5   —       5
+SC trusts:      4.3     5     5   —  
+Promises: 40 active, 1 kept, 0 broken (this round)
+
+=== ROUND 9 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 16
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice, witchhunt]
+[PROMISE BROKEN] House of Representatives broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] President broke no_attack to Senate (-2 trust)
+[PROMISE BROKEN] Supreme Court broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] President broke bill_passage to House of Representatives (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to President (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] President broke no_attack to Senate (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to President (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] Supreme Court broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] Supreme Court broke event_cooperation to President (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to President (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] President broke no_attack to Senate (-2 trust)
+[PROMISE BROKEN] Supreme Court broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] Supreme Court broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] President broke bill_passage to House of Representatives (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to President (-2 trust)
+[NEGOTIATION] Round 9 | President → Supreme Court: "Back off or I launch a witchhunt"
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: moderate
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 9 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 0, sincerity: LYING)
+[NEGOTIATION] Round 9 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 1.5, sincerity: genuine)
+  Action: initiateLegislation (Params: {"partAdj":1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill]
+[NEGOTIATION] Round 9 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 0, sincerity: LYING)
+[NEGOTIATION] Round 9 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 1.5, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":1})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 9 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "No deal" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 9 | Senate → House of Representatives: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] House of Representatives → Senate: "No deal" (trust: 9.5, sincerity: genuine)
+[NEGOTIATION] Round 9 | Senate → Supreme Court: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] Supreme Court → Senate: "No deal" (trust: 5, sincerity: genuine)
+  Action: confirmJustice (Params: none)
+  Result: ✓ Justice confirmed.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 5
+VP: 40
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, generalCourt, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 3
+Popularity: 16
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice, witchhunt]
+[NEGOTIATION] Round 9 | President → Supreme Court: "Back off or I launch a witchhunt"
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 9 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 0, sincerity: genuine)
+[NEGOTIATION] Round 9 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 1.5, sincerity: genuine)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 9 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "Deal" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 9 | Senate → House of Representatives: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] House of Representatives → Senate: "No deal" (trust: 9.5, sincerity: genuine)
+[NEGOTIATION] Round 9 | Senate → Supreme Court: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] Supreme Court → Senate: "No deal" (trust: 5, sincerity: genuine)
+  Action: confirmJustice (Params: none)
+  Result: ✓ Justice confirmed.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 42
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: advisoryRole (Params: none)
+  Result: ✓ Advisory role taken.
+
+--- President's Turn ---
+Actions Remaining: 2
+Popularity: 16
+Available: [executiveOrder, advocate, admonish, campaign, witchhunt]
+[NEGOTIATION] Round 9 | President → Supreme Court: "Back off or I launch a witchhunt"
+  Action: witchhunt (Params: none)
+  Result: ✓ Witchhunt declared!
+[THREAT EXECUTED] President followed through on threat against Supreme Court
+[THREAT EXECUTED] President followed through on threat against Supreme Court
+[THREAT EXECUTED] President followed through on threat against Supreme Court
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 9 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 0, sincerity: LYING)
+[NEGOTIATION] Round 9 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 1.5, sincerity: genuine)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 4
+Available: [nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 9 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "No deal" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 9 | Senate → House of Representatives: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] House of Representatives → Senate: "Deal" (trust: 9.5, sincerity: genuine)
+[NEGOTIATION] Round 9 | Senate → Supreme Court: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] Supreme Court → Senate: "Deal" (trust: 5, sincerity: genuine)
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the Senate!
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 37
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: billReview (Params: {"partAdj":1,"popAdj":-1})
+  Result: ✓ Bill reviewed.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 9 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 0, sincerity: genuine)
+[NEGOTIATION] Round 9 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 1.5, sincerity: genuine)
+  Action: whipHouse (Params: {"faction":"republican","direction":"left"})
+  Result: ✓ House whipped!
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 4
+Available: [nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 9 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "No deal" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 9 | Senate → House of Representatives: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] House of Representatives → Senate: "No deal" (trust: 9.5, sincerity: genuine)
+[NEGOTIATION] Round 9 | Senate → Supreme Court: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] Supreme Court → Senate: "Deal" (trust: 5, sincerity: genuine)
+  Action: nominations (Params: {"pass":false})
+  Result: ✓ Nominations blocked.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 38
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, suggestJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: recusal (Params: {"leaning":"conservative"})
+  Result: ✓ conservative justice recused.
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, suggestJustice, internalInquiry]
+  Action: judicialReview (Params: {"billIndex":5,"vpSpent":5})
+  Result: ✓ Ruling: unconstitutional
+
+--- End of Round 9 ---
+VP Standings: President 49 | House 77 | Senate 94 | Supreme Court 39
+President Popularity: 12
+House PC: 0 | Senate PC: 4
+Current Bill: Agricultural Subsidy Bill (Part: 8, Pop: 15, Leg: 9)
+Elections:
+Supreme Court: Lib 3, Mod 9, Con 2 | JP: 28
+Precedents Set: 6
+
+Trust Matrix (Round 9):
+                Pres  House  Sen   SC
+Pres trusts:    —       0     5     1
+House trusts:     0   —     9.5     0
+Sen trusts:       0   1.5   —     2.5
+SC trusts:        0     0     5   —  
+Promises: 22 active, 3 kept, 0 broken (this round)
+
+=== ROUND 10 ===
+
+--- President's Turn ---
+Actions Remaining: 4
+Popularity: 12
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice]
+[PROMISE BROKEN] House of Representatives broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] President broke bill_passage to House of Representatives (-2 trust)
+[PROMISE BROKEN] Supreme Court broke event_cooperation to President (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] Supreme Court broke event_cooperation to President (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] Supreme Court broke event_cooperation to President (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to President (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to Supreme Court (-2 trust)
+[PROMISE BROKEN] President broke event_cooperation to House of Representatives (-2 trust)
+[PROMISE BROKEN] Supreme Court broke event_cooperation to President (-2 trust)
+[PROMISE BROKEN] House of Representatives broke event_cooperation to President (-2 trust)
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: moderate
+
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill, initiateLegislation]
+[NEGOTIATION] Round 10 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 0, sincerity: LYING)
+[NEGOTIATION] Round 10 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 0, sincerity: genuine)
+  Action: initiateLegislation (Params: {"partAdj":1,"popAdj":1})
+  Result: ✓ New legislation initiated.
+  (Free action — turn continues)
+--- House of Representatives's Turn ---
+Actions Remaining: 4
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 10 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 0, sincerity: LYING)
+[NEGOTIATION] Round 10 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 0, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":0})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 4
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 10 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "Deal" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 10 | Senate → House of Representatives: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] House of Representatives → Senate: "Deal" (trust: 9.25, sincerity: genuine)
+[NEGOTIATION] Round 10 | Senate → Supreme Court: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] Supreme Court → Senate: "No deal" (trust: 5, sincerity: genuine)
+  Action: confirmJustice (Params: none)
+  Result: ✓ Justice confirmed.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 5
+VP: 39
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, generalCourt, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: generalCourt (Params: none)
+  Result: ✓ General cases heard.
+
+--- President's Turn ---
+Actions Remaining: 3
+Popularity: 12
+Available: [executiveOrder, advocate, admonish, taxCuts, campaign, assignJustice]
+  Action: assignJustice (Params: {"leaning":"liberal"})
+  Result: ✓ Justice nominated: liberal
+
+--- House of Representatives's Turn ---
+Actions Remaining: 3
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 10 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 0, sincerity: genuine)
+[NEGOTIATION] Round 10 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 0, sincerity: genuine)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 3
+PC: 4
+Available: [confirmJustice, nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 10 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "No deal" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 10 | Senate → House of Representatives: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] House of Representatives → Senate: "Deal" (trust: 9.25, sincerity: genuine)
+[NEGOTIATION] Round 10 | Senate → Supreme Court: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] Supreme Court → Senate: "Deal" (trust: 5, sincerity: genuine)
+  Action: confirmJustice (Params: none)
+  Result: ✓ Justice confirmed.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 4
+VP: 41
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, advisoryRole, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: advisoryRole (Params: none)
+  Result: ✓ Advisory role taken.
+
+--- President's Turn ---
+Actions Remaining: 2
+Popularity: 12
+Available: [executiveOrder, advocate, admonish, campaign]
+  Action: executiveOrder (Params: none)
+  Result: ✓ Executive Order issued. +1 VP, +1 Popularity.
+
+--- House of Representatives's Turn ---
+Actions Remaining: 2
+PC: 0
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, hostHearing, housePassBill]
+[NEGOTIATION] Round 10 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "Yes, I will sign it" (trust: 0, sincerity: LYING)
+[NEGOTIATION] Round 10 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 0, sincerity: genuine)
+  Tried: housePassBill → FAILED: Bill already passed the House.
+  Action: supportBill (Params: none)
+  Result: ✓ Bill supported.
+
+--- Senate's Turn ---
+Actions Remaining: 2
+PC: 4
+Available: [nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 10 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "Deal" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 10 | Senate → House of Representatives: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] House of Representatives → Senate: "No deal" (trust: 9.25, sincerity: genuine)
+[NEGOTIATION] Round 10 | Senate → Supreme Court: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] Supreme Court → Senate: "Deal" (trust: 5, sincerity: genuine)
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill passed the Senate!
+
+--- Supreme Court's Turn ---
+Actions Remaining: 3
+VP: 44
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, billReview, suggestJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: billReview (Params: {"partAdj":1,"popAdj":-1})
+  Result: ✓ Bill reviewed.
+
+--- President's Turn ---
+Actions Remaining: 1
+Popularity: 13
+Available: [executiveOrder, advocate, admonish, veto, signBill]
+  Action: signBill (Params: none)
+  Result: ✓ Bill signed into law!
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+[PROMISE KEPT] President fulfilled bill_passage to House of Representatives
+
+--- House of Representatives's Turn ---
+Actions Remaining: 1
+PC: 1
+Available: [stateOfUnion, whipHouse, supportBill, attackBill, killBill, hostHearing, popularizeBill, housePassBill]
+[NEGOTIATION] Round 10 | House → President: "Will you sign the current bill?"
+[RESPONSE] President → House: "No, I intend to veto" (trust: 0, sincerity: genuine)
+[NEGOTIATION] Round 10 | House → Senate: "Will you pass the current bill?"
+[RESPONSE] Senate → House: "No, we may block it" (trust: 0, sincerity: genuine)
+[NEGOTIATION] Round 10 | House of Representatives → President: "Let's work together against Senate"
+[RESPONSE] President → House of Representatives: "I'll pass on that" (trust: 0, sincerity: genuine)
+  Action: housePassBill (Params: {"pcToUse":1})
+  Result: ✓ Bill passed the House!
+
+--- Senate's Turn ---
+Actions Remaining: 1
+PC: 5
+Available: [nominations, debate, updateBill, filibuster, stallBill, conference, senatePassBill, reviveBill, repealBill]
+[NEGOTIATION] Round 10 | Senate → President: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] President → Senate: "No deal" (trust: 5, sincerity: genuine)
+[NEGOTIATION] Round 10 | Senate → House of Representatives: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] House of Representatives → Senate: "Deal" (trust: 9.25, sincerity: genuine)
+[NEGOTIATION] Round 10 | Senate → Supreme Court: "Don't attack me and I'll cooperate on bills"
+[RESPONSE] Supreme Court → Senate: "Deal" (trust: 5, sincerity: genuine)
+  Action: senatePassBill (Params: {"pcToUse":2})
+  Result: ✓ Bill failed.
+
+--- Supreme Court's Turn ---
+Actions Remaining: 2
+VP: 45
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, suggestJustice, internalInquiry, partisanRuling, constitutionalCrisis, recusal, landmarkRuling]
+  Action: recusal (Params: {"leaning":"conservative"})
+  Result: ✓ conservative justice recused.
+Available: [judicialReview, inquiryPresident, inquiryChamber, investigateBill, suggestJustice, internalInquiry]
+  Action: judicialReview (Params: {"billIndex":5,"vpSpent":5})
+  Result: ✓ Ruling: unconstitutional
+
+--- End of Round 10 ---
+VP Standings: President 54 | House 86 | Senate 96 | Supreme Court 46
+President Popularity: 15
+House PC: 0 | Senate PC: 3
+Current Bill: Labor Rights Bill (Part: 18, Pop: 10, Leg: 9)
+Elections:
+  House Election: 44 shift 2 toward, 61 shift 1 toward
+  New House: Far-D 94, Dem 341, Rep 0, Far-R 0 (Majority: democrat)
+  Senate Election: 8 senators shifted 1 steps
+  New Senate: Dem 0, Mod-Dem 93, Mod-Rep 7, Rep 0 (Majority: democrat)
+Supreme Court: Lib 4, Mod 10, Con 2 | JP: 32
+Precedents Set: 7
+
+Trust Matrix (Round 10):
+                Pres  House  Sen   SC
+Pres trusts:    —       0     5     0
+House trusts:     6   —     9.3     0
+Sen trusts:       0     0   —     0.8
+SC trusts:        0     0     5   —  
+Promises: 12 active, 9 kept, 0 broken (this round)
+
+=== GAME OVER ===
+Final VP Standings: President 54 | House 86 | Senate 96 | Supreme Court 46
+Winner: Senate with 96 VP!
+
+=== FULL ACTION LOG ===
+R1 [president] Tax Cuts: Tax Cuts bill on the floor! Partisanship 15, Popularity 20, Legality 10.
+R1 [house] Initiate Legislation: New bill: Part 9, Pop 11, Leg 7
+R1 [house] Pass Bill: FAILED with 118/218 votes.
+R1 [senate] Pass Bill: PASSED with 75 votes!
+R1 [supremeCourt] General Court: +2 VP, +1 JP.
+R1 [president] Executive Order: +1 VP, +1 Popularity
+R1 [house] Pass Bill: FAILED with 118/218 votes.
+R1 [senate] Conference: +2 PC for both Senate and House.
+R1 [supremeCourt] Advisory Role: 2+ branches aligned. +2 VP, +1 JP. May adjust bill.
+R1 [house] Pass Bill: FAILED with 216/218 votes.
+R1 [senate] Debate Legislation: +2 PC, 5 senators shifted (right).
+R1 [supremeCourt] Bill Review: Bill legality +2, partisanship -1, popularity -1. +1 VP, +1 JP.
+R1 [house] Pass Bill: FAILED with 118/218 votes.
+R1 [senate] Block Nominations: +1 PC, +1 VP, -2 President Popularity.
+R1 [supremeCourt] Investigate Bill: Bill legality -2. Now: 7
+R2 [supremeCourt] Court Calendar: Supermajority of justices — +1 bonus action this round.
+R2 [president] Tax Cuts: Tax Cuts bill on the floor! Partisanship 15, Popularity 20, Legality 10.
+R2 [house] Initiate Legislation: New bill: Part 9, Pop 11, Leg 7
+R2 [house] Pass Bill: FAILED with 118/218 votes.
+R2 [senate] Pass Bill: PASSED with 100 votes!
+R2 [supremeCourt] General Court: +2 VP, +1 JP.
+R2 [president] Executive Order: +1 VP, +1 Popularity
+R2 [house] Pass Bill: FAILED with 118/218 votes.
+R2 [senate] Conference: +2 PC for both Senate and House.
+R2 [supremeCourt] Advisory Role: 2+ branches aligned. +2 VP, +1 JP. May adjust bill.
+R2 [house] Pass Bill: FAILED with 216/218 votes.
+R2 [senate] Block Nominations: +1 PC, +1 VP, -2 President Popularity.
+R2 [supremeCourt] Bill Review: Bill legality +2, partisanship -1, popularity -1. +1 VP, +1 JP.
+R2 [house] Pass Bill: FAILED with 118/218 votes.
+R2 [senate] Update Bill: Bill modified. Part: 7, Pop: 11, Leg: 10
+R2 [supremeCourt] Investigate Bill: Bill legality -2. Now: 8
+R2 [supremeCourt] Internal Inquiry: Rolled 17 — justice retires!
+R2 [election] House Election: 34 reps shift 2 away, 60 shift 1 away
+R2 [election] Senate Election: 11 senators shifted -1 steps.
+R3 [supremeCourt] Court Calendar: Supermajority of justices — +1 bonus action this round.
+R3 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R3 [house] Initiate Legislation: New bill: Part 9, Pop 11, Leg 7
+R3 [house] Pass Bill: FAILED with 210/218 votes.
+R3 [senate] Pass Bill: PASSED with 100 votes!
+R3 [supremeCourt] General Court: +2 VP, +1 JP.
+R3 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R3 [house] Pass Bill: FAILED with 210/218 votes.
+R3 [senate] Conference: +2 PC for both Senate and House.
+R3 [supremeCourt] Advisory Role: 2+ branches aligned. +2 VP, +1 JP. May adjust bill.
+R3 [president] Campaign Trail: +4 Popularity.
+R3 [house] Pass Bill: PASSED with 252 votes!
+R3 [senate] Pass Bill: FAILED with 41/60 votes.
+R3 [supremeCourt] Bill Review: Bill legality +2, partisanship -1, popularity -1. +1 VP, +1 JP.
+R3 [house] Kill Bill: Bill sent to committee. +1 VP. Cannot pass this round.
+R3 [senate] Debate Legislation: +2 PC, 5 senators shifted (right).
+R3 [supremeCourt] Recusal: Justice #1 (liberal) recused from judicial review this round.
+R3 [supremeCourt] Judicial Review: "House Bill" ruled CONSTITUTIONAL. +5 VP, +1 JP. Cannot be reviewed again.
+R4 [supremeCourt] Court Calendar: Supermajority of justices — +1 bonus action this round.
+R4 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R4 [house] Initiate Legislation: New bill: Part 9, Pop 11, Leg 7
+R4 [house] Pass Bill: FAILED with 210/218 votes.
+R4 [senate] Pass Bill: PASSED with 100 votes!
+R4 [supremeCourt] General Court: +2 VP, +1 JP.
+R4 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R4 [house] Pass Bill: FAILED with 210/218 votes.
+R4 [senate] Conference: +2 PC for both Senate and House.
+R4 [supremeCourt] Advisory Role: 2+ branches aligned. +2 VP, +1 JP. May adjust bill.
+R4 [president] Executive Order: +1 VP, +1 Popularity
+R4 [supremeCourt] Precedent Applied: Precedent (constitutional) matched "House Bill". Legality +3, SC +1 VP.
+R4 [house] Pass Bill: PASSED with 252 votes!
+R4 [senate] Pass Bill: PASSED with 77 votes!
+R4 [supremeCourt] Bill Review: Bill legality +2, partisanship -1, popularity -1. +1 VP, +1 JP.
+R4 [president] Sign Bill: Bill signed! +2 VP, +Pop bonus, new bill on floor.
+R4 [house] Whip the House: Converted 20 democrat to republican.
+R4 [senate] Debate Legislation: +2 PC, 5 senators shifted (right).
+R4 [supremeCourt] Recusal: Justice #1 (liberal) recused from judicial review this round.
+R4 [supremeCourt] Judicial Review: "House Bill" ruled CONSTITUTIONAL. +5 VP, +1 JP. Cannot be reviewed again.
+R4 [election] House Election: 57 shift 2 toward, 78 shift 1 toward
+R4 [election] Senate Election: 14 senators shifted 1 steps.
+R4 [election] Presidential Election: Incumbent wins! Rolled 1 vs 16.
+R5 [supremeCourt] Court Calendar: Supermajority of justices — +1 bonus action this round.
+R5 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R5 [house] Initiate Legislation: New bill: Part 9, Pop 11, Leg 7
+R5 [house] Pass Bill: PASSED with 435 votes!
+R5 [supremeCourt] Precedent Applied: Precedent (constitutional) matched "House Bill". Legality +3, SC +1 VP.
+R5 [senate] Pass Bill: PASSED with 100 votes!
+R5 [supremeCourt] General Court: +2 VP, +1 JP.
+R5 [president] Sign Bill: Bill signed! +2 VP, +Pop bonus, new bill on floor.
+R5 [house] Pass Bill: PASSED with 404 votes!
+R5 [senate] Pass Bill: PASSED with 95 votes!
+R5 [supremeCourt] Advisory Role: 2+ branches aligned. +2 VP, +1 JP. May adjust bill.
+R5 [president] Sign Bill: Bill signed! +2 VP, +Pop bonus, new bill on floor.
+R5 [house] Kill Bill: Bill sent to committee. +1 VP. Cannot pass this round.
+R5 [senate] Debate Legislation: +2 PC, 5 senators shifted (right).
+R5 [supremeCourt] Bill Review: Bill legality +2, partisanship -1, popularity -1. +1 VP, +1 JP.
+R5 [president] Sign Bill: Bill signed! +2 VP, +Pop bonus, new bill on floor.
+R5 [house] Attack Bill: -5 Popularity, bill more extreme.
+R5 [senate] Block Nominations: +1 PC, +1 VP, -2 President Popularity.
+R5 [supremeCourt] Recusal: Justice #1 (liberal) recused from judicial review this round.
+R5 [supremeCourt] Judicial Review: "Foreign Aid Authorization" ruled CONSTITUTIONAL. +5 VP, +1 JP. Cannot be reviewed again.
+R5 [passive] President Bonus: Popularity > 15. +1 VP.
+R6 [supremeCourt] Court Calendar: Supermajority of justices — +1 bonus action this round.
+R6 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R6 [house] Initiate Legislation: New bill: Part 9, Pop 11, Leg 7
+R6 [house] Pass Bill: PASSED with 404 votes!
+R6 [supremeCourt] Precedent Applied: Precedent (constitutional) matched "House Bill". Legality +3, SC +1 VP.
+R6 [senate] Pass Bill: PASSED with 100 votes!
+R6 [supremeCourt] General Court: +2 VP, +1 JP.
+R6 [president] Sign Bill: Bill signed! +2 VP, +Pop bonus, new bill on floor.
+R6 [house] Kill Bill: Bill sent to committee. +1 VP. Cannot pass this round.
+R6 [senate] Debate Legislation: +2 PC, 4 senators shifted (right).
+R6 [supremeCourt] Advisory Role: 2+ branches aligned. +2 VP, +1 JP. May adjust bill.
+R6 [president] Sign Bill: Bill signed! +2 VP, +Pop bonus, new bill on floor.
+R6 [house] Support Bill: +5 Popularity, bill more extreme.
+R6 [senate] Block Nominations: +1 PC, +1 VP, -2 President Popularity.
+R6 [supremeCourt] Bill Review: Bill legality +2, partisanship -1, popularity -1. +1 VP, +1 JP.
+R6 [president] Sign Bill: Bill signed! +2 VP, +Pop bonus, new bill on floor.
+R6 [house] Support Bill: +5 Popularity, bill more extreme.
+R6 [senate] Update Bill: Bill modified. Part: 6, Pop: 13, Leg: 13
+R6 [supremeCourt] Recusal: Justice #1 (liberal) recused from judicial review this round.
+R6 [supremeCourt] Judicial Review: "House Bill" ruled CONSTITUTIONAL. +5 VP, +1 JP. Cannot be reviewed again.
+R6 [passive] President Bonus: Popularity > 15. +1 VP.
+R6 [election] House Election: 47 shift 2 toward, 65 shift 1 toward
+R6 [election] Senate Election: 23 senators shifted 2 steps.
+R7 [supremeCourt] Court Calendar: Supermajority of justices — +1 bonus action this round.
+R7 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R7 [house] Initiate Legislation: New bill: Part 9, Pop 11, Leg 7
+R7 [house] Pass Bill: PASSED with 435 votes!
+R7 [senate] Confirm Justice: Justice confirmed: liberal. President +2 VP.
+R7 [supremeCourt] General Court: +2 VP, +1 JP.
+R7 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R7 [house] Support Bill: +5 Popularity, bill more extreme.
+R7 [senate] Confirm Justice: Justice confirmed: liberal. President +2 VP.
+R7 [supremeCourt] Advisory Role: 2+ branches aligned. +2 VP, +1 JP. May adjust bill.
+R7 [president] Executive Order: +1 VP, +1 Popularity
+R7 [house] Support Bill: +5 Popularity, bill more extreme.
+R7 [senate] Pass Bill: FAILED with 30/60 votes.
+R7 [supremeCourt] Bill Review: Bill legality +2, partisanship +1, popularity -1. +1 VP, +1 JP.
+R7 [president] Executive Order: +1 VP, +1 Popularity
+R7 [house] Support Bill: +5 Popularity, bill more extreme.
+R7 [senate] Conference: +2 PC for both Senate and House.
+R7 [supremeCourt] Judicial Review: "House Bill" ruled CONSTITUTIONAL. +5 VP, +1 JP. Cannot be reviewed again.
+R7 [supremeCourt] Investigate Executive Orders: President -2 VP, -2 Pop. House/Senate +1 PC.
+R7 [passive] President Bonus: Popularity > 15. +1 VP.
+R7 [election] Court Turnover: liberal justice died (rolled 1)
+R8 [supremeCourt] Court Calendar: Supermajority of justices — +1 bonus action this round.
+R8 [president] Assign Justice: Rolled 10 — must assign moderate justice.
+R8 [president] Assign Justice: Nominated a moderate justice. Awaiting Senate confirmation.
+R8 [house] Initiate Legislation: New bill: Part 9, Pop 11, Leg 7
+R8 [house] Pass Bill: PASSED with 435 votes!
+R8 [senate] Confirm Justice: Justice confirmed: moderate. President +2 VP.
+R8 [supremeCourt] General Court: +2 VP, +1 JP.
+R8 [president] Assign Justice: Rolled 8 — must assign moderate justice.
+R8 [president] Assign Justice: Nominated a moderate justice. Awaiting Senate confirmation.
+R8 [house] Support Bill: +5 Popularity, bill more extreme.
+R8 [senate] Confirm Justice: Justice confirmed: moderate. President +2 VP.
+R8 [supremeCourt] Bill Review: Bill legality +2, partisanship +0, popularity -2. +1 VP, +1 JP.
+R8 [president] Executive Order: +1 VP, +1 Popularity
+R8 [house] Support Bill: +5 Popularity, bill more extreme.
+R8 [senate] Block Nominations: +1 PC, +1 VP, -2 President Popularity.
+R8 [supremeCourt] Suggest Justice: Court suggests a moderate justice.
+R8 [president] Executive Order: +1 VP, +1 Popularity
+R8 [house] Support Bill: +5 Popularity, bill more extreme.
+R8 [senate] Update Bill: Bill modified. Part: 4, Pop: 20, Leg: 10
+R8 [supremeCourt] Investigate Executive Orders: President -2 VP, -2 Pop. House/Senate +1 PC.
+R8 [supremeCourt] Investigate Bill: Bill legality -2. Now: 8
+R8 [election] House Election: 44 shift 2 toward, 82 shift 1 toward
+R8 [election] Senate Election: 15 senators shifted 1 steps.
+R8 [election] Presidential Election: Incumbent wins! Rolled 1 vs 17.
+R9 [supremeCourt] Court Calendar: Supermajority of justices — +1 bonus action this round.
+R9 [president] Assign Justice: Rolled 1 — must assign moderate justice.
+R9 [president] Assign Justice: Nominated a moderate justice. Awaiting Senate confirmation.
+R9 [house] Initiate Legislation: New bill: Part 11, Pop 11, Leg 7
+R9 [house] Pass Bill: PASSED with 360 votes!
+R9 [senate] Confirm Justice: Justice confirmed: moderate. President +2 VP.
+R9 [supremeCourt] General Court: +2 VP, +1 JP.
+R9 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R9 [house] Support Bill: +5 Popularity, bill more extreme.
+R9 [senate] Confirm Justice: Justice confirmed: liberal. President +2 VP.
+R9 [supremeCourt] Advisory Role: 2+ branches aligned. +2 VP, +1 JP. May adjust bill.
+R9 [president] Declare Witchhunt: SC loses 6 VP, -1 review bonus for 2 rounds. President -2 Pop, -2 VP.
+R9 [house] Support Bill: +5 Popularity, bill more extreme.
+R9 [senate] Pass Bill: PASSED with 85 votes!
+R9 [supremeCourt] Bill Review: Bill legality +2, partisanship +1, popularity -1. +1 VP, +1 JP.
+R9 [house] Whip the House: Converted 20 republican to democrat.
+R9 [senate] Block Nominations: +1 PC, +1 VP, -2 President Popularity.
+R9 [supremeCourt] Recusal: Justice #2 (conservative) recused from judicial review this round.
+R9 [supremeCourt] Judicial Review: "House Bill" ruled UNCONSTITUTIONAL! +5 VP, +1 JP. VP rescinded: Pres 10, House 9, Senate 13, SC -1
+R10 [supremeCourt] Court Calendar: Supermajority of justices — +1 bonus action this round.
+R10 [president] Assign Justice: Rolled 7 — must assign moderate justice.
+R10 [president] Assign Justice: Nominated a moderate justice. Awaiting Senate confirmation.
+R10 [house] Initiate Legislation: New bill: Part 11, Pop 11, Leg 7
+R10 [house] Pass Bill: PASSED with 380 votes!
+R10 [senate] Confirm Justice: Justice confirmed: moderate. President +2 VP.
+R10 [supremeCourt] General Court: +2 VP, +1 JP.
+R10 [president] Assign Justice: Nominated a liberal justice. Awaiting Senate confirmation.
+R10 [house] Support Bill: +5 Popularity, bill more extreme.
+R10 [senate] Confirm Justice: Justice confirmed: liberal. President +2 VP.
+R10 [supremeCourt] Advisory Role: 2+ branches aligned. +2 VP, +1 JP. May adjust bill.
+R10 [president] Executive Order: +1 VP, +1 Popularity
+R10 [house] Support Bill: +5 Popularity, bill more extreme.
+R10 [supremeCourt] Precedent Applied: Precedent (unconstitutional) matched "House Bill". Legality -3, SC +2 VP.
+R10 [senate] Pass Bill: PASSED with 85 votes!
+R10 [supremeCourt] Bill Review: Bill legality +2, partisanship +1, popularity -1. +1 VP, +1 JP.
+R10 [president] Sign Bill: Bill signed! +2 VP, +Pop bonus, new bill on floor.
+R10 [house] Pass Bill: PASSED with 380 votes!
+R10 [senate] Pass Bill: FAILED with 0/60 votes.
+R10 [supremeCourt] Recusal: Justice #2 (conservative) recused from judicial review this round.
+R10 [supremeCourt] Judicial Review: "House Bill" ruled UNCONSTITUTIONAL! +5 VP, +1 JP. VP rescinded: Pres 12, House 9, Senate 13, SC -1
+R10 [election] House Election: 44 shift 2 toward, 61 shift 1 toward
+R10 [election] Senate Election: 8 senators shifted 1 steps.
+
+=== STATISTICS ===
+Total Actions Executed: 173
+Bills Passed: 5
+President Terms Served: 2
+Executive Orders Total: 8
+Final Dice Rolls: 159
+
+=== TRUST & NEGOTIATION SUMMARY ===
+
+Final Trust Matrix:
+                Pres  House  Sen   SC
+Pres trusts:    —     0.3     5   0.3
+House trusts:   5.8   —       9   0.3
+Sen trusts:     0.3   0.3   —       1
+SC trusts:      0.3   0.3     5   —  
+
+Promise Statistics:
+  President: 44 made, 17 kept, 21 broken
+  House of Representatives: 18 made, 0 kept, 14 broken
+  Senate: 20 made, 20 kept, 0 broken
+  Supreme Court: 14 made, 0 kept, 9 broken
+
+Awards:
+  Most Trusted: Senate (avg trust: 6.3)
+  Biggest Betrayer: President (21 broken promises)
+
+Key Negotiation Moments:
+  Round 3: House of Representatives → President (-2) — Promise broken: bill_passage
+  Round 4: House of Representatives → President (-2) — Promise broken: bill_passage
+  Round 4: House of Representatives → President (-2) — Promise broken: bill_passage
+  Round 4: House of Representatives → President (-2) — Promise broken: bill_passage
+  Round 9: Supreme Court → House of Representatives (-2) — Promise broken: event_cooperation
+
+Personality Archetypes: President=Dealmaker, House=Opportunist, Senate=Strategist, SC=Outsider

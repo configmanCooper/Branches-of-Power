@@ -1,0 +1,123 @@
+==========================================================
+  PERSONALITY EFFECTIVENESS RANKINGS
+  5 simulations per personality
+  160 total simulations run on 2026-04-24
+==========================================================
+
+Method: Each personality was tested with that role fixed to
+the personality and all other roles using random personalities.
+This isolates the effect of each personality on performance.
+
+=== PRESIDENT PERSONALITIES ===
+
+Rank  Personality          Avg VP   Win Rate      Min VP   Max VP
+----  -------------------  ------   ----------    ------   ------
+ #1   Isolationist         126.0    80% (4/5)        74      145
+ #2   Reformer              92.6     0% (0/5)        68      139
+ #3   Hawk                  83.8     0% (0/5)        65      122
+ #4   Statesman             76.4     0% (0/5)        33      127
+ #5   Populist              73.4     0% (0/5)        18      119
+ #6   Dealmaker             69.0    20% (1/5)        26      107
+ #7   Opportunist           66.6    20% (1/5)        41      101
+ #8   Tactician             61.8    20% (1/5)        35       81
+
+=== HOUSE PERSONALITIES ===
+
+Rank  Personality          Avg VP   Win Rate      Min VP   Max VP
+----  -------------------  ------   ----------    ------   ------
+ #1   Power Broker         142.8    60% (3/5)        26      226
+ #2   Pragmatist           112.4    40% (2/5)        15      204
+ #3   Legislator           110.6    20% (1/5)        28      164
+ #4   Radical              106.2    20% (1/5)        43      211
+ #5   Populist Speaker     100.0     0% (0/5)        65      128
+ #6   Committee Chair       94.4    20% (1/5)        54      152
+ #7   Obstructionist        89.6    40% (2/5)        80      108
+ #8   Whip Master           79.2    20% (1/5)        54      122
+
+=== SENATE PERSONALITIES ===
+
+Rank  Personality          Avg VP   Win Rate      Min VP   Max VP
+----  -------------------  ------   ----------    ------   ------
+ #1   Majority Leader      114.0     0% (0/5)        61      157
+ #2   Dealmaker            109.4     0% (0/5)        85      149
+ #3   Hardliner            108.4    20% (1/5)        77      123
+ #4   Consensus Builder    106.2    20% (1/5)        77      166
+ #5   Kingmaker             86.0    20% (1/5)        42      125
+ #6   Filibusterer          81.6    40% (2/5)        61      101
+ #7   Saboteur              71.8    60% (3/5)        25      105
+ #8   Institutionalist      53.6     0% (0/5)        29       86
+
+=== SUPREME COURT PERSONALITIES ===
+
+Rank  Personality          Avg VP   Win Rate      Min VP   Max VP
+----  -------------------  ------   ----------    ------   ------
+ #1   Precedent Setter     138.0    40% (2/5)        72      215
+ #2   Originalist           83.8     0% (0/5)        52      119
+ #3   Minimalist            80.6    20% (1/5)        24      184
+ #4   Politician            73.6     0% (0/5)        41      106
+ #5   Maverick              73.0     0% (0/5)        50       98
+ #6   Activist              71.2    20% (1/5)        24      125
+ #7   Guardian              66.8    20% (1/5)        36      161
+ #8   Strategist            41.6     0% (0/5)        20       92
+
+==========================================================
+  BEST & WORST PERSONALITY PER ROLE
+==========================================================
+
+President:
+  BEST  = Isolationist (126.0 avg VP)
+  WORST = Tactician (61.8 avg VP)
+  Spread = 64.2 VP difference
+
+House:
+  BEST  = Power Broker (142.8 avg VP)
+  WORST = Whip Master (79.2 avg VP)
+  Spread = 63.6 VP difference
+
+Senate:
+  BEST  = Majority Leader (114.0 avg VP)
+  WORST = Institutionalist (53.6 avg VP)
+  Spread = 60.4 VP difference
+
+Supreme Court:
+  BEST  = Precedent Setter (138.0 avg VP)
+  WORST = Strategist (41.6 avg VP)
+  Spread = 96.4 VP difference
+
+==========================================================
+  TRAIT CORRELATION ANALYSIS
+==========================================================
+
+Average trait values for top 3 vs bottom 3 performers:
+
+President:
+  riskLevel         Top3=0.53  Bot3=0.57  Diff=-0.04
+  legislativeFocus  Top3=0.47  Bot3=0.50  Diff=-0.03
+  baseLieRate       Top3=0.17  Bot3=0.35  Diff=-0.18 ▼
+  negotiationRate   Top3=0.43  Bot3=0.73  Diff=-0.30 ▼
+  aggressiveness    Top3=0.43  Bot3=0.33  Diff=0.10
+  cooperation       Top3=0.37  Bot3=0.60  Diff=-0.23 ▼
+
+House:
+  riskLevel         Top3=0.57  Bot3=0.33  Diff=0.24 ▲
+  legislativeFocus  Top3=0.70  Bot3=0.47  Diff=0.23 ▲
+  baseLieRate       Top3=0.25  Bot3=0.20  Diff=0.05
+  negotiationRate   Top3=0.63  Bot3=0.43  Diff=0.20 ▲
+  aggressiveness    Top3=0.27  Bot3=0.43  Diff=-0.16 ▼
+  cooperation       Top3=0.57  Bot3=0.37  Diff=0.20 ▲
+
+Senate:
+  riskLevel         Top3=0.57  Bot3=0.50  Diff=0.07
+  legislativeFocus  Top3=0.67  Bot3=0.37  Diff=0.30 ▲
+  baseLieRate       Top3=0.23  Bot3=0.33  Diff=-0.10
+  negotiationRate   Top3=0.57  Bot3=0.37  Diff=0.20 ▲
+  aggressiveness    Top3=0.37  Bot3=0.63  Diff=-0.26 ▼
+  cooperation       Top3=0.53  Bot3=0.27  Diff=0.26 ▲
+
+Supreme Court:
+  riskLevel         Top3=0.27  Bot3=0.57  Diff=-0.30 ▼
+  legislativeFocus  Top3=0.40  Bot3=0.53  Diff=-0.13
+  baseLieRate       Top3=0.12  Bot3=0.27  Diff=-0.15
+  negotiationRate   Top3=0.30  Bot3=0.53  Diff=-0.23 ▼
+  aggressiveness    Top3=0.23  Bot3=0.43  Diff=-0.20 ▼
+  cooperation       Top3=0.43  Bot3=0.47  Diff=-0.04

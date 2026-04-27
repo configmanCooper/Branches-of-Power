@@ -1,0 +1,13 @@
+=== BATCH SIMULATION RESULTS ===
+10 simulations run on 2026-04-24
+
+Sim 1: Winner=senate VP=[Pres:56 House:65 Sen:85 SC:17] Bills=0 Prec=0 JP=3 Landmark=none
+Sim 2: Winner=president VP=[Pres:106 House:33 Sen:71 SC:75] Bills=1 Prec=3 JP=0 Landmark=none
+Sim 3: Winner=supremeCourt VP=[Pres:67 House:36 Sen:43 SC:124] Bills=0 Prec=5 JP=4 Landmark=courtAuthority
+Sim 4: Winner=house VP=[Pres:84 House:101 Sen:101 SC:47] Bills=5 Prec=1 JP=8 Landmark=none
+Sim 5: Winner=president VP=[Pres:148 House:76 Sen:127 SC:43] Bills=5 Prec=1 JP=2 Landmark=none
+Sim 6: Winner=president VP=[Pres:96 House:0 Sen:62 SC:36] Bills=0 Prec=0 JP=5 Landmark=extraAction
+Sim 7: Winner=senate VP=[Pres:112 House:105 Sen:125 SC:47] Bills=6 Prec=3 JP=1 Landmark=none
+Sim 8: Winner=president VP=[Pres:123 House:29 Sen:106 SC:56] Bills=1 Prec=2 JP=4 Landmark=courtAuthority
+Sim 9: Winner=president VP=[Pres:113 House:72 Sen:107 SC:68] Bills=0 Prec=1 JP=1 Landmark=none
+Sim 10: Winner=president VP=[Pres:104 House:0 Sen:102 SC:15] Bills=0 Prec=1 JP=3 Landmark=none

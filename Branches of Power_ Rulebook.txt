@@ -1,0 +1,231 @@
+﻿Branches of Power: Rulebook
+Game Overview
+Players: 1 President, 1 Supreme Court Justice, 1 Senator, 1 House Representative
+Objective: Compete for control among the three branches of government. The game focuses on branch vs. branch rather than party vs. party dynamics. Players may cooperate or oppose each other depending on strategic needs.
+Game Setup
+1. Determine Initial Conditions:
+   * Roll for the President's party (Republican or Democrat).
+   * Roll to determine the composition of the Supreme Court (conservative, moderate, liberal justices).
+   * Roll to determine the Senate composition (Republican, Moderate Republican, Moderate Democrat, Democrat senators).
+   * Roll to determine the House composition (Extreme Republican, Republican, Democrat, Extreme Democrat representatives).
+2. Initial Actions:
+   * Each player starts with 4 action points per round.
+   * Players take turns in the default order: President, House, Senate, Supreme Court. The order can be changed if 3 out of 4 players agree.
+   * Each round consists of each player taking 4 actions. The round ends once all players have used their action points.
+Game Duration
+* First Game: 6 rounds recommended.
+* Standard Game: 10 rounds.
+* Extended Game: Add rounds in multiples of 4.
+Scoring and Elections
+1. Scoring: Players score points based on achieving their goals, such as passing laws aligned with their party's ideology.
+2. Elections:
+   * Supreme Court: Annually.
+   * Senate and House: Every two years.
+   * President: Every four years.
+   * Election Order: Supreme Court, House, Senate, President.
+Victory
+The player with the most points at the end of the game wins. Points are accumulated through actions, passing bills, and strategic maneuvers.
+Actions by Branch
+President
+Victory Points (VP): Earned by achieving goals and passing laws.
+Popularity: Affects re-election chances and future presidential elections.
+Actions
+1. Executive Order
+   * Cost: 1 action point
+   * Effect: Gain 1 VP, increase popularity by 1. If there are any passed bills, write an 'E' on 1 of your choice and lower its legality by 1. For experienced players, if any bills with new rules have been passed, make a small addition to the rule without contradicting it. Reduce the legality of the bill by 2.
+2. Advocate/Admonish Legislation
+   * Cost: 1 action point
+   * Effect: Give both the Senate and House +2 or -2 PC, or give one +4 or -4 PC. Decrease bill popularity by 5.
+3. Veto
+   * Cost: 1 action point and 1 VP (only if a bill was passed this round)
+   * Effect: Send the bill back to Congress. All points gained or lost by all players are undone. The bill is back on the floor. Both Senate and House must get a 2/3rds vote to pass again. If the bill is passed again, the President receives no VP for it and also loses 1 popularity.
+4. Sue
+   * Cost: 1 action point (only if a bill was passed this round)
+   * Effect: If an opposing party bill just passed, send the bill to the Supreme Court. If the Supreme Court finds the bill unconstitutional, gain 3 VP. Otherwise, lose 1 VP, and both the House and Senate gain 1 PC. Regardless, give the Supreme Court 1 VP.
+5. Tax Cuts
+   * Cost: 3 action points
+   * Effect: Puts a new bill on the floor with popularity 20, legality 10, partisanship 5 or 15 depending on your party. Can vote 3/4 players if another bill stays on the floor too. If passed by both chambers, gain normal bill actions plus a bonus of +2 popularity and +2 VP.
+6. Campaign Trail
+   * Cost: 2 action points
+   * Effect: Go campaigning for re-election. Increase popularity by 4.
+7. Sign Bill
+   * Cost: 1 action point (only allowed if a bill has been passed by both houses this round)
+   * Effect: If bill popularity is > 10, add 1 popularity. If > 15, add 2 popularity. Brings a new People’s bill to the floor immediately. Gain 2 VP. House and Senate both get 1 PC.
+8. Assign Justice
+   * Cost: 1 action point
+   * Effect: You can assign a justice candidate if a justice has died or retired. If a justice has died, roll a 20-sided die. If below 11, assign a moderate justice. If above 10, assign a justice of whatever party you'd like. If a justice retired, assign a new justice of whatever party you'd like. If the Senate confirms them, gain 2 VP. If the Supreme Court has suggested a justice, you are forced to use this action this turn to nominate them or use 2 VP and lose 2 popularity to select a different one or ignore the suggestion and not take this action.
+9. Declare Witchhunt
+   * Cost: 2 action points, 2 popularity, and 2 VP (can only be done twice per game, popularity must be ≥ 15)
+   * Effect: Declare the Supreme Court is performing a witch hunt, and you are a victim. This erodes faith in the Supreme Court. The Supreme Court loses 6 VP and cannot investigate you next round. The Supreme Court gets -1 bonus vote in judicial review for the next two rounds.
+Passive Actions
+* Anytime a bill is passed by both chambers, gain 5 VP. If the bill is partisan 10, gain 1 more VP. Otherwise, gain an additional 1/-1 VP per partisan point (e.g., if you are a Democrat President and the partisanship of the bill is 16, you gain 6 extra VP points; if the partisanship is 4, you lose 6 VP points). If the bill's popularity is 6-10, take -1 popularity. If 5 or less, take -2 popularity.
+* If President's popularity is above 15 at the end of the round, gain 1 VP.
+Senate
+Political Capital (PC): Used to influence legislative actions. Maximum of 4 PC can be carried over to the next round.
+Actions
+1. Justice Nomination
+   * Cost: 1 action point
+   * Effect: Approve/Disapprove presidential nominee to the Supreme Court. If approved, the justice is now on the Supreme Court. If disapproved, the President must nominate someone new. If the justice retired as opposed to died, you must use 2 PC to disapprove. If the justice was suggested by the Supreme Court, you must use 3 PC to disapprove. Gain 1 VP.
+2. Pass/Block General Nominations
+   * Cost: 1 action point (one per round)
+   * Effect: Either pass nominations and gain 4 PC and +1 President popularity, or block nominations, gain 1 PC, and -2 President popularity and gain 1 VP.
+3. Debate Legislation
+   * Cost: 1 action point
+   * Effect: Gain 1 PC and convert 5 senators one step away in whatever direction you'd like.
+4. Update Bill
+   * Cost: 1 action point
+   * Effect: Change bill legality, partisanship, and popularity in any way by a total of a 3-point difference. Use 1 PC to change another 2 points.
+5. Filibuster
+   * Cost: 4 PC
+   * Effect: Tell everyone this bill just isn't gonna happen. Gain 1 VP, the House gets 2 PC, -1 President popularity and -1 President VP, discard this bill, and put a new People’s bill on the floor. (The Supreme Court does not get VP for this.)
+6. Stall Bill
+   * Cost: 2 PC
+   * Effect: Force a current bill to stay on the floor next round without requiring a vote from other players.
+7. Conference
+   * Cost: 1 action point (once per round)
+   * Effect: Confer with the House on the bill. Both the Senate and House gain 2 PC.
+8. Pass Bill
+   * Cost: 1 action point
+   * Effect: Calculate if you can pass it. Not allowed to calculate until committing to action, but can guess based on the number of Dems/Reps. Can use PC to increase the range by 1 for any group.
+      * Democrats vote yes on anything from 11-18.
+      * Moderate Democrats vote yes on anything from 8-15.
+      * Moderate Republicans vote yes on anything from 5-12.
+      * Republicans vote yes on anything from 3-9.
+      * If fewer than 6 more yes votes are needed to pass, can use 1 PC to roll a 6-sided die and add that to votes (can do this only once).
+      * A bill passes if you get at least 60 yes votes or at least 51 yes votes if you use 1 PC.
+      * If the bill passes, gain 4 VP. Divide yes votes by 20, round up, add that amount of VP. Once the bill is passed by the House, add 1 PC for each partisan point of the majority party and gain 2 more VP if partisanship of the bill aligns with your majority party.
+9. Revive Bill
+   * Cost: 1 action point
+   * Effect: While the Senate is not allowed to create new bills, it may pull any bill that was not passed and put it back on the floor with this action.
+10. Repeal Bill
+   * Cost: 1 action point
+   * Effect: The Senate brings back a passed bill to the floor and inverses the partisanship number on it and writes an 'R' on it. Passing this bill repeals it. Rules to pass are used. If repealed, erase this bill. If repealed, the Senate and House gain 2 VP. If the partisanship of the bill now doesn’t align with the President, the President loses 2 VP.
+11. Government Shutdown
+   * Cost: 6 PC (only once per round, only twice per game)
+   * Effect: Refuse to pass appropriations for the government to put great pressure on the House and President. Set House PC to 0, President popularity -4. Gain 1 VP.
+House
+Political Capital (PC): Used to influence legislative actions. Maximum of 4 PC can be carried over to the next round.
+Actions
+1. State of the Union Address
+   * Cost: 1 action point (once per round)
+   * Effect: Either give the President +2 popularity or -4 popularity, or gain 2 PC, or give the Senate -4 PC, or gain 1 VP.
+2. Whip the House
+   * Cost: 1 action point
+   * Effect: Convert any 20 representatives to 1 step away (e.g., 20 extreme Democrats to Democrats, or vice versa).
+3. Support/Attack Bill
+   * Cost: 1 action point
+   * Effect: Increase or decrease bill popularity by 5. Make the bill more extreme by 2 points (if less than 10, -2; if 10, flip a coin; if 11 or more, +2).
+4. Kill Bill
+   * Cost: 1 action point, 1 PC (once per round)
+   * Effect: Send a bill on the floor to committee to die. Gain 1 VP. The bill stays on the floor this round and the next round without a vote, but you can no longer pass it this round.
+5. Host a Hearing
+   * Cost: 1 action point
+   * Effect: Have a hearing on a controversial topic. Either gain 1 PC, increase President popularity by 1, or gain 2 PC, decrease President popularity by 2, or gain 1 VP.
+6. Popularize the Bill
+   * Cost: 1 action point, 1 PC (once per round)
+   * Effect: Increase bill popularity by 5, decrease legality by 4, and increase partisanship by 3 points (away from 10).
+7. Change Bill Now
+   * Cost: 2 action points, 2 PC
+   * Effect: Put a new bill on the floor immediately. Starts with 10 legality, 10 partisanship, 10 popularity. Add or subtract up to 5 points in partisanship and/or popularity, but subtract 1 legality for each point added or subtracted. Optionally discard any bill on the floor (Supreme Court does not get VP for this).
+8. Articles of Impeachment
+   * Cost: 1 action point, 6 PC (once per round, can only be done twice per game)
+   * Effect: Must get a 2/3rds vote (288 votes in House, 67 votes in Senate). This puts a new unique bill on the floor, impeachment. This unique bill starts as partisan 20 or 1 depending on your party, legality 10, popularity 10. For every 2 executive orders the current President has signed, add 1 legality and make it 1 less partisan (partisanship moves towards 10). For every bill the President has signed with a legality of less than 10, add 1 legality. This bill must get a 2/3rds vote from both chambers. If passed, the President loses 8 VP and a new presidential election happens before the President’s next action. The House gains 6 VP, Senate gains 2 VP. If only the House passes it, the President loses 5 popularity. The President cannot veto this bill, but can send it to the Supreme Court.
+9. Pass Bill
+   * Cost: 1 action point
+   * Effect: Calculate if you can pass it.
+      * Democrats vote yes on anything from 11-18.
+      * Extreme Democrats vote yes on anything from 14-20.
+      * Extreme Republicans vote yes on anything from 1-6.
+      * Republicans vote yes on anything from 3-9.
+      * If fewer than 20 more yes votes are needed to pass, can use 1 PC to roll a 20-sided die and add that to votes.
+      * A bill passes the House if it gets at least 218 votes.
+      * If the bill passes, gain 4 VP. Divide yes votes by 80, round up, add that amount of VP. Once the bill is passed by the Senate, add 1 PC for each partisan point of the majority party, and gain 2 more VP if the partisanship of the bill aligns with your majority party.
+10. Pack the Courts
+   * Cost: 1 action point, 4 VP, 6 PC (can only be done once per game)
+   * Effect: This puts a new unique bill on the floor, pack the courts. This bill has an initial legality of 5, a partisanship of 18 or 3 depending on the current majority party of the House, and a popularity of 5. If passed by the Senate, put 4 new justices on the court of a party of your choosing and the Supreme Court loses 10 VP. The Supreme Court now has 13 justices for the rest of the game instead of 9. The House, Senate, and President all get VP when this bill passes just like they do with any other bill. If the Supreme Court tries to overturn this bill, they get a 1 bonus vote against them and must use 2 VP. The Supreme Court also cannot lower the legality of this bill.
+11. Initiate Legislation
+   * Cost: Free action (once per round)
+   * Effect: Create a new bill and put it on the floor. By default, it is 10 legality, 10 partisanship, 10 popularity. Can add/subtract 1 point to either partisanship and subtract 2 legality, or 1 popularity and subtract 1 legality. Can also use 1 PC per point to add points with no legality penalty. The House can name the bill whatever they'd like. For more experienced players, they may also, if they want, add a new rule to the game. It cannot contradict any current rule and it cannot give or take away PC or VP. If a new rule is added to the bill, start the legality of the bill at 5 and take a quick vote from all other players. For every player that votes yes, add 5 legality. The partisanship of a bill with a new rule attached is either 8 (if Republican majority) or 12 (if Democrat majority).
+Supreme Court
+Actions
+1. Judicial Review
+   * Cost: 1 action point
+   * Effect: If the President sends a bill, or any bill that is passed in this round or the prior round, the court can determine if a bill is constitutional.
+      * Conservative justices will vote unconstitutional if partisanship is 11-20 and if legality is below 15, otherwise vote constitutional.
+      * Moderates will vote unconstitutional if partisanship is 15-20 and 1-5 and if legality is below 15, otherwise vote constitutional.
+      * Liberals will vote unconstitutional if partisanship is 1-9 and if legality is below 15, otherwise vote constitutional.
+      * For every 2 legality of the bill above 10, add one bonus vote in its favor of being constitutional.
+      * For every 2 legality below 10, add one bonus vote against it being constitutional.
+      * If the President sent it with the sue action, give one bonus vote for it to be unconstitutional.
+      * You may also use 2 VP to give one bonus vote in either direction, or 5 VP to give two bonus votes in either direction.
+      * If voted constitutional, gain 2 VP. Write 'C' on the bill and put it back in the passed bill deck. The bill cannot ever be judicially reviewed again.
+      * If voted unconstitutional, gain 5 VP. Also, any points other players received or lost for passing this bill are rescinded, and anything the bill did is reversed. Take the bill card and place it on your mat. In an experienced game, you may also choose to only take 4 VP if found unconstitutional and send the bill back to the floor with a new rule on it. Write 'C' on the bill; as long as it is not changed, the bill cannot be judicially reviewed again. The House and Senate may choose to pass it or not.
+2. Inquiry of President
+   * Cost: 1 action point
+   * Effect: Choose President popularity -2 or +1 popularity. Gain 1 VP.
+3. Inquiry of House or Senate
+   * Cost: 1 action point
+   * Effect: Choose -2 PC or +1 PC to whoever you inquire. Gain 1 VP.
+4. Investigate Executive Orders
+   * Cost: 1 action point (once per round, can only do if President used executive orders at least twice this round)
+   * Effect: President loses 2 VP and 2 popularity this round. House and Senate both get 1 PC. For more experienced players, if the President added an extra rule to a bill with an executive order, choose if you would like to erase that executive order.
+5. Investigate Bill
+   * Cost: 1 action point
+   * Effect: Permanently lower the legality of the current bill on the floor by 2.
+6. Bill Review
+   * Cost: 1 action point (once per round)
+   * Effect: Review a current bill on the floor and advise on legality. Increase the legality of the bill by 2, change popularity or partisanship by a total of two points in either direction of your choice. Gain 1 VP.
+7. Disapprove of Justice Candidate
+   * Cost: 1 action point
+   * Effect: If a justice candidate has been nominated by the President, but not yet approved by the Senate, you can disapprove and put forward a candidate of a different leaning than the President nominated. The President can either do as you ask, or take a -2 VP and -2 popularity penalty. This can only be done once per candidate.
+8. Suggest Justice Candidate
+   * Cost: 1 action point (once per round)
+   * Effect: If a justice has died or retired, but the President has not yet nominated a candidate, you can suggest one. This forces the President to either nominate your suggestion or take a big VP and popularity penalty next action.
+9. General Court
+   * Cost: 1 action point (once per round)
+   * Effect: Preside over general cases that come to the Supreme Court. Gain 1 VP.
+10. Advisory Role
+   * Cost: 1 action point (once per round, can only take this action if President, the House, and the Supreme Court all lean either Democrat or Republican)
+   * Effect: As the court and all other branches have synergy, you are trusted and give advice to the President and Congress that affects the law. Change the points of the bill a total of two in whatever categories (legality, partisanship, popularity) and direction you want. Gain 2 VP.
+11. Internal Inquiry
+   * Cost: 1 action point, 2 VP (once per round)
+   * Effect: Roll a 20-sided die. If equal to or above 15, cause a justice of your choice to retire.
+12. Partisan Ruling
+   * Cost: 2 action points, 4 VP (once per round, can be done twice per game)
+   * Effect: Make a ruling that permanently polarizes partisanship. All bills on the floor and all future bills are either increased or decreased by one partisanship point (your choice).
+13. Constitutional Crisis
+   * Cost: 2 action points, 8 VP (once per round, can be done twice per game)
+   * Effect: Permanently, for the rest of the game, lower all legality of prior passed bills, any bill on the floor, and the initial legality of new bills by 2.
+Passive Actions
+* If a bill is ever removed from the floor without being passed by both chambers, gain 1 VP. If a bill is ever signed by the President, lose 1 VP.
+Co-Action: Constitutional Amendment
+* Requirements: President's popularity ≥ 15, agreement from President, Senate, and House.
+* Cost: 2 action points from each player, 1 VP from each player, 1 popularity, and 1 PC from both the Senate and the House.
+* Effect: Take back a bill from the Supreme Court and can either put it in the draw pile or immediately on the floor. Write 'C' on the bill to now declare it constitutional. The Supreme Court loses 5 VP.
+End of Game
+Count up Victory Point tokens. The player with the highest amount of Victory Points wins.
+Physical Game Components
+* Rulebook with detailed examples.
+* Two 2-minute sand timers (optional).
+* Custom reference cards for each player.
+* Custom player mats for each player.
+* Political Capital Tokens (1 and 5 denominations).
+* Victory Points Tokens (1 and 5 denominations).
+* Action Point Tokens.
+* Bill Cards with random values.
+* Special Bill Cards for special actions.
+* Blank Bill Cards.
+* Plastic protectors for Bill Cards.
+* Dry erase marker.
+* Board Game Box.
+* Custom dice for Senate, House, and Supreme Court changes.
+* 20-sided die for President elections.
+* Custom Coin for President game start.
+* Election Cards explaining each player's election process.
+* Bill Pass Cards for Senate and House.
+* Judicial Review Card for the Supreme Court.
+* Game board with trackers for each branch and President's popularity.
+* Round tracker token.
+Game Board Layout
+* Spaces for bills: floor stack, passed stack, failed stack, and draw pile.
+* Round tracker showing the current round number.

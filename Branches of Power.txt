@@ -1,0 +1,364 @@
+﻿1 player presidency
+1 player supreme court
+1 player senate
+1 player house
+
+
+This game is about branch vs branch not party vs party
+Sometimes you will want to work together, sometimes you wont
+Each player takes one action at a time , have 4 action points per round. If they have no action points they are skipped. A player may take more than one action if 3/4 players agree.
+
+
+Start of the game roll for:
+If president republican or democrat
+how many conservate/moderate/liberal justices
+how many republican/moderate republican/moderate democrat/democrat senators
+how many extreme republican/republican/democrat/extreme democrat representatives
+
+
+Each round consists of each branch taking an action 4 times. The default Turn is order is President, House, Senate, Supreme Court, but this can be changed if 3 out of 4 players agree. Each player takes one action and then switched to the next player. The round is over once all players have taken 4 actions.
+
+
+the games last 24 rounds
+
+
+Each player scores points based on achieving their agency
+if republican passing conservative laws, if democrat passing democrat laws
+
+
+
+
+
+
+Elections(deaths and retirements for Supreme Court) happen at the end of the Round
+Supreme Court every year
+Senate and House every two years
+President every 4 years
+
+
+Election order is Supreme Court, House, Senate,  President
+
+
+You win based on how many points you have at the end of the game
+
+
+However, passing different laws or doing different things may also affect the elections of the next year
+President is every 4 years
+Senate every 2 years 1/3rd is up for reelection - 100 members
+
+
+Members of Senate are: Democrats, Moderate Democrats, Moderate Republicans, Republicans
+House every 1 year 1/2 is up for election - 435 members
+Members of House are: Extrememe Democrates, Demcrats, Republicans, Extreme Republicans
+
+
+
+
+
+
+Bill
+
+
+Every year a new bill comes to the floor. The bill has the following ratings
+Partisan 1 -20, with 1 being extreme conservative and 20 being extreme liberal
+(Partisan Points: if Republican or Republican Majority this is every point less than 10. If Democrat or Democrat Majority this is every point greater than 10)
+Popularity 1-20 . This will determine how popular this bill is with the public
+Legality 1-20. This will determine how easy or hard it would be for the supreme court to overturn if passed
+
+
+
+
+
+
+At the start of each round a new bill comes to the floor, even if the prior was not passed, unless 3/4 players agree to keep the current bill on the floor.
+
+
+
+
+President
+
+
+Victory Points - How  this player wins the game
+Popularity - How this player gets reelected/ ensures next president is same party
+Popularity starts at 10, is a number 1-20
+PC - Political Capital . Helps Congress pass a bill
+
+
+How President Reelection works: President has election every 4 rounds.
+If president has served 4 rounds give a +2 bonus to popularity for roll. If President as has served 8 rounds give -1 popularity bonus.
+If the President has served 8 rounds they cannot be reelected, but a president of their same party can be elected.
+Roll a 20 sided die.
+If the number rolled is equal to or under popularity, same president/same party wins. Their popularity goes up by 1.
+If number rolled is over popularity, different party wins.
+If the winning president is new, either new president or new party won, set popularity to 10
+If its a new president but the same party won and the prior president Popularity was over 15, set Popularity to 11
+
+
+If new party wins presidency, president gets -2 VP
+
+
+President Gets 4 Actions Per round
+
+
+President Possible Actions
+
+
+
+
+Executive Order - Get 1  victory point and  increase popularity by 1
+
+
+Advocate/Admonish current Legislation -  Give  both the Senate and House 2/-2 PC, or give one 4/-4 PC. Decrease bill popularity by 5.
+
+
+Veto (only if a bill was passed this round, costs one VP) Send the bill back to Congress, overriding the current bill.  All points gained or lost by all players are undone. The bill is back on the floor. Both senate and house must get 2/3rds vote to pass again. If the bill is passed again president receives no VP for it and also -1 Popularity.
+Sue -(only if a bill was passed this round)  If an opposing party bill just passed, send the bill to Supreme Court. If the supreme Court finds the bill unconstitutional, gain 3 VP. Otherwise, lose 1 VP, and house and Senate both gain one PC. Regardless, give Supreme Court one VP.
+
+
+Tax cuts(Costs 2 actions)-Puts a new bill on the floor with popularity 20, legality 10, partisanship 5 or 15 depending on your party.  Can vote 3/4 players if other bill stays on floor too.  If passed by both chambers, gain normal bill actions plus bonus +2 popularity and +2 VP.
+
+
+Campaign trail(costs two actions): go campaigning for reelection. Increase Popularity by 4.
+
+
+Sign Bill (only allowed if a bill has been passed by both houses this round) - If bill popularity is > 10 add 1 popularity, > 15 add 2 popularity. Brings new bill to the floor immediately. Gain 2 VP. House and Senate both get 1 PC.
+
+
+Assign Justice: You can assign a justice candidate if a justice has died or retired. If a justice has died roll a 20 sided dice. If below 11 assign a moderate Justice. If above 10 assign a Justice of whatever party you'd like. If a justice retired assign a new justice of whatever party you'd like. If the Senate confirms them gain 2VP. If the Supreme Court has suggested a Justice you are forced to use this action this turn to nominate the,, or use 2VP and lose 2 Popularity to Select a Different one or ignore the suggestion and not take this action.
+
+
+Declare Witchhunt by Supreme Court ( Popularity must be >=15, Costs 2 Popularity and 2 VP, and can only be done twice per game):
+Declare the Supreme Court is performing a witch hunt, and you are a victim. This erodes faith in the Supreme Court. Supreme Court loses 6VP and cannot investigate you next round.
+
+
+
+
+President Passive Actions(Dont use up at Action):
+Anytime a bill is passed by both chambers, gain 4 VP. If bill is a partisan 10 gain 1 more VP. Otherwise gain an additional 1 / -1 VP per partisan point. ( For example if you are a Democrat President, Partisanship of bill is 16, you can 6 extra VP points) If bill popularity is 6-10 take - 1 popularity. If 5 or less take -2 Popularity.
+
+
+If President Popularity is above 15 at the end of the round, gain 1 VP
+
+
+
+
+Senate
+
+
+Maximum of 4PC can be carried over to next round
+Gets 4 Actions Per round
+
+
+Senate Possible Actions
+
+
+
+
+Justice Nomination: Approve/Disapprove presidential nominee to supreme Court. If Approved gain justice is now on supreme Court. If Disapproved, the president must nominate someone new. If the justice retired as opposed to died, you must use two PC to disapprove. If the justice was suggested by Supreme Court you must use three PC to disapprove. Either way, gain 1 VP.
+
+
+Pass/Block General Nominations(one per round): Either Pass Nominations and gain 4 PC and +1 President Popularity, or block Nominations gain 1 PC and -2 President Popularity and gain 1 VP
+
+
+Debate Legislation: Gain two PC and convert 2 Senators one step away
+
+
+Update Bill - You change bill legality, partisanship, and popularity in any way by a total of a 3 point difference. Use one PC to change another 2 points.
+
+
+Filibuster( cost 6 PC): Tell everyone this bill just aint gonna happen. Gain one VP, House gets two PC, -1 President Popularity and -1 President VP, and put new bill on the floor.
+
+
+Stall Bill (Once Per Round, Cost 2PC): Force Current Bill to stay on floor next round without requiring vote from other players
+
+
+Conference (Once per round) : Confer with the House on the Bill. Both the Senate and House gain 2 PC.
+
+
+Pass Bill - Must calculate if you can pass it. Not allowed to calculate until committing to action, but can guess based on number of Dems/Reps.
+Can use PC to increase range by 1 for any group.
+Democrats, Vote yes on anything from 11- 18.
+Moderate Democrats: Votes yes on anything from 8-15.
+Moderate Republicans, Votes yes on anything from 5-12
+Republicans, Votes yes on anything from 3-9
+If less than 6 more yes votes are needed to pass, can use 1 PC to roll a 6 sided die and add that to votes
+A bill passes if you get at least 60 yes votes, or at least 50 yes votes if you use 1 PC.
+If Bill passed, gain 4 VP. Divide yes votes by 20, round up, add that amount of VP.  Once passed by House, add 1/2 PC rounded down for each partisan point of majority party,  and gain two more VP. Gain two more VP if partisanship of bill aligns with your majority party.
+
+
+Government Shutdown(Only Once Per Round, Only twice per game Costs 6PC) : Refuse to pass appropriations for the Government to put great pressure on the House and President. Set House PC to 0 and President Popularity -4. Gain 1 VP.
+
+
+How Senate elections work :
+
+
+every two years up to 32 Senators may change over
+Roll one 20 sided die and two six sided die
+This is the number of Senators that are changing based on President Popularity
+
+
+If president popularity 0-5 , these senators move two steps away from his party
+If president popularity 6-10 these senators move one away from his party
+If president popularity 11-15 these senators move one towards his party
+If president popularity 16-20 these senators move two towards his party
+
+
+
+
+
+
+
+
+House
+Gets 4 Actions Per round
+Maximum of 4PC can be carried over to next round
+
+
+House Possible Actions
+
+
+
+
+State of the Union Address ( once per round)- Either Give President + 2 Popularity, or - 4 Popularity, or gain 2 PC , or take give Senate -4PC, or gain one VP
+
+
+Whip the House - Convert any 20 representatives to 1 step away
+For Example 20 extreme democrats to democrats, or vice versa
+
+
+Support/Attack Bill: Increase or Decrease Bill Popularity by 5. Make bill more extreme by 2 points ( if less than 10 -2, if 10 flip a coin, if 11 or more + 2)
+
+
+Kill Bill(Once per round, cost 1 PC): Send the bill to committee to die. Gain 1 VP. Bill stays on floor, but you can no longer pass it this round.
+
+
+Host a Hearing: Have a hearing on controversial topic. Either Gain 1 PC , president popularity +1, or Gain 2 PC, President Popularity -2 , or gain 1 VP
+
+
+Popularize the Bill(Once per round, cost 1 PC): Make Bill + 5 popularity, - 4 legality, and +3 more partisan(in direction away from 10)
+
+
+Change bill now!(Costs two PC):  Puts new bill on floor immediately.
+
+
+
+
+Articles of Impeachment(Once per round, can only be done twice per game,cost 6PC): Must get 2/3rds vote. This puts a new unique bill on the floor, impeachment. Players by 3/4 vote can decide if other bill stays as well. This unique bill starts as partisan 20 or 1 depending on your party, legality 10, popularity 10. For every 2 executive orders the current president has signed, add one legality and make it 1 less partisan. For every bill the president has signed with a legality of less than 10, add one legality. This bill must get 2/3rds vote from both chambers. If passed, the President loses 8 VP, House Gains 6 VP, Senate Gains 2 VP. If only the house passes it the President loses 5 Popularity.  The president cannot Veto this bill, but can send to Supreme Court.
+
+
+Pass Bill - Must calculate if you can pass it.
+Can use PC to increase range by 1 for any group.
+Democrats, Vote yes on anything from 11- 18.
+Extreme Democrats: Votes yes on anything from 14-20.
+Extreme Republicans, Votes yes on anything from 1-6
+Republicans, Votes yes on anything from 3-9
+If less than 20 more yes votes are needed to pass, can use 1 PC to roll a 20 sided die and add that to votes
+A bill passes the house if it gets at least 218 votes.
+If Bill passed, gain 4 VP.  Divide yes votes by 80, round up, add that amount of VP.  Once passed by Senate, add 1 PC for each partisan point of majority party, and gain two more VP. Gain an additon two VP if partisanship of bill aligns with your majority party.
+
+
+Pack the Courts ( Can only be done once per game, costs 4 VP and 6 PC):
+This puts a new unique bill on the floor, pack the courts. This bill has an initial legality of 5 , a partisanship of 18 or 3 depending on current majority party of house, and an popularity of 5.  If passed by the Senate, put 4 new justices on the court of a party of your choosing and Supreme Court loses 10 VP.  The Supreme Court now has 13 justices for the rest of the game instead of 9. The House, Senate, and President all get VP when this bill passes just like they do with any other bill. If the Supreme Court tries to overturn this bill they get a 1 bonus vote against them and must use two VP. The Supreme Court also cannot lower the legality of this bill.
+
+
+How House elections work:
+ all 435 representatives of the house may change every two rounds
+The potential amount of represenatives changing party affiliation is determined by President Popularity as follows:
+President popularity 0-3
+Roll 10 20 sided die. This many changes two steps away from the presidents party.
+Then Roll 12 20 sided die. This many changes one step away from the presidents party.
+President popularity 4-8
+Roll 4 20 sided die. This many changes two steps away from the presidents party.
+Roll 6 20 sided die. This many changes one step away from the presidents party.
+President popularity 9-12
+Roll 4 20 sided die this many changes one step away from the presidents party.
+Roll 4 20 sided die this many changes one step towards the presidents party.
+President popularity 13-18
+Roll 4 20 sided die this many changes two steps towards the presidents party.
+Roll 6 20 sided die this many changes one step towards the presidents party.
+President popularity 19-20
+Roll 10 20 sided die. This many changes two steps towards the presidents party.
+Then Roll 12 20 sided die. This many changes one step towards the presidents party.
+
+
+
+
+
+
+How Supreme Court Justices change each round:
+Supreme Court  starts with a total of 9 total members.
+at the end of every round roll a 20 sided die.
+If it lands one a 1 a member of the majority dies,
+if it lands on a 2 a member of the majority retires,
+if it lands on a 19 a member of the minority retires,
+if it lands on a 20 a member of the minority dies.
+If it lands on a 10 a member of the moderates dies. If it lands on 11 a members of the moderates retires.
+
+
+
+
+
+
+
+
+
+
+
+
+Supreme Court-
+Gets 4 Actions Per round
+
+
+Possible Actions
+
+
+Judicial Review- If the president sends a bill, or any bill that is passed in this round or the prior round , the court can determine if a bill is constitutional.
+Conservative justices will vote unconstitutional 11-20, if legality is below 15 , otherwise votes constitutional
+Moderates will vote unconstitutional 15-20 and 1-5 , if legality is below 10 ,
+otherwise votes constitutional
+And liberals will vote unconstitutional 1-9, if legality is below 15,
+otherwise votes constitutional
+For every 2 legality of the bill above 10, add one bonus vote in it's favor of being constitutional
+For every 2 legality below 10, add one bonus vote against it being constitutional
+If the president sent it give one bonus vote for it to be unconstitutional.
+You may also use 2 VP to give one bonus vote in either direction, or 5VP to give two bonus votes in either direction
+
+
+If voted constitutional gain 1 VP.
+If voted unconstitutional gain 5VP. Also any point other players received for passing this bill are rescinded and anything the bill did is reversed.
+
+
+Inquiry of President-
+You Choose President Popularity -2 or plus 1 Pop. Gain 1 VP.
+
+
+Inquiry of House or Senate: you choose -2 PC or plus 1 PC to whoever you inquire. Gain 1 VP.
+
+
+Investigate Executive Orders - ( Once Per Round,  and only can do If president used executive orders at least twice this round): President loses all VP and Popularity gained from Executive Orders this round. House and Senate both get one PC. 
+
+
+Investigate Bill - Lower Legality of Current bill on the floor by 2
+
+
+Disapprove of  Justice Candidate - If justice candidate has been nominated by president, but not yet approved by Senate, you can disapprove and put forward a candidate of a different leaning than the president nominated. The President can either do as you ask, or takes a -2 VP and -2 Popularity Penalty. This can only be done once per candidate.
+
+
+Suggest Justice Candidate (Once per Round)- If a justice has died or retired, but the President has not yet nominated a candidate, you can suggest one. This forces this President to either nominate your suggestion or take a big VP and popularity penalty next action.
+
+
+General Court (Once Per Round) - Preside over General Cases that come to the Supreme Court. Gain 2 VP.
+
+
+Advisory Role - (once per round, and can only take this action if president, the house , and the Supreme Court all lean either Democrat or Republican):
+As the Court and all other branches have synergy, you are trusted and give advice to the President and Congress that affects the law. Gain 2 VP.
+
+
+Internal Inquiry -(Once Per round, maximum of 6 times per game, Costs 2VP) : Roll a 20 sided dice. If above 15, cause a Justice of your choice to retire
+
+
+Constitutional Crisis -(Once per round, take two actions, costs 10 VP . This can be done twice per game. ) Permanently, for the rest of the game , lower all legality of prior passed bill, any bill on the floor, and initial legality of new bills by 2.
+
+
+Passive Actions(Dont use up and action):
+If a bill is ever removed from the floor without being passed by both chamber, gain 1 VP , if a bill is ever signed by President -1 VP
