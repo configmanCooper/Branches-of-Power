@@ -1235,7 +1235,17 @@ var UI = (function() {
 
     function getDealTypeLabel(type, billName) {
         var label = (Engine.DEAL_TYPES && Engine.DEAL_TYPES[type]) ? Engine.DEAL_TYPES[type].label : (type || 'General favor');
-        if (billName) label += ' <span style="color:#FFC107">"' + escapeHtml(billName) + '"</span>';
+        if (billName) {
+            label += ' <span style="color:#FFC107">"' + escapeHtml(billName) + '"</span>';
+        } else if (Engine.DEAL_TYPES && Engine.DEAL_TYPES[type] && Engine.DEAL_TYPES[type].billRelated && currentState && currentState.bills && currentState.bills.length > 0) {
+            var activeBill = currentState.bills[0];
+            if (currentState.activeBillId) {
+                for (var i = 0; i < currentState.bills.length; i++) {
+                    if (currentState.bills[i].id === currentState.activeBillId) { activeBill = currentState.bills[i]; break; }
+                }
+            }
+            if (activeBill) label += ' <span style="color:#FFC107">"' + escapeHtml(activeBill.name) + '"</span>';
+        }
         return label;
     }
 

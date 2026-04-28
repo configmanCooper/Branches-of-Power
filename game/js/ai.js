@@ -489,7 +489,19 @@ var GameAI = (function() {
             if (bestTarget) {
                 var proposal = getAIDealProposal(role, bestTarget, state);
                 if (proposal) {
-                    Engine.proposeDeal(role, proposal.to, proposal.askType, proposal.offerType, proposal.message);
+                    var activeBill = (state.bills && state.bills.length > 0) ? state.bills[0] : null;
+                    if (state.activeBillId) {
+                        for (var bi = 0; bi < state.bills.length; bi++) {
+                            if (state.bills[bi].id === state.activeBillId) { activeBill = state.bills[bi]; break; }
+                        }
+                    }
+                    var askBillId = null, offerBillId = null;
+                    var dt = Engine.DEAL_TYPES || {};
+                    if (activeBill) {
+                        if (dt[proposal.askType] && dt[proposal.askType].billRelated) askBillId = activeBill.id;
+                        if (dt[proposal.offerType] && dt[proposal.offerType].billRelated) offerBillId = activeBill.id;
+                    }
+                    Engine.proposeDeal(role, proposal.to, proposal.askType, proposal.offerType, proposal.message, askBillId, offerBillId);
                 }
             }
         }
