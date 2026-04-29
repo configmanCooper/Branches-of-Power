@@ -158,16 +158,22 @@ var UI = (function() {
                 var msg = document.getElementById('deal-message');
                 var askBill = document.getElementById('deal-ask-bill');
                 var offerBill = document.getElementById('deal-offer-bill');
+                var askDetailEl = document.getElementById('deal-ask-detail');
+                var offerDetailEl = document.getElementById('deal-offer-detail');
                 if (target && ask && offer) {
                     var askBillId = (askBill && askBill.value) ? parseInt(askBill.value) : null;
                     var offerBillId = (offerBill && offerBill.value) ? parseInt(offerBill.value) : null;
+                    var askDetail = (askDetailEl && askDetailEl.value && document.getElementById('deal-ask-detail-row').style.display !== 'none') ? askDetailEl.value : null;
+                    var offerDetail = (offerDetailEl && offerDetailEl.value && document.getElementById('deal-offer-detail-row').style.display !== 'none') ? offerDetailEl.value : null;
                     Network.localAction(currentRole, 'proposeDeal', {
                         to: target.value,
                         askType: ask.value,
                         offerType: offer.value,
                         message: msg ? msg.value : '',
                         askBillId: askBillId,
-                        offerBillId: offerBillId
+                        offerBillId: offerBillId,
+                        askDetail: askDetail,
+                        offerDetail: offerDetail
                     });
                     closeModal();
                     // AI responds to deals immediately
@@ -1338,8 +1344,8 @@ var UI = (function() {
                     html += '<div style="color:#FF9800;font-size:0.8em;font-weight:bold;margin-bottom:4px">🔄 COUNTEROFFER</div>';
                 }
                 html += '<div style="color:' + Config.ROLE_COLORS[pd.from] + ';font-weight:bold">' + Config.ROLE_ICONS[pd.from] + ' ' + Config.ROLE_LABELS[pd.from] + ' proposes:</div>';
-                html += '<div style="margin:4px 0"><strong>Asks you to:</strong> ' + getDealTypeLabel(pd.askType, pd.askBillName) + '</div>';
-                html += '<div style="margin:4px 0"><strong>Offers to:</strong> ' + getDealTypeLabel(pd.offerType, pd.offerBillName) + '</div>';
+                html += '<div style="margin:4px 0"><strong>Asks you to:</strong> ' + getDealTypeLabel(pd.askType, pd.askBillName, pd.askDetail) + '</div>';
+                html += '<div style="margin:4px 0"><strong>Offers to:</strong> ' + getDealTypeLabel(pd.offerType, pd.offerBillName, pd.offerDetail) + '</div>';
                 if (pd.message) html += '<div style="font-style:italic;color:#aaa">"' + escapeHtml(pd.message) + '"</div>';
                 html += '<div style="margin-top:6px">';
                 html += '<button class="btn btn-small" data-action="acceptDeal" data-deal-id="' + pd.id + '" style="background:#4CAF50;color:white;padding:3px 10px;border-radius:4px;border:none;cursor:pointer;margin-right:6px">✅ Accept</button>';
@@ -1357,8 +1363,8 @@ var UI = (function() {
             for (var k = 0; k < acceptedDeals.length; k++) {
                 var ad = acceptedDeals[k];
                 html += '<div class="deal-card" style="background:rgba(76,175,80,0.1);border:1px solid #4CAF50;border-radius:6px;padding:8px;margin:4px 0">';
-                html += '<div>Promised ' + Config.ROLE_LABELS[ad.to] + ': <strong>' + getDealTypeLabel(ad.offerType, ad.offerBillName) + '</strong></div>';
-                html += '<div style="font-size:0.8em;color:#888">They will: ' + getDealTypeLabel(ad.askType, ad.askBillName) + '</div>';
+                html += '<div>Promised ' + Config.ROLE_LABELS[ad.to] + ': <strong>' + getDealTypeLabel(ad.offerType, ad.offerBillName, ad.offerDetail) + '</strong></div>';
+                html += '<div style="font-size:0.8em;color:#888">They will: ' + getDealTypeLabel(ad.askType, ad.askBillName, ad.askDetail) + '</div>';
                 html += '<div style="margin-top:6px">';
                 html += '<button class="btn btn-small" data-action="fulfillDeal" data-deal-id="' + ad.id + '" style="background:#4CAF50;color:white;padding:3px 10px;border-radius:4px;border:none;cursor:pointer;margin-right:6px">✅ Fulfill</button>';
                 html += '<button class="btn btn-small" data-action="breakDeal" data-deal-id="' + ad.id + '" style="background:#f44336;color:white;padding:3px 10px;border-radius:4px;border:none;cursor:pointer">💔 Break Promise</button>';
@@ -1377,7 +1383,7 @@ var UI = (function() {
             for (var w = 0; w < waitingDeals.length; w++) {
                 var wd = waitingDeals[w];
                 html += '<div style="font-size:0.85em;padding:4px;border-left:2px solid ' + Config.ROLE_COLORS[wd.to] + '">';
-                html += Config.ROLE_LABELS[wd.to] + ' promised: ' + getDealTypeLabel(wd.askType, wd.askBillName);
+                html += Config.ROLE_LABELS[wd.to] + ' promised: ' + getDealTypeLabel(wd.askType, wd.askBillName, wd.askDetail);
                 html += '</div>';
             }
             html += '</div>';
@@ -1392,8 +1398,18 @@ var UI = (function() {
         return html;
     }
 
-    function getDealTypeLabel(type, billName) {
+    function getDealTypeLabel(type, billName, detail) {
         var label = (Engine.DEAL_TYPES && Engine.DEAL_TYPES[type]) ? Engine.DEAL_TYPES[type].label : (type || 'General favor');
+        // Append detail if present
+        if (detail && Engine.DEAL_DETAILS && Engine.DEAL_DETAILS[type]) {
+            var details = Engine.DEAL_DETAILS[type];
+            for (var di = 0; di < details.length; di++) {
+                if (details[di].value === detail) {
+                    label += ' <span style="color:#FF9800;font-size:0.9em">(' + escapeHtml(details[di].label) + ')</span>';
+                    break;
+                }
+            }
+        }
         if (billName) {
             label += ' <span style="color:#FFC107">"' + escapeHtml(billName) + '"</span>';
         } else if (Engine.DEAL_TYPES && Engine.DEAL_TYPES[type] && Engine.DEAL_TYPES[type].billRelated && currentState && currentState.bills && currentState.bills.length > 0) {
@@ -1439,6 +1455,10 @@ var UI = (function() {
         html += '<h4>What do you ask them to do?</h4>';
         html += '<select id="deal-ask" style="width:100%;padding:8px;margin:6px 0;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px">';
         html += '</select>';
+        html += '<div id="deal-ask-detail-row" style="display:none;margin:4px 0">';
+        html += '<label style="font-size:0.85em;color:#aaa">Specifically?</label>';
+        html += '<select id="deal-ask-detail" style="width:100%;padding:6px;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px"></select>';
+        html += '</div>';
         html += '<div id="deal-ask-bill-row" style="display:none;margin:4px 0">';
         html += '<label style="font-size:0.85em;color:#aaa">Which bill?</label>';
         html += '<select id="deal-ask-bill" style="width:100%;padding:6px;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px">' + billOptionsHtml + '</select>';
@@ -1452,6 +1472,10 @@ var UI = (function() {
             }
         }
         html += '</select>';
+        html += '<div id="deal-offer-detail-row" style="display:none;margin:4px 0">';
+        html += '<label style="font-size:0.85em;color:#aaa">Specifically?</label>';
+        html += '<select id="deal-offer-detail" style="width:100%;padding:6px;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px"></select>';
+        html += '</div>';
         html += '<div id="deal-offer-bill-row" style="display:none;margin:4px 0">';
         html += '<label style="font-size:0.85em;color:#aaa">Which bill?</label>';
         html += '<select id="deal-offer-bill" style="width:100%;padding:6px;background:#1a1a2e;color:white;border:1px solid #444;border-radius:4px">' + billOptionsHtml + '</select>';
@@ -1467,12 +1491,17 @@ var UI = (function() {
             { label: 'Cancel', action: 'closeModal', className: 'btn-red' }
         ]);
 
-        // Show/hide bill selector based on deal type
+        // Show/hide bill selector and detail selector based on deal type
+        var dealDetails = Engine.DEAL_DETAILS || {};
         function updateBillVisibility() {
             var askEl = document.getElementById('deal-ask');
             var offerEl = document.getElementById('deal-offer');
             var askBillRow = document.getElementById('deal-ask-bill-row');
             var offerBillRow = document.getElementById('deal-offer-bill-row');
+            var askDetailRow = document.getElementById('deal-ask-detail-row');
+            var offerDetailRow = document.getElementById('deal-offer-detail-row');
+            var askDetailEl = document.getElementById('deal-ask-detail');
+            var offerDetailEl = document.getElementById('deal-offer-detail');
             if (askEl && askBillRow) {
                 var askType = dealTypes[askEl.value];
                 askBillRow.style.display = (askType && askType.billRelated && bills.length > 0) ? 'block' : 'none';
@@ -1480,6 +1509,33 @@ var UI = (function() {
             if (offerEl && offerBillRow) {
                 var offerType = dealTypes[offerEl.value];
                 offerBillRow.style.display = (offerType && offerType.billRelated && bills.length > 0) ? 'block' : 'none';
+            }
+            // Detail dropdowns
+            if (askEl && askDetailRow && askDetailEl) {
+                var askDetails = dealDetails[askEl.value];
+                if (askDetails && askDetails.length > 0) {
+                    askDetailRow.style.display = 'block';
+                    var opts = '';
+                    for (var ai = 0; ai < askDetails.length; ai++) {
+                        opts += '<option value="' + askDetails[ai].value + '">' + askDetails[ai].label + '</option>';
+                    }
+                    askDetailEl.innerHTML = opts;
+                } else {
+                    askDetailRow.style.display = 'none';
+                }
+            }
+            if (offerEl && offerDetailRow && offerDetailEl) {
+                var offerDetails = dealDetails[offerEl.value];
+                if (offerDetails && offerDetails.length > 0) {
+                    offerDetailRow.style.display = 'block';
+                    var opts2 = '';
+                    for (var oi = 0; oi < offerDetails.length; oi++) {
+                        opts2 += '<option value="' + offerDetails[oi].value + '">' + offerDetails[oi].label + '</option>';
+                    }
+                    offerDetailEl.innerHTML = opts2;
+                } else {
+                    offerDetailRow.style.display = 'none';
+                }
             }
         }
 
@@ -1519,8 +1575,8 @@ var UI = (function() {
         } else {
             for (var i = history.length - 1; i >= 0; i--) {
                 var d = history[i];
-                var statusColor = d.status === 'fulfilled' ? '#4CAF50' : (d.status === 'broken' ? '#f44336' : (d.status === 'accepted' ? '#2196F3' : (d.status === 'rejected' ? '#FF9800' : '#888')));
-                var statusIcon = d.status === 'fulfilled' ? '✅' : (d.status === 'broken' ? '💔' : (d.status === 'accepted' ? '🤝' : (d.status === 'rejected' ? '❌' : '⏳')));
+                var statusColor = d.status === 'fulfilled' ? '#4CAF50' : (d.status === 'broken' ? '#f44336' : (d.status === 'accepted' ? '#2196F3' : (d.status === 'rejected' ? '#FF9800' : (d.status === 'countered' ? '#FF9800' : '#888'))));
+                var statusIcon = d.status === 'fulfilled' ? '✅' : (d.status === 'broken' ? '💔' : (d.status === 'accepted' ? '🤝' : (d.status === 'rejected' ? '❌' : (d.status === 'countered' ? '🔄' : '⏳'))));
                 html += '<div style="padding:6px 8px;margin:4px 0;background:rgba(255,255,255,0.03);border-radius:4px;border-left:3px solid ' + statusColor + '">';
                 html += '<div style="display:flex;justify-content:space-between;align-items:center">';
                 html += '<strong style="color:' + (Config.ROLE_COLORS[d.from] || '#fff') + '">' + (Config.ROLE_LABELS[d.from] || d.from) + '</strong>';

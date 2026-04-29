@@ -557,6 +557,56 @@ var Engine = (function() {
         general: { label: 'General favor', roles: ['president', 'house', 'senate', 'supremeCourt'] }
     };
 
+    // Detail options for deal types that need specifics
+    var DEAL_DETAILS = {
+        updateBill: [
+            { value: 'increase_popularity', label: 'Increase bill popularity' },
+            { value: 'decrease_popularity', label: 'Decrease bill popularity' },
+            { value: 'increase_legality', label: 'Increase bill legality' },
+            { value: 'decrease_legality', label: 'Decrease bill legality' },
+            { value: 'shift_partisan_left', label: 'Shift bill left (more Democrat)' },
+            { value: 'shift_partisan_right', label: 'Shift bill right (more Republican)' },
+            { value: 'center_bill', label: 'Center bill partisanship' }
+        ],
+        advocate: [
+            { value: 'target_house', label: 'Advocate to the House' },
+            { value: 'target_senate', label: 'Advocate to the Senate' },
+            { value: 'target_both', label: 'Advocate to both chambers' }
+        ],
+        admonish: [
+            { value: 'target_house', label: 'Admonish the House' },
+            { value: 'target_senate', label: 'Admonish the Senate' },
+            { value: 'target_both', label: 'Admonish both chambers' }
+        ],
+        confirmJustice: [
+            { value: 'confirm', label: 'Confirm the nominee' },
+            { value: 'reject', label: 'Reject the nominee' }
+        ],
+        nominations: [
+            { value: 'pass', label: 'Pass nominations' },
+            { value: 'block', label: 'Block nominations' }
+        ],
+        supportBill: [
+            { value: 'boost_popularity', label: 'Boost bill popularity' }
+        ],
+        attackBill: [
+            { value: 'reduce_popularity', label: 'Reduce bill popularity' }
+        ],
+        riderAmendment: [
+            { value: 'attach_rider', label: 'Attach a rider amendment' }
+        ],
+        reviewBill: [
+            { value: 'strike_down', label: 'Try to strike down the bill' },
+            { value: 'uphold', label: 'Uphold the bill' }
+        ],
+        amicusBrief: [
+            { value: 'reduce_legality', label: 'Reduce bill legality' }
+        ],
+        oralArguments: [
+            { value: 'center_partisanship', label: 'Center bill partisanship' }
+        ]
+    };
+
     function clampTrust(val) { return Math.max(0, Math.min(10, val)); }
 
     function adjustTrust(from, to, amount) {
@@ -565,7 +615,7 @@ var Engine = (function() {
         }
     }
 
-    function proposeDeal(from, to, askType, offerType, message, askBillId, offerBillId) {
+    function proposeDeal(from, to, askType, offerType, message, askBillId, offerBillId, askDetail, offerDetail) {
         // Build description with bill names
         var askLabel = DEAL_TYPES[askType] ? DEAL_TYPES[askType].label : askType;
         var offerLabel = DEAL_TYPES[offerType] ? DEAL_TYPES[offerType].label : offerType;
@@ -594,12 +644,16 @@ var Engine = (function() {
             offerBillId: offerBillId || null,
             askBillName: askBillName,
             offerBillName: offerBillName,
+            askDetail: askDetail || null,
+            offerDetail: offerDetail || null,
             message: message || '',
             round: state.round,
             status: 'pending'
         };
         state.deals.push(deal);
-        var dealDesc = askLabel + (askBillName ? ' ("' + askBillName + '")' : '') + ' for ' + offerLabel + (offerBillName ? ' ("' + offerBillName + '")' : '');
+        var askDetailStr = askDetail ? ' [' + askDetail + ']' : '';
+        var offerDetailStr = offerDetail ? ' [' + offerDetail + ']' : '';
+        var dealDesc = askLabel + askDetailStr + (askBillName ? ' ("' + askBillName + '")' : '') + ' for ' + offerLabel + offerDetailStr + (offerBillName ? ' ("' + offerBillName + '")' : '');
         addLog(from, 'Propose Deal', 'Proposed deal to ' + Config.ROLE_LABELS[to] + ': ' + dealDesc);
         return deal;
     }
@@ -3456,7 +3510,7 @@ var Engine = (function() {
 
             // Deals (free actions — don't consume a turn)
             case 'proposeDeal':
-                actionResult = proposeDeal(role, params.to, params.askType, params.offerType, params.message, params.askBillId || null, params.offerBillId || null);
+                actionResult = proposeDeal(role, params.to, params.askType, params.offerType, params.message, params.askBillId || null, params.offerBillId || null, params.askDetail || null, params.offerDetail || null);
                 if (actionResult) actionResult = { success: true, deal: actionResult, message: 'Deal proposed.' };
                 break;
             case 'respondDeal':
@@ -3602,6 +3656,7 @@ var Engine = (function() {
         getAcceptedDealsForRole: getAcceptedDealsForRole,
         adjustTrust: adjustTrust,
         DEAL_TYPES: DEAL_TYPES,
+        DEAL_DETAILS: DEAL_DETAILS,
         getAvailableActions: getAvailableActions,
         executeAction: executeAction,
         getWinner: getWinner,
