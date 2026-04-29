@@ -4,7 +4,7 @@
 var Config = (function() {
     'use strict';
 
-    var VERSION = '3.0.0';
+    var VERSION = '3.1.0';
 
     // Game length options
     var GAME_LENGTHS = {
@@ -103,6 +103,50 @@ var Config = (function() {
         'Environmental Protection Act', 'Foreign Aid Authorization', 'Election Security Act',
         'Antitrust Enforcement Act', 'Mental Health Funding Bill', 'Transportation Safety Act'
     ];
+
+    var BILL_DESCRIPTIONS = {
+        'Education Reform Act': 'Overhauls public school funding and curriculum standards.',
+        'Healthcare Access Bill': 'Expands coverage and reduces prescription costs.',
+        'Infrastructure Investment Act': 'Funds roads, bridges, and broadband expansion.',
+        'Tax Reform Bill': 'Restructures tax brackets and closes loopholes.',
+        'Climate Action Act': 'Sets emissions targets and funds green energy.',
+        'Immigration Reform Bill': 'Updates visa programs and border policy.',
+        'Defense Spending Act': 'Adjusts military budget and readiness programs.',
+        'Social Security Amendment': 'Modifies benefits and retirement age thresholds.',
+        'Criminal Justice Reform': 'Reforms sentencing guidelines and prison conditions.',
+        'Voting Rights Act': 'Strengthens voter protections and access.',
+        'Gun Control Legislation': 'Regulates firearm sales and background checks.',
+        'Trade Agreement Act': 'Establishes new international trade terms.',
+        'Technology Privacy Act': 'Protects digital data and limits surveillance.',
+        'Housing Affordability Bill': 'Funds affordable housing and rent protections.',
+        'Veterans Benefits Act': 'Expands healthcare and job programs for veterans.',
+        'Drug Policy Reform': 'Updates drug scheduling and treatment funding.',
+        'Energy Independence Act': 'Invests in domestic energy production.',
+        'Labor Rights Bill': 'Strengthens union protections and worker safety.',
+        'Financial Regulation Act': 'Tightens oversight of banks and markets.',
+        'Agricultural Subsidy Bill': 'Adjusts farm subsidies and food programs.',
+        'Space Exploration Act': 'Funds NASA missions and commercial space.',
+        'Cybersecurity Enhancement Act': 'Strengthens federal cyber defenses.',
+        'Minimum Wage Adjustment': 'Raises the federal minimum wage.',
+        'Student Loan Reform': 'Restructures student debt and repayment plans.',
+        'Environmental Protection Act': 'Strengthens pollution limits and conservation.',
+        'Foreign Aid Authorization': 'Sets foreign assistance budgets and priorities.',
+        'Election Security Act': 'Funds secure voting systems and audits.',
+        'Antitrust Enforcement Act': 'Strengthens monopoly breakup powers.',
+        'Mental Health Funding Bill': 'Expands mental health services and research.',
+        'Transportation Safety Act': 'Updates vehicle and transit safety standards.'
+    };
+
+    var GLOSSARY = {
+        VP: 'Victory Points — your score. Highest VP wins the game.',
+        PC: 'Political Capital — spend to boost votes, filibuster, or use powerful actions. Caps at 4 between rounds.',
+        JP: 'Judicial Points — Supreme Court resource for reviews, briefs, and rulings.',
+        Pop: 'Popularity — President\'s public approval (1-20). Affects elections and unlocks Bully Pulpit.',
+        Stability: 'National stability (0-10). Events lower it. At 0, the government collapses and everyone loses.',
+        Partisanship: 'How politically aligned a bill is (1=far right, 20=far left). Determines which factions vote for it.',
+        Popularity_Bill: 'How popular a bill is with the public (1-20). Affects President VP when signing.',
+        Legality: 'How legally sound a bill is (1-20). Low legality means the Supreme Court can strike it down.'
+    };
 
     // Election rules
     var ELECTIONS = {
@@ -225,7 +269,9 @@ var Config = (function() {
         BILL_NAMES: BILL_NAMES,
         ELECTIONS: ELECTIONS,
         PER_GAME_LIMITS: PER_GAME_LIMITS,
-        ACTION_TOOLTIPS: ACTION_TOOLTIPS
+        ACTION_TOOLTIPS: ACTION_TOOLTIPS,
+        BILL_DESCRIPTIONS: BILL_DESCRIPTIONS,
+        GLOSSARY: GLOSSARY
     };
 })();
 

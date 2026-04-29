@@ -176,7 +176,15 @@ var Engine = (function() {
             eventHistory: [],
             eventCooldown: 0,
             stabilityCollapse: false,
-            unitySummitParticipants: []
+            unitySummitParticipants: [],
+            vpSources: {
+                president: [],
+                house: [],
+                senate: [],
+                supremeCourt: []
+            },
+            dealHistory: [],
+            roundSummaries: []
         };
 
         // Generate first bill
@@ -425,6 +433,12 @@ var Engine = (function() {
         });
     }
 
+    function trackVP(role, amount, source) {
+        if (state.vpSources && state.vpSources[role]) {
+            state.vpSources[role].push({ round: state.round, amount: amount, source: source });
+        }
+    }
+
     function advanceTurn() {
         var currentRole = getCurrentRole();
         var roleState = state[currentRole];
@@ -607,6 +621,20 @@ var Engine = (function() {
             adjustTrust(deal.from, deal.to, -0.5);
             addLog(deal.to, 'Reject Deal', 'Rejected deal from ' + Config.ROLE_LABELS[deal.from] + '.');
         }
+        if (state.dealHistory) {
+            state.dealHistory.push({
+                id: deal.id,
+                from: deal.from,
+                to: deal.to,
+                askType: deal.askType,
+                offerType: deal.offerType,
+                askBillName: deal.askBillName || '',
+                offerBillName: deal.offerBillName || '',
+                status: deal.status,
+                round: state.round,
+                resolvedRound: state.round
+            });
+        }
         return { success: true, deal: deal };
     }
 
@@ -622,6 +650,20 @@ var Engine = (function() {
         state[deal.from].vp += 1;
         state[deal.to].vp += 1;
         addLog(deal.from, 'Deal Fulfilled', 'Kept promise to ' + Config.ROLE_LABELS[deal.to] + '. Both +1 VP.');
+        if (state.dealHistory) {
+            state.dealHistory.push({
+                id: deal.id,
+                from: deal.from,
+                to: deal.to,
+                askType: deal.askType,
+                offerType: deal.offerType,
+                askBillName: deal.askBillName || '',
+                offerBillName: deal.offerBillName || '',
+                status: deal.status,
+                round: state.round,
+                resolvedRound: state.round
+            });
+        }
         return { success: true };
     }
 
@@ -641,6 +683,20 @@ var Engine = (function() {
             }
         }
         addLog(deal.from, 'Deal Broken', 'Broke promise to ' + Config.ROLE_LABELS[deal.to] + '! Trust damaged.');
+        if (state.dealHistory) {
+            state.dealHistory.push({
+                id: deal.id,
+                from: deal.from,
+                to: deal.to,
+                askType: deal.askType,
+                offerType: deal.offerType,
+                askBillName: deal.askBillName || '',
+                offerBillName: deal.offerBillName || '',
+                status: deal.status,
+                round: state.round,
+                resolvedRound: state.round
+            });
+        }
         return { success: true };
     }
 
@@ -2031,7 +2087,8 @@ var Engine = (function() {
             desc = 'All future bills start with +3 legality.';
         } else if (effect === 'courtAuthority') {
             state.supremeCourt.judicialReviewBonus += 2;
-            desc = 'All future judicial reviews get +2 unconstitutional votes.';
+            state.supremeCourt.courtAuthorityRoundsLeft = 3;
+            desc = 'Judicial reviews get +2 unconstitutional votes for 3 rounds.';
         } else if (effect === 'precedentPower') {
             desc = 'All precedent effects are doubled.';
         }
@@ -2632,6 +2689,7 @@ var Engine = (function() {
         // President passive: VP for high popularity
         if (state.president.popularity > 15) {
             state.president.vp += 1;
+            trackVP('president', 1, 'Popularity Bonus');
             addLog('passive', 'President Bonus', 'Popularity > 15. +1 VP.');
         }
 
@@ -2639,12 +2697,16 @@ var Engine = (function() {
         if (state.precedents && state.precedents.length > 0) {
             var precVP = state.precedents.length;
             state.supremeCourt.vp += precVP;
+            trackVP('supremeCourt', precVP, 'Precedent Dividends');
             addLog('passive', 'Precedent Dividends', '+' + precVP + ' VP for ' + state.precedents.length + ' precedent(s).');
         }
 
         // Cap PC carryover
+        var senateCapped = state.senate.pc > Config.MAX_PC_CARRYOVER;
+        var houseCapped = state.house.pc > Config.MAX_PC_CARRYOVER;
         state.senate.pc = Math.min(state.senate.pc, Config.MAX_PC_CARRYOVER);
         state.house.pc = Math.min(state.house.pc, Config.MAX_PC_CARRYOVER);
+        state.pcCappedThisRound = { senate: senateCapped, house: houseCapped };
 
         // Process elections
         var electionResults = processElections();
@@ -2652,12 +2714,36 @@ var Engine = (function() {
         // Check if bill on floor wasn't passed — SC gets VP
         if (state.bills.length > 0 && !state.billPassedThisRound) {
             state.supremeCourt.vp += 1;
+            trackVP('supremeCourt', 1, 'Bill Not Passed Bonus');
         }
 
         // Senate penalty: if House passed a bill but Senate didn't pass it this round
         if (state.billPassedByHouse && !state.billPassedBySenate) {
             state.senate.vp -= 1;
             addLog('passive', 'Senate Inaction', 'House passed bill but Senate did not. Senate -1 VP.');
+        }
+
+        // Track president popularity streak
+        if (state.president.popularity >= 12) {
+            state.presidentHighPopStreak = (state.presidentHighPopStreak || 0) + 1;
+        } else {
+            state.presidentHighPopStreak = 0;
+        }
+
+        // Round summary
+        if (state.roundSummaries) {
+            state.roundSummaries.push({
+                round: state.round,
+                vp: {
+                    president: state.president.vp,
+                    house: state.house.vp,
+                    senate: state.senate.vp,
+                    supremeCourt: state.supremeCourt.vp
+                },
+                stability: state.stability,
+                billsPassed: state.billPassedThisRound ? 1 : 0,
+                eventResolved: (state.activeEvent && state.activeEvent.resolved) ? state.activeEvent.name : null
+            });
         }
 
         // Advance round
@@ -2668,6 +2754,7 @@ var Engine = (function() {
             if (state.precedents && state.precedents.length > 0) {
                 var legacyVP = state.precedents.length * 1;
                 state.supremeCourt.vp += legacyVP;
+                trackVP('supremeCourt', legacyVP, 'Court Legacy');
                 addLog('supremeCourt', 'Court Legacy', '+' + legacyVP + ' VP for ' + state.precedents.length + ' judicial review rulings.');
             }
 
@@ -2679,13 +2766,17 @@ var Engine = (function() {
             if (houseBills > 0 || senateBills > 0) {
                 if (houseBills > senateBills) {
                     state.house.vp += 3;
+                    trackVP('house', 3, 'Legislative Legacy');
                     addLog('house', 'Legislative Legacy', 'Most bills passed (' + houseBills + '). +3 VP.');
                 } else if (senateBills > houseBills) {
                     state.senate.vp += 3;
+                    trackVP('senate', 3, 'Legislative Legacy');
                     addLog('senate', 'Legislative Legacy', 'Most bills passed (' + senateBills + '). +3 VP.');
                 } else {
                     state.house.vp += 3;
                     state.senate.vp += 3;
+                    trackVP('house', 3, 'Legislative Legacy');
+                    trackVP('senate', 3, 'Legislative Legacy');
                     addLog('system', 'Legislative Legacy', 'House and Senate tied with ' + houseBills + ' bills. Both +3 VP.');
                 }
             }
@@ -2693,6 +2784,7 @@ var Engine = (function() {
             // Constitutional Guardian: +3 VP for SC if struck down 2+ bills
             if (state.unconstitutionalBills && state.unconstitutionalBills.length >= 2) {
                 state.supremeCourt.vp += 3;
+                trackVP('supremeCourt', 3, 'Constitutional Guardian');
                 addLog('supremeCourt', 'Constitutional Guardian', 'Struck down ' + state.unconstitutionalBills.length + ' bills. +3 VP.');
             }
 
@@ -2710,6 +2802,7 @@ var Engine = (function() {
                     Config.ROLES.forEach(function(r) {
                         if (dealCounts[r] === maxDeals) {
                             state[r].vp += 3;
+                            trackVP(r, 3, 'Diplomat');
                             addLog(r, 'Diplomat', 'Most deals fulfilled (' + maxDeals + '). +3 VP.');
                         }
                     });
@@ -2731,6 +2824,7 @@ var Engine = (function() {
                     Config.ROLES.forEach(function(r) {
                         if (resolveCounts[r] === maxResolved) {
                             state[r].vp += 3;
+                            trackVP(r, 3, 'Crisis Manager');
                             addLog(r, 'Crisis Manager', 'Most events resolved (' + maxResolved + '). +3 VP.');
                         }
                     });
@@ -2741,8 +2835,38 @@ var Engine = (function() {
             if (state.stability >= 8 && state.unitySummitParticipants && state.unitySummitParticipants.length > 0) {
                 for (var si = 0; si < state.unitySummitParticipants.length; si++) {
                     state[state.unitySummitParticipants[si]].vp += 3;
+                    trackVP(state.unitySummitParticipants[si], 3, 'Stability Champion');
                 }
                 addLog('system', 'Stability Champion', 'Stability ≥ 8. Unity Summit participants +3 VP each.');
+            }
+
+            // Role-Specific Win Bonuses
+            // President: Maintained popularity >= 12 for 3+ consecutive rounds
+            if (state.presidentHighPopStreak >= 3) {
+                state.president.vp += 3;
+                addLog('president', 'Popular Leader', 'Maintained popularity ≥ 12 for ' + state.presidentHighPopStreak + '+ rounds. +3 VP.');
+                trackVP('president', 3, 'Popular Leader');
+            }
+
+            // House: Passed 4+ bills total
+            if ((state.house.billsPassedTotal || 0) >= 4) {
+                state.house.vp += 3;
+                addLog('house', 'Legislative Powerhouse', 'Passed ' + state.house.billsPassedTotal + ' bills through the House. +3 VP.');
+                trackVP('house', 3, 'Legislative Powerhouse');
+            }
+
+            // Senate: Filibustered or stalled 3+ bills
+            if ((state.senate.filibustersUsedTotal || 0) >= 3) {
+                state.senate.vp += 3;
+                addLog('senate', 'Master Obstructionist', 'Filibustered ' + state.senate.filibustersUsedTotal + ' bills. +3 VP.');
+                trackVP('senate', 3, 'Master Obstructionist');
+            }
+
+            // Supreme Court: Set 3+ precedents
+            if ((state.precedents || []).length >= 3) {
+                state.supremeCourt.vp += 3;
+                addLog('supremeCourt', 'Judicial Authority', 'Set ' + state.precedents.length + ' precedents. +3 VP.');
+                trackVP('supremeCourt', 3, 'Judicial Authority');
             }
 
             state.phase = 'gameOver';
@@ -2791,6 +2915,15 @@ var Engine = (function() {
 
         state.senate.governmentShutdownUsedThisRound = false;
         state.senate.filibusterUsedThisRound = false;
+
+        // Landmark Ruling courtAuthority expiry
+        if (state.supremeCourt.courtAuthorityRoundsLeft !== undefined && state.supremeCourt.courtAuthorityRoundsLeft > 0) {
+            state.supremeCourt.courtAuthorityRoundsLeft--;
+            if (state.supremeCourt.courtAuthorityRoundsLeft <= 0) {
+                state.supremeCourt.judicialReviewBonus = Math.max(0, state.supremeCourt.judicialReviewBonus - 2);
+                addLog('supremeCourt', 'Court Authority Expired', 'Landmark ruling effect ended. Judicial review bonus removed.');
+            }
+        }
         state.senate.stallUsedThisRound = false;
         state.senate.conferenceUsedThisRound = false;
         state.senate.nominationsUsedThisRound = false;
@@ -3457,7 +3590,8 @@ var Engine = (function() {
         rollD6: rollD6,
         getStability: function() { return state ? state.stability : 0; },
         getActiveEvent: function() { return state ? state.activeEvent : null; },
-        getQueuedEvent: function() { return state ? state.queuedEvent : null; }
+        getQueuedEvent: function() { return state ? state.queuedEvent : null; },
+        trackVP: trackVP
     };
 })();
 

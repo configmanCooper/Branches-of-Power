@@ -5,6 +5,33 @@ Uses [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.1.0] — 2025-07-24
+
+### New UI Features (16 Improvements)
+- **Election Countdown Warning**: Header shows rounds until next presidential election/midterm.
+- **VP Change Indicators**: Animated delta badges flash when VP changes (+/-).
+- **Turn Order Strip**: Visual indicator showing play order with active player highlighted.
+- **Bill Flavor Descriptions**: 30 unique bill descriptions displayed on bill cards.
+- **Stat Glossary Tooltips**: ℹ️ icons on VP/Pop/PC/JP with explanations on hover/click.
+- **Action VP Preview**: Green hints showing expected VP gains on action buttons.
+- **Event Resolution Deadline**: Urgency coloring (red) when event deadline ≤1 round + warning icon.
+- **PC Cap Toast**: One-time warning toast when Political Capital is capped.
+- **Chat Redesign**: Card-based messages with timestamps replacing horizontal layout.
+- **Deal History Tab**: Button + modal showing full deal history with status colors.
+- **Enhanced Game Over Scorecard**: Ranked scores with medals, VP breakdown, and game stats grid.
+- **Round Summary Toasts**: Brief notification summarizing completed rounds.
+
+### Balance Changes
+- **Landmark Ruling Nerf**: Court Authority now lasts 3 rounds (was permanent until next ruling).
+- **Role-Specific Win Bonuses**: Popular Leader (President, pop≥12 for 3+ rounds), Legislative Powerhouse (House, 6+ bills), Master Obstructionist (Senate, 4+ blocks), Judicial Authority (SC, 3+ rulings).
+- **VP Source Tracking**: All bonus/end-round VP is now tracked by source for scorecard breakdown.
+- **Deal History Tracking**: All deals recorded with status, round, and resolution details.
+- **Round Summaries**: Snapshot of VP, stability, and events each round.
+
+### Config Additions
+- **BILL_DESCRIPTIONS**: 30 bill flavor text entries.
+- **GLOSSARY**: 8 game term definitions for stat tooltips.
+
 ## [3.0.0] — 2026-04-26
 
 ### Major Balance Overhaul

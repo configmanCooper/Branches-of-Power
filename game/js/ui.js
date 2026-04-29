@@ -10,6 +10,11 @@ var UI = (function() {
     var actionLog = [];
     var tutorialActive = false;
     var tutorialStep = 0;
+    var previousVP = null;
+    var vpDeltas = {};
+    var vpDeltaTimeout = null;
+    var lastPCCapRound = null;
+    var lastSummaryRound = 0;
 
     function escapeHtml(str) {
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -211,6 +216,9 @@ var UI = (function() {
                 break;
 
             // Tutorial & Help
+            case 'showDealHistory':
+                showDealHistoryModal();
+                break;
             case 'showHowToPlay':
                 showHowToPlayModal();
                 break;
@@ -600,6 +608,49 @@ var UI = (function() {
         if (!state) return;
         currentState = state;
 
+        // VP change detection
+        if (previousVP) {
+            var newDeltas = {};
+            for (var vdi = 0; vdi < Config.ROLES.length; vdi++) {
+                var vdr = Config.ROLES[vdi];
+                var diff = state[vdr].vp - (previousVP[vdr] || 0);
+                if (diff !== 0) newDeltas[vdr] = diff;
+            }
+            if (Object.keys(newDeltas).length > 0) {
+                vpDeltas = newDeltas;
+                if (vpDeltaTimeout) clearTimeout(vpDeltaTimeout);
+                vpDeltaTimeout = setTimeout(function() { vpDeltas = {}; if (currentState) renderGame(currentState); }, 2500);
+            }
+        }
+        previousVP = {};
+        for (var vpi = 0; vpi < Config.ROLES.length; vpi++) {
+            previousVP[Config.ROLES[vpi]] = state[Config.ROLES[vpi]].vp;
+        }
+
+        // PC cap notification
+        if (state.pcCappedThisRound && state.round !== lastPCCapRound) {
+            lastPCCapRound = state.round;
+            if (state.pcCappedThisRound.senate && currentRole === 'senate') {
+                showToast('⚠️ Senate PC capped at ' + Config.MAX_PC_CARRYOVER + ' for this round.', 'warning');
+            }
+            if (state.pcCappedThisRound.house && currentRole === 'house') {
+                showToast('⚠️ House PC capped at ' + Config.MAX_PC_CARRYOVER + ' for this round.', 'warning');
+            }
+        }
+
+        // Round summary toast
+        if (state.roundSummaries && state.roundSummaries.length > 0 && state.round > 1) {
+            var latestSummary = state.roundSummaries[state.roundSummaries.length - 1];
+            if (latestSummary.round > lastSummaryRound && latestSummary.round === state.round - 1) {
+                lastSummaryRound = latestSummary.round;
+                var summaryParts = ['Round ' + latestSummary.round + ' Complete'];
+                if (latestSummary.billsPassed) summaryParts.push('📜 Bill passed');
+                if (latestSummary.eventResolved) summaryParts.push('⚡ ' + latestSummary.eventResolved + ' resolved');
+                summaryParts.push('Stability: ' + latestSummary.stability + '/10');
+                showToast(summaryParts.join(' | '), 'info');
+            }
+        }
+
         var content = document.getElementById('game-content');
         if (state.phase === 'gameOver') {
             renderGameOver(state);
@@ -622,15 +673,49 @@ var UI = (function() {
                          state.phase === 'election' ? 'Election Phase' :
                          state.phase === 'gameOver' ? 'Game Over' : state.phase;
         html += ' • ' + phaseLabel + '</span>';
+
+        // Election countdown
+        var nextPresElection = 0;
+        var nextMidterm = 0;
+        for (var er = state.round; er <= state.maxRounds; er++) {
+            if (er % 4 === 0 && !nextPresElection) nextPresElection = er;
+            if (er % 2 === 0 && !nextMidterm) nextMidterm = er;
+        }
+        var electionWarning = '';
+        if (nextPresElection && nextPresElection - state.round <= 2 && nextPresElection - state.round > 0) {
+            electionWarning += ' <span class="election-warning pres-election">🗳️ Presidential Election in ' + (nextPresElection - state.round) + ' round' + (nextPresElection - state.round > 1 ? 's' : '') + '!</span>';
+        }
+        if (nextMidterm && nextMidterm !== nextPresElection && nextMidterm - state.round <= 1 && nextMidterm - state.round > 0) {
+            electionWarning += ' <span class="election-warning midterm">📊 Midterms next round!</span>';
+        }
+        html += electionWarning;
+
         html += '<span class="turn-display active-turn" style="color:' + Config.ROLE_COLORS[currentTurnRole] + ';background:rgba(255,255,255,0.08);padding:4px 12px;border-radius:6px;border:1px solid ' + Config.ROLE_COLORS[currentTurnRole] + '">';
         html += Config.ROLE_ICONS[currentTurnRole] + ' ' + Config.ROLE_LABELS[currentTurnRole] + '\'s Turn';
         html += ' (Action ' + (5 - state[currentTurnRole].actionsRemaining) + '/4)</span>';
+
+        // Turn order indicator
+        html += '<div class="turn-order-strip">';
+        for (var toi = 0; toi < state.turnOrder.length; toi++) {
+            var toRole = state.turnOrder[toi];
+            var isToCurrent = toRole === currentTurnRole;
+            html += '<span class="turn-order-item' + (isToCurrent ? ' turn-order-active' : '') + '" style="color:' + Config.ROLE_COLORS[toRole] + '">' + Config.ROLE_ICONS[toRole] + '</span>';
+            if (toi < state.turnOrder.length - 1) html += '<span class="turn-order-arrow">→</span>';
+        }
+        html += '</div>';
+
         html += '</div>';
         // VP Scoreboard in header
         html += '<div class="vp-scoreboard">';
         for (var vi = 0; vi < Config.ROLES.length; vi++) {
             var vr = Config.ROLES[vi];
-            html += '<span class="vp-score" style="color:' + Config.ROLE_COLORS[vr] + '">' + Config.ROLE_ICONS[vr] + ' ' + state[vr].vp + '</span>';
+            var vpDelta = vpDeltas[vr];
+            var vpDeltaHtml = '';
+            if (vpDelta) {
+                var deltaClass = vpDelta > 0 ? 'vp-delta-pos' : 'vp-delta-neg';
+                vpDeltaHtml = ' <span class="vp-delta ' + deltaClass + '">' + (vpDelta > 0 ? '+' : '') + vpDelta + '</span>';
+            }
+            html += '<span class="vp-score" style="color:' + Config.ROLE_COLORS[vr] + '">' + Config.ROLE_ICONS[vr] + ' ' + state[vr].vp + vpDeltaHtml + '</span>';
         }
         html += '</div>';
         // Stability gauge
@@ -675,7 +760,8 @@ var UI = (function() {
             html += '<div class="event-banner" style="background:rgba(255,193,7,0.1);border:2px solid ' + sevColor + ';border-radius:10px;padding:10px 14px;margin:8px 0;position:relative">';
             html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
             html += '<span style="font-weight:bold;font-size:1.05em;color:' + sevColor + '">⚡ ' + escapeHtml(evt.name) + '</span>';
-            html += '<span style="font-size:0.8em;padding:2px 8px;border-radius:10px;background:' + sevColor + ';color:white">' + sevLabels[evt.severity] + ' | ' + evt.roundsRemaining + ' rounds left</span>';
+            var urgencyColor = evt.roundsRemaining <= 1 ? '#f44336' : sevColor;
+            html += '<span style="font-size:0.8em;padding:2px 8px;border-radius:10px;background:' + urgencyColor + ';color:white;font-weight:bold">' + sevLabels[evt.severity] + ' | ' + evt.roundsRemaining + ' round' + (evt.roundsRemaining !== 1 ? 's' : '') + ' left' + (evt.roundsRemaining <= 1 ? ' ⚠️' : '') + '</span>';
             html += '</div>';
             html += '<p style="margin:4px 0;font-size:0.9em;color:#ccc;font-style:italic">' + escapeHtml(evt.flavor) + '</p>';
 
@@ -792,15 +878,18 @@ var UI = (function() {
 
         html += '</div>'; // game-main
 
-        // Chat bar
+        // Chat bar (vertical card-based)
         html += '<div class="chat-bar">';
         html += '<div id="chat-messages" class="chat-messages">';
         for (var ci = Math.max(0, chatMessages.length - 20); ci < chatMessages.length; ci++) {
             var cm = chatMessages[ci];
-            html += '<span class="chat-msg"><strong style="color:' + (Config.ROLE_COLORS[cm.from] || '#fff') + '">' + escapeHtml(cm.from) + ':</strong> ' + escapeHtml(cm.text) + '</span>';
+            var chatTime = cm.timestamp ? new Date(cm.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+            html += '<div class="chat-msg"><strong style="color:' + (Config.ROLE_COLORS[cm.from] || '#fff') + '">' + escapeHtml(cm.from) + '</strong>';
+            if (chatTime) html += ' <span class="chat-time">' + chatTime + '</span>';
+            html += '<br>' + escapeHtml(cm.text) + '</div>';
         }
         html += '</div>';
-        html += '<input type="text" id="chat-input" placeholder="Chat..." class="chat-input">';
+        html += '<input type="text" id="chat-input" placeholder="Type a message..." class="chat-input">';
         html += '</div>';
 
         html += '</div>'; // game-board
@@ -949,19 +1038,23 @@ var UI = (function() {
             html += '</div>';
 
             html += '<div class="player-stats">';
-            html += '<div class="stat"><span class="stat-label">VP</span><span class="stat-value vp-value">' + rs.vp + '</span></div>';
+            var vpGlossary = (Config.GLOSSARY && Config.GLOSSARY.VP) || '';
+            html += '<div class="stat" title="' + escapeHtml(vpGlossary) + '"><span class="stat-label">VP ℹ️</span><span class="stat-value vp-value">' + rs.vp + '</span></div>';
 
             if (role === 'president') {
-                html += '<div class="stat"><span class="stat-label">Pop</span><span class="stat-value" style="color:' + getPartyColor(rs.party) + '">' + rs.popularity + '</span></div>';
+                var popGlossary = (Config.GLOSSARY && Config.GLOSSARY.Pop) || '';
+                html += '<div class="stat" title="' + escapeHtml(popGlossary) + '"><span class="stat-label">Pop ℹ️</span><span class="stat-value" style="color:' + getPartyColor(rs.party) + '">' + rs.popularity + '</span></div>';
                 html += '<div class="stat"><span class="stat-label">Party</span><span class="stat-value" style="color:' + getPartyColor(rs.party) + '">' + (rs.party === 'democrat' ? 'D' : 'R') + '</span></div>';
             }
             if (role === 'house' || role === 'senate') {
-                html += '<div class="stat"><span class="stat-label">PC</span><span class="stat-value">' + rs.pc + '</span></div>';
+                var pcGlossary = (Config.GLOSSARY && Config.GLOSSARY.PC) || '';
+                html += '<div class="stat" title="' + escapeHtml(pcGlossary) + '"><span class="stat-label">PC ℹ️</span><span class="stat-value">' + rs.pc + '</span></div>';
                 html += '<div class="stat"><span class="stat-label">Maj</span><span class="stat-value" style="color:' + getPartyColor(rs.majorityParty) + '">' + (rs.majorityParty === 'democrat' ? 'D' : 'R') + '</span></div>';
             }
             if (role === 'supremeCourt') {
                 var courtMaj = Engine.getCourtMajority();
-                html += '<div class="stat"><span class="stat-label">JP</span><span class="stat-value" style="color:#9C27B0">' + rs.jp + '</span></div>';
+                var jpGlossary = (Config.GLOSSARY && Config.GLOSSARY.JP) || '';
+                html += '<div class="stat" title="' + escapeHtml(jpGlossary) + '"><span class="stat-label">JP ℹ️</span><span class="stat-value" style="color:#9C27B0">' + rs.jp + '</span></div>';
                 html += '<div class="stat"><span class="stat-label">Justices</span><span class="stat-value">' + rs.justices.length + '</span></div>';
                 html += '<div class="stat"><span class="stat-label">Lean</span><span class="stat-value">' + courtMaj.charAt(0).toUpperCase() + '</span></div>';
                 if (rs.landmarkEffect) {
@@ -1024,6 +1117,9 @@ var UI = (function() {
         var html = '<div class="bill-card" style="border-color:' + partColor + '">';
         html += '<div class="bill-header" style="background:' + partColor + '">';
         html += '<h3>' + escapeHtml(bill.name) + '</h3>';
+        if (Config.BILL_DESCRIPTIONS && Config.BILL_DESCRIPTIONS[bill.name]) {
+            html += '<p class="bill-flavor">' + escapeHtml(Config.BILL_DESCRIPTIONS[bill.name]) + '</p>';
+        }
         if (bill.markers && bill.markers.length > 0) {
             html += '<span class="bill-markers">' + bill.markers.join(' ') + '</span>';
         }
@@ -1115,6 +1211,39 @@ var UI = (function() {
         return html;
     }
 
+    function getVPPreview(actionId, state, role) {
+        var previews = {
+            executiveOrder: '+1 VP',
+            signBill: '+4-8 VP',
+            bullyPulpit: '+5 VP',
+            stateDinner: '+3 VP',
+            witchhunt: 'SC -6 VP',
+            campaign: '+4 Pop',
+            earmark: '+4 VP',
+            subpoena: '+2 VP',
+            caucusMeeting: '+3 PC',
+            hostHearing: '+2 VP or +2 PC',
+            killBill: '+1 VP',
+            supportBill: '+5 Bill Pop',
+            debate: '+2 PC',
+            conference: '+1 PC',
+            senatePassBill: 'VP varies',
+            housePassBill: 'VP varies',
+            generalCourt: '+2 VP',
+            courtAdvisoryRole: '+2 VP',
+            courtClerksResearch: '+2 JP',
+            judicialReview: '+3-6 VP',
+            writeOpinion: '+1 VP, +1 JP',
+            certiorari: '+1 VP, +1 JP',
+            oralArguments: '+2 VP, +1 JP',
+            landmarkRuling: '+5 VP',
+            governmentShutdown: '-2 VP',
+            powerOfPurse: '-4 VP',
+            popularizeBill: '+3 Bill Pop'
+        };
+        return previews[actionId] || '';
+    }
+
     function renderActions(state, activeRole) {
         var actions = Engine.getAvailableActions(activeRole);
         var isMyAction = (activeRole === currentRole) || (Network.getRoomCode() === 'LOCAL');
@@ -1146,6 +1275,10 @@ var UI = (function() {
                 html += '<span class="action-name">' + escapeHtml(a.label) + '</span>';
                 html += '<span class="action-desc">' + escapeHtml(a.description) + '</span>';
                 html += '<span class="action-cost">Cost: ' + a.cost + ' action' + (a.cost !== 1 ? 's' : '') + '</span>';
+                var vpHint = getVPPreview(a.id, state, activeRole);
+                if (vpHint) {
+                    html += '<span class="action-vp-preview">' + vpHint + '</span>';
+                }
                 html += '</button>';
             }
             html += '</div>';
@@ -1227,6 +1360,11 @@ var UI = (function() {
                 html += '</div>';
             }
             html += '</div>';
+        }
+
+        // Deal history button
+        if (state.dealHistory && state.dealHistory.length > 0) {
+            html += '<div style="margin-top:8px;text-align:center"><button class="btn" data-action="showDealHistory" style="font-size:0.8em;padding:4px 10px;background:rgba(255,255,255,0.05);border:1px solid #555;color:#aaa;border-radius:4px;cursor:pointer">📋 Deal History (' + state.dealHistory.length + ')</button></div>';
         }
 
         html += '</div>';
@@ -1349,6 +1487,38 @@ var UI = (function() {
         var offerSelect = document.getElementById('deal-offer');
         if (offerSelect) offerSelect.addEventListener('change', updateBillVisibility);
         updateBillVisibility();
+    }
+
+    function showDealHistoryModal() {
+        var state = currentState;
+        var history = (state && state.dealHistory) || [];
+        var html = '<div style="max-height:400px;overflow-y:auto">';
+        if (history.length === 0) {
+            html += '<p style="color:#888;text-align:center">No deal history yet.</p>';
+        } else {
+            for (var i = history.length - 1; i >= 0; i--) {
+                var d = history[i];
+                var statusColor = d.status === 'fulfilled' ? '#4CAF50' : (d.status === 'broken' ? '#f44336' : (d.status === 'accepted' ? '#2196F3' : (d.status === 'rejected' ? '#FF9800' : '#888')));
+                var statusIcon = d.status === 'fulfilled' ? '✅' : (d.status === 'broken' ? '💔' : (d.status === 'accepted' ? '🤝' : (d.status === 'rejected' ? '❌' : '⏳')));
+                html += '<div style="padding:6px 8px;margin:4px 0;background:rgba(255,255,255,0.03);border-radius:4px;border-left:3px solid ' + statusColor + '">';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+                html += '<strong style="color:' + (Config.ROLE_COLORS[d.from] || '#fff') + '">' + (Config.ROLE_LABELS[d.from] || d.from) + '</strong>';
+                html += '<span style="font-size:0.75em;color:#888">R' + d.round + '</span>';
+                html += '</div>';
+                html += '<div style="font-size:0.85em;color:#ccc;margin:2px 0">→ ' + (Config.ROLE_LABELS[d.to] || d.to) + '</div>';
+                var askLabel = (Engine.DEAL_TYPES && Engine.DEAL_TYPES[d.askType]) ? Engine.DEAL_TYPES[d.askType].label : d.askType;
+                var offerLabel = (Engine.DEAL_TYPES && Engine.DEAL_TYPES[d.offerType]) ? Engine.DEAL_TYPES[d.offerType].label : d.offerType;
+                html += '<div style="font-size:0.8em;color:#aaa">Asked: ' + escapeHtml(askLabel) + (d.askBillName ? ' "' + escapeHtml(d.askBillName) + '"' : '') + '</div>';
+                html += '<div style="font-size:0.8em;color:#aaa">Offered: ' + escapeHtml(offerLabel) + (d.offerBillName ? ' "' + escapeHtml(d.offerBillName) + '"' : '') + '</div>';
+                html += '<div style="font-size:0.85em;margin-top:2px"><span style="color:' + statusColor + '">' + statusIcon + ' ' + d.status.charAt(0).toUpperCase() + d.status.slice(1) + '</span>';
+                if (d.resolvedRound && d.resolvedRound !== d.round) html += ' <span style="font-size:0.8em;color:#666">(R' + d.resolvedRound + ')</span>';
+                html += '</div></div>';
+            }
+        }
+        html += '</div>';
+        showModal('📋 Deal History', html, [
+            { label: 'Close', action: 'closeModal', className: 'btn-secondary' }
+        ]);
     }
 
     function showPassedLawsModal() {
@@ -1479,18 +1649,52 @@ var UI = (function() {
             html += '<p class="winner-vp">' + winner.vp + ' Victory Points</p>';
             html += '</div>';
         }
-        html += '<div class="final-scores">';
+
+        // Enhanced final scores with VP breakdown
+        html += '<div class="final-scores" style="max-width:600px">';
         html += '<h3>Final Scores</h3>';
         var roles = Config.ROLES;
-        for (var i = 0; i < roles.length; i++) {
-            var r = roles[i];
+        var sortedRoles = roles.slice().sort(function(a, b) { return state[b].vp - state[a].vp; });
+        for (var i = 0; i < sortedRoles.length; i++) {
+            var r = sortedRoles[i];
             var rs = state[r];
+            var rank = i + 1;
+            var medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : '4️⃣'));
             html += '<div class="final-score-card" style="border-left: 4px solid ' + Config.ROLE_COLORS[r] + '">';
-            html += '<span>' + Config.ROLE_ICONS[r] + ' ' + Config.ROLE_LABELS[r] + '</span>';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;width:100%">';
+            html += '<span>' + medal + ' ' + Config.ROLE_ICONS[r] + ' ' + Config.ROLE_LABELS[r] + '</span>';
             html += '<span class="final-vp">' + rs.vp + ' VP</span>';
+            html += '</div>';
+
+            // VP sources breakdown
+            if (state.vpSources && state.vpSources[r] && state.vpSources[r].length > 0) {
+                var sourceSums = {};
+                for (var si = 0; si < state.vpSources[r].length; si++) {
+                    var src = state.vpSources[r][si];
+                    sourceSums[src.source] = (sourceSums[src.source] || 0) + src.amount;
+                }
+                html += '<div style="font-size:0.75em;color:#888;margin-top:4px;padding-left:24px">';
+                var sourceKeys = Object.keys(sourceSums);
+                for (var sk = 0; sk < sourceKeys.length; sk++) {
+                    html += sourceKeys[sk] + ': ' + (sourceSums[sourceKeys[sk]] > 0 ? '+' : '') + sourceSums[sourceKeys[sk]] + 'VP';
+                    if (sk < sourceKeys.length - 1) html += ' • ';
+                }
+                html += '</div>';
+            }
             html += '</div>';
         }
         html += '</div>';
+
+        // Game stats
+        html += '<div class="game-stats" style="max-width:600px;width:100%;margin-top:12px">';
+        html += '<h3 style="color:var(--text-secondary);margin-bottom:8px">📊 Game Stats</h3>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+        html += '<div class="stat-card" style="background:var(--bg-panel);padding:8px 12px;border-radius:6px"><span style="color:#888;font-size:0.8em">Bills Passed</span><br><strong>' + (state.passedBills ? state.passedBills.length : 0) + '</strong></div>';
+        html += '<div class="stat-card" style="background:var(--bg-panel);padding:8px 12px;border-radius:6px"><span style="color:#888;font-size:0.8em">Events</span><br><strong>' + (state.eventHistory ? state.eventHistory.length : 0) + '</strong></div>';
+        html += '<div class="stat-card" style="background:var(--bg-panel);padding:8px 12px;border-radius:6px"><span style="color:#888;font-size:0.8em">Deals Made</span><br><strong>' + (state.dealHistory ? state.dealHistory.length : 0) + '</strong></div>';
+        html += '<div class="stat-card" style="background:var(--bg-panel);padding:8px 12px;border-radius:6px"><span style="color:#888;font-size:0.8em">Final Stability</span><br><strong>' + (state.stability !== undefined ? state.stability + '/10' : 'N/A') + '</strong></div>';
+        html += '</div></div>';
+
         html += '<button class="btn btn-primary btn-large" onclick="location.reload()">Play Again</button>';
         html += '</div>';
         content.innerHTML = html;
@@ -1506,6 +1710,7 @@ var UI = (function() {
     }
 
     function addChatMessage(msg) {
+        if (!msg.timestamp) msg.timestamp = Date.now();
         chatMessages.push(msg);
         if (currentState) renderGame(currentState);
     }

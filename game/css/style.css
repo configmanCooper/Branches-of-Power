@@ -387,7 +387,7 @@ body {
 /* --- Chat --- */
 .chat-bar {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 8px;
     padding: 6px 12px;
     background: var(--bg-panel);
@@ -396,12 +396,25 @@ body {
 .chat-messages {
     flex: 1;
     display: flex;
-    gap: 12px;
+    gap: 6px;
     overflow-x: auto;
-    white-space: nowrap;
     font-size: 0.85em;
+    max-height: 60px;
+    overflow-y: auto;
 }
-.chat-msg { flex-shrink: 0; }
+.chat-msg {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.03);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    white-space: normal;
+    max-width: 300px;
+}
+.chat-time {
+    font-size: 0.7em;
+    color: #666;
+}
 .chat-input {
     width: 250px;
     padding: 6px 10px;
@@ -550,6 +563,71 @@ body {
     min-height: 100vh;
     font-size: 1.5em;
     color: var(--text-secondary);
+}
+
+/* Election Warning */
+.election-warning {
+    font-size: 0.8em;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+    animation: pulse 1.5s infinite;
+    margin-left: 6px;
+}
+.pres-election { background: rgba(218,165,32,0.3); color: #DAA520; border: 1px solid #DAA520; }
+.midterm { background: rgba(33,150,243,0.3); color: #2196F3; border: 1px solid #2196F3; }
+
+/* VP Delta indicators */
+.vp-delta {
+    font-size: 0.75em;
+    font-weight: bold;
+    animation: vpFlash 2.5s ease-out;
+    margin-left: 2px;
+}
+.vp-delta-pos { color: #4CAF50; }
+.vp-delta-neg { color: #f44336; }
+@keyframes vpFlash {
+    0% { opacity: 1; transform: translateY(-2px); }
+    70% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-8px); }
+}
+
+/* Turn Order Strip */
+.turn-order-strip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85em;
+    background: rgba(255,255,255,0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.turn-order-item {
+    opacity: 0.4;
+    transition: opacity 0.3s;
+}
+.turn-order-active {
+    opacity: 1;
+    font-size: 1.2em;
+    text-shadow: 0 0 8px currentColor;
+}
+.turn-order-arrow { color: #555; font-size: 0.7em; }
+
+/* Bill flavor text */
+.bill-flavor {
+    font-size: 0.75em;
+    color: rgba(255,255,255,0.6);
+    font-style: italic;
+    margin-top: 2px;
+}
+
+/* Action VP preview */
+.action-vp-preview {
+    display: block;
+    font-size: 0.75em;
+    color: #4CAF50;
+    font-weight: 600;
+    margin-top: 2px;
 }
 
 /* --- Responsive --- */
@@ -845,7 +923,8 @@ body {
     font-size: 14px;
 }
 
-    /* H7: Stability gauge responsive */
+/* H7: Stability gauge responsive */
+@media (max-width: 600px) {
     .stability-gauge {
         width: 100% !important;
         flex-wrap: wrap !important;
