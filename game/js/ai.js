@@ -698,6 +698,83 @@ var GameAI = (function() {
         return { to: playerRole, askType: pick.ask, offerType: pick.offer, message: pick.msg };
     }
 
+    // AI counteroffer: when rejecting a deal, AI may propose a counter-deal
+    // Returns null if no counteroffer, or {counterAskType, counterOfferType, message, counterAskBillId, counterOfferBillId}
+    function generateCounteroffer(aiRole, fromRole, originalAskType, originalOfferType, state) {
+        var conf = aiConfig[aiRole];
+        if (!conf || !conf.personality) return null;
+        var p = conf.personality;
+
+        // Counteroffer chance based on negotiation rate
+        var counterChance = (p.negotiationRate || 0.3) * 0.6 + p.cooperation * 0.2;
+        if (Math.random() > counterChance) return null;
+
+        var bill = getStateBill(state);
+        var billId = bill ? bill.id : null;
+        var stab = state.stability !== undefined ? state.stability : 5;
+        var counters = [];
+
+        if (aiRole === 'president') {
+            if (originalOfferType !== 'signBill' && bill) {
+                counters.push({ ask: originalAskType, offer: 'signBill', msg: 'I\'ll sign the bill instead — deal?' });
+            }
+            counters.push({ ask: 'passBillHouse', offer: originalOfferType !== 'general' ? originalOfferType : 'signBill', msg: 'Get the House to pass the bill and I\'ll make it worth your while.' });
+            counters.push({ ask: 'passBillSenate', offer: originalOfferType !== 'general' ? originalOfferType : 'signBill', msg: 'Get the Senate to pass the bill instead.' });
+            counters.push({ ask: 'general', offer: 'general', msg: 'How about a general favor exchange instead?' });
+        } else if (aiRole === 'house') {
+            if (originalAskType !== 'passBillHouse') {
+                counters.push({ ask: 'signBill', offer: 'passBillHouse', msg: 'We\'ll pass the bill if you sign it — counteroffer.' });
+            }
+            if (fromRole === 'senate') {
+                counters.push({ ask: 'passBillSenate', offer: 'passBillHouse', msg: 'Let\'s both pass this bill instead.' });
+            }
+            counters.push({ ask: 'general', offer: 'passBillHouse', msg: 'We\'ll pass the bill — but we want something different in return.' });
+        } else if (aiRole === 'senate') {
+            if (originalAskType !== 'passBillSenate') {
+                counters.push({ ask: 'signBill', offer: 'passBillSenate', msg: 'We\'ll pass the bill if you sign it — counteroffer.' });
+            }
+            if (originalAskType !== 'confirmJustice' && state.pendingJustice) {
+                counters.push({ ask: 'nominateJustice', offer: 'confirmJustice', msg: 'We\'ll confirm a justice if you nominate one we like.' });
+            }
+            if (fromRole === 'house') {
+                counters.push({ ask: 'passBillHouse', offer: 'passBillSenate', msg: 'Pass the bill in the House and we\'ll pass it in the Senate.' });
+            }
+            counters.push({ ask: 'general', offer: 'passBillSenate', msg: 'We\'ll pass the bill — but our terms are different.' });
+        } else if (aiRole === 'supremeCourt') {
+            counters.push({ ask: 'general', offer: 'reviewBill', msg: 'We\'ll consider a judicial review — but on our terms.' });
+            if (stab <= 5) {
+                counters.push({ ask: 'resolveEvent', offer: 'resolveEvent', msg: 'Let\'s focus on resolving the current crisis instead.' });
+            }
+            counters.push({ ask: 'general', offer: 'general', msg: 'We\'ll cooperate — but differently than what you proposed.' });
+        }
+
+        // Event-based counteroffers (any role)
+        if (state.activeEvent && !state.activeEvent.resolved && stab <= 4) {
+            counters.push({ ask: 'resolveEvent', offer: 'resolveEvent', msg: 'Forget that — let\'s resolve the crisis together first!' });
+            counters.push({ ask: 'commitToEvent', offer: 'commitToEvent', msg: 'Stability is too low. Let\'s commit to event resolution instead.' });
+        }
+
+        // Filter out counters that match the original
+        counters = counters.filter(function(c) {
+            return !(c.ask === originalAskType && c.offer === originalOfferType);
+        });
+
+        if (counters.length === 0) return null;
+
+        var pick = counters[Math.floor(Math.random() * counters.length)];
+        var dt = (typeof Engine !== 'undefined' && Engine.DEAL_TYPES) ? Engine.DEAL_TYPES : {};
+        var counterAskBillId = (billId && dt[pick.ask] && dt[pick.ask].billRelated) ? billId : null;
+        var counterOfferBillId = (billId && dt[pick.offer] && dt[pick.offer].billRelated) ? billId : null;
+
+        return {
+            counterAskType: pick.ask,
+            counterOfferType: pick.offer,
+            message: '🔄 ' + pick.msg,
+            counterAskBillId: counterAskBillId,
+            counterOfferBillId: counterOfferBillId
+        };
+    }
+
     return {
         PERSONALITIES: PERSONALITIES,
         getPersonalities: getPersonalities,
@@ -708,6 +785,7 @@ var GameAI = (function() {
         resetAI: resetAI,
         getAIDecision: getAIDecision,
         respondToDeal: respondToDeal,
+        generateCounteroffer: generateCounteroffer,
         getAIDealProposal: getAIDealProposal
     };
 })();

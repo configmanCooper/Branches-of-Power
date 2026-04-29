@@ -638,6 +638,33 @@ var Engine = (function() {
         return { success: true, deal: deal };
     }
 
+    function counterDeal(dealId, counterAskType, counterOfferType, counterMessage, counterAskBillId, counterOfferBillId) {
+        var deal = null;
+        for (var i = 0; i < state.deals.length; i++) {
+            if (state.deals[i].id === dealId) { deal = state.deals[i]; break; }
+        }
+        if (!deal || deal.status !== 'pending') return { success: false, message: 'Deal not found or already resolved.' };
+
+        // Reject the original deal
+        deal.status = 'countered';
+        adjustTrust(deal.from, deal.to, -0.2); // Slight trust dip (less than full reject)
+        addLog(deal.to, 'Counter Deal', 'Countered deal from ' + Config.ROLE_LABELS[deal.from] + ' with a new proposal.');
+        if (state.dealHistory) {
+            state.dealHistory.push({
+                id: deal.id, from: deal.from, to: deal.to,
+                askType: deal.askType, offerType: deal.offerType,
+                askBillName: deal.askBillName || '', offerBillName: deal.offerBillName || '',
+                status: 'countered', round: deal.round, resolvedRound: state.round
+            });
+        }
+
+        // Create the counter-proposal (swap from/to)
+        var counterDealObj = proposeDeal(deal.to, deal.from, counterAskType, counterOfferType, counterMessage || '', counterAskBillId || null, counterOfferBillId || null);
+        counterDealObj.isCounteroffer = true;
+        counterDealObj.originalDealId = deal.id;
+        return { success: true, originalDeal: deal, counterDeal: counterDealObj };
+    }
+
     function fulfillDeal(dealId) {
         var deal = null;
         for (var i = 0; i < state.deals.length; i++) {
@@ -3324,7 +3351,7 @@ var Engine = (function() {
             return { success: false, message: 'Action in progress.' };
         }
         // Deal actions are free and don't require it to be your turn
-        var dealActions = ['proposeDeal', 'respondDeal', 'fulfillDeal', 'breakDeal'];
+        var dealActions = ['proposeDeal', 'respondDeal', 'counterDeal', 'fulfillDeal', 'breakDeal'];
         if (dealActions.indexOf(actionId) === -1 && getCurrentRole() !== role) {
             return { success: false, message: 'Not your turn.' };
         }
@@ -3434,6 +3461,9 @@ var Engine = (function() {
                 break;
             case 'respondDeal':
                 actionResult = respondToDeal(params.dealId, params.accept);
+                break;
+            case 'counterDeal':
+                actionResult = counterDeal(params.dealId, params.counterAskType, params.counterOfferType, params.counterMessage, params.counterAskBillId || null, params.counterOfferBillId || null);
                 break;
             case 'fulfillDeal':
                 actionResult = fulfillDeal(params.dealId);
@@ -3566,6 +3596,7 @@ var Engine = (function() {
         respondToDeal: respondToDeal,
         fulfillDeal: fulfillDeal,
         breakDeal: breakDeal,
+        counterDeal: counterDeal,
         getActiveDeals: getActiveDeals,
         getPendingDealsForRole: getPendingDealsForRole,
         getAcceptedDealsForRole: getAcceptedDealsForRole,

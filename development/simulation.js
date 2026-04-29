@@ -298,9 +298,25 @@ function runNegotiations(role, state, actions) {
                 if (trust[role][others[bi]] <= 4) {
                     log('[NEGOTIATION] Round ' + round + ' | ' + roleLabel(role) + ' → ' + roleLabel(others[bi]) + ': "Don\'t attack me and I\'ll cooperate on bills"');
                     var bribeAccept = trust[others[bi]][role] >= 3 && Math.random() > 0.5;
-                    log('[RESPONSE] ' + roleLabel(others[bi]) + ' → ' + roleLabel(role) + ': "' + (bribeAccept ? 'Deal' : 'No deal') + '" (trust: ' + trust[others[bi]][role] + ', sincerity: genuine)');
                     if (bribeAccept) {
+                        log('[RESPONSE] ' + roleLabel(others[bi]) + ' → ' + roleLabel(role) + ': "Deal" (trust: ' + trust[others[bi]][role] + ', sincerity: genuine)');
                         makePromise(others[bi], role, 'no_attack', 'No hostile actions this round', round);
+                    } else {
+                        // Rejected — chance of counteroffer
+                        var counterChance = 0.4;
+                        if (Math.random() < counterChance) {
+                            log('[COUNTEROFFER] ' + roleLabel(others[bi]) + ' → ' + roleLabel(role) + ': "No, but how about you support my bill and I\'ll lay off?" (trust: ' + trust[others[bi]][role] + ')');
+                            var counterAccept = trust[role][others[bi]] >= 4 && Math.random() > 0.4;
+                            if (counterAccept) {
+                                log('[RESPONSE] ' + roleLabel(role) + ' → ' + roleLabel(others[bi]) + ': "Counter accepted"');
+                                makePromise(role, others[bi], 'bill_support', 'Support their bill in exchange for peace', round);
+                                makePromise(others[bi], role, 'no_attack', 'No hostile actions this round', round);
+                            } else {
+                                log('[RESPONSE] ' + roleLabel(role) + ' → ' + roleLabel(others[bi]) + ': "Counter rejected"');
+                            }
+                        } else {
+                            log('[RESPONSE] ' + roleLabel(others[bi]) + ' → ' + roleLabel(role) + ': "No deal" (trust: ' + trust[others[bi]][role] + ', sincerity: genuine)');
+                        }
                     }
                 }
             }

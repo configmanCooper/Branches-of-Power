@@ -174,7 +174,25 @@ var UI = (function() {
                     if (GameAI.isAI(target.value)) {
                         var aiAccepts = GameAI.respondToDeal(target.value, currentRole, ask.value, offer.value, Engine.getState());
                         var latestDeal = Engine.getState().deals[Engine.getState().deals.length - 1];
-                        Network.localAction(target.value, 'respondDeal', { dealId: latestDeal.id, accept: aiAccepts });
+                        if (aiAccepts) {
+                            Network.localAction(target.value, 'respondDeal', { dealId: latestDeal.id, accept: true });
+                        } else {
+                            // AI rejected — try to counteroffer
+                            var counter = GameAI.generateCounteroffer(target.value, currentRole, ask.value, offer.value, Engine.getState());
+                            if (counter) {
+                                Network.localAction(target.value, 'counterDeal', {
+                                    dealId: latestDeal.id,
+                                    counterAskType: counter.counterAskType,
+                                    counterOfferType: counter.counterOfferType,
+                                    counterMessage: counter.message,
+                                    counterAskBillId: counter.counterAskBillId,
+                                    counterOfferBillId: counter.counterOfferBillId
+                                });
+                                showToast('🔄 ' + Config.ROLE_LABELS[target.value] + ' rejected your deal but made a counteroffer!', 'info');
+                            } else {
+                                Network.localAction(target.value, 'respondDeal', { dealId: latestDeal.id, accept: false });
+                            }
+                        }
                     }
                 }
                 break;
@@ -1315,7 +1333,10 @@ var UI = (function() {
             html += '<h4 style="margin:4px 0;color:#FFC107">📨 Incoming Deals</h4>';
             for (var j = 0; j < pendingDeals.length; j++) {
                 var pd = pendingDeals[j];
-                html += '<div class="deal-card" style="background:rgba(255,193,7,0.1);border:1px solid #FFC107;border-radius:6px;padding:8px;margin:4px 0">';
+                html += '<div class="deal-card" style="background:rgba(255,193,7,0.1);border:1px solid ' + (pd.isCounteroffer ? '#FF9800' : '#FFC107') + ';border-radius:6px;padding:8px;margin:4px 0">';
+                if (pd.isCounteroffer) {
+                    html += '<div style="color:#FF9800;font-size:0.8em;font-weight:bold;margin-bottom:4px">🔄 COUNTEROFFER</div>';
+                }
                 html += '<div style="color:' + Config.ROLE_COLORS[pd.from] + ';font-weight:bold">' + Config.ROLE_ICONS[pd.from] + ' ' + Config.ROLE_LABELS[pd.from] + ' proposes:</div>';
                 html += '<div style="margin:4px 0"><strong>Asks you to:</strong> ' + getDealTypeLabel(pd.askType, pd.askBillName) + '</div>';
                 html += '<div style="margin:4px 0"><strong>Offers to:</strong> ' + getDealTypeLabel(pd.offerType, pd.offerBillName) + '</div>';
