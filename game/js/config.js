@@ -240,6 +240,87 @@ var Config = (function() {
         skipRemainingActions: 'End your turn early.'
     };
 
+    // Complete action reference for each role (for the "View Actions" modal)
+    var ROLE_ACTIONS = {
+        president: [
+            { name: 'Executive Order', cost: '1 action', effect: '+1 VP, +1 Popularity' },
+            { name: 'Advocate Legislation', cost: '1 action', effect: '+2/+4 PC to chambers, -5 Bill Pop' },
+            { name: 'Admonish Legislation', cost: '1 action', effect: '-2/-4 PC from chambers, -5 Bill Pop' },
+            { name: 'Sign Bill', cost: '1 action', effect: '+4 VP, +Popularity bonus. Requires bill passed by both chambers.' },
+            { name: 'Veto', cost: '1 action + 1 VP', effect: 'Send bill back. Requires 2/3 to override. Only when bill passed.' },
+            { name: 'Sue', cost: '1 action', effect: 'Send bill to Supreme Court for judicial review.' },
+            { name: 'Campaign Trail', cost: '2 actions', effect: '+4 Popularity' },
+            { name: 'Tax Cuts', cost: '3 actions', effect: 'Create a popular bill on the floor.' },
+            { name: 'Bully Pulpit', cost: '1 action + 2 Pop', effect: '+5 VP. Requires Popularity > 15.' },
+            { name: 'State Dinner', cost: '1 action', effect: '+3 VP, +2 Pop. Target player gets +1 VP. Once/round.' },
+            { name: 'Assign Justice', cost: '1 action', effect: 'Nominate a justice. Max 4 per game.' },
+            { name: 'Declare Witchhunt', cost: '2 actions + 2 VP + 2 Pop', effect: 'SC loses 6 VP. Requires Pop ≥ 15. Limited per game.' },
+            { name: 'Executive Privilege', cost: 'Free', effect: '+2 extra actions this round. Once per game.' },
+            { name: 'Propose Amendment', cost: '2 actions + 1 VP + 1 Pop', effect: 'Restore an unconstitutional bill. Requires Pop ≥ 15.' },
+            { name: 'Propose Unity Summit', cost: '2 actions + 2 VP', effect: 'All branches unite for +2/+3 stability. Requires stability < 8.' }
+        ],
+        house: [
+            { name: 'State of the Union', cost: '1 action', effect: 'Choose: +1 VP, +2 PC, or hurt President popularity. Once/round.' },
+            { name: 'Whip the House', cost: '1 action', effect: 'Shift 20 reps one faction step.' },
+            { name: 'Support Bill', cost: '1 action', effect: '+5 bill popularity, shift partisanship.' },
+            { name: 'Attack Bill', cost: '1 action', effect: '-5 bill popularity, shift partisanship.' },
+            { name: 'Kill Bill', cost: '1 action + 1 PC', effect: '+1 VP. Remove bill from floor. Once/round.' },
+            { name: 'Pass Bill (House)', cost: '1 action', effect: 'Call House vote. VP based on margin. Needs 218/435.' },
+            { name: 'Host Hearing', cost: '1 action', effect: 'Choose: +2 VP, +2 PC, or -2 Pres Pop.' },
+            { name: 'Rider Amendment', cost: '1 action', effect: 'Attach +3 VP rider to bill if it passes.' },
+            { name: 'Earmark', cost: '6 PC', effect: '+4 VP. Spend political capital for points.' },
+            { name: 'Caucus Meeting', cost: '1 action', effect: '+3 PC. Build political capital. Once/round.' },
+            { name: 'Subpoena Power', cost: '1 action', effect: '-2 Pres Popularity, +2 VP. Once/round.' },
+            { name: 'Power of the Purse', cost: '1 action + 4 VP', effect: 'President & Senate lose 1 action this round & next. Once/game.' },
+            { name: 'Popularize Bill', cost: '1 action + 1 PC', effect: '+5 Pop, -4 Legality, +3 Partisanship. Once/round.' },
+            { name: 'Change Bill Now', cost: '2 actions + 2 PC', effect: 'Replace current bill with a new one.' },
+            { name: 'Initiate Legislation', cost: 'Free', effect: 'Create a new bill on the floor. Once/round.' },
+            { name: 'Impeach President', cost: '1 action + 6 PC', effect: 'Impeachment proceedings. Limited per game.' },
+            { name: 'Pack the Courts', cost: '1 action + 6 PC + 4 VP', effect: 'Add 4 justices to Supreme Court. Once/game.' },
+            { name: 'Propose Amendment', cost: '2 actions + 1 VP + 1 PC', effect: 'Restore an unconstitutional bill.' },
+            { name: 'Propose Unity Summit', cost: '2 actions + 2 VP', effect: 'All branches unite for stability.' }
+        ],
+        senate: [
+            { name: 'Confirm Justice', cost: '1 action', effect: 'Approve or reject justice nominee.' },
+            { name: 'Pass/Block Nominations', cost: '1 action', effect: '+4 PC or +1 VP. Once/round.' },
+            { name: 'Debate Legislation', cost: '1 action', effect: '+2 PC, shift senators toward center.' },
+            { name: 'Update Bill', cost: '1 action', effect: 'Change partisanship, popularity, or legality (±3 free, more costs PC).' },
+            { name: 'Pass Bill (Senate)', cost: '1 action', effect: 'Call Senate vote. Needs 60/100 (or 51 with PC).' },
+            { name: 'Filibuster', cost: '4-5 PC', effect: 'Kill bill, new bill appears. +1 VP Senate, -1 VP President.' },
+            { name: 'Stall Bill', cost: '2 PC', effect: 'Bill stays on floor next round. Once/round.' },
+            { name: 'Conference', cost: '1 action', effect: '+1 PC for both Senate and House. Once/round.' },
+            { name: 'Revive Bill', cost: '1 action', effect: 'Bring a passed bill back to the floor.' },
+            { name: 'Repeal Bill', cost: '1 action', effect: 'Create a repeal bill for a passed law.' },
+            { name: 'Government Shutdown', cost: '6 PC', effect: 'House PC reset to 0, President -4 Popularity. Limited per game.' },
+            { name: 'Propose Amendment', cost: '2 actions + 1 VP + 1 PC', effect: 'Restore an unconstitutional bill.' },
+            { name: 'Propose Unity Summit', cost: '2 actions + 2 VP', effect: 'All branches unite for stability.' }
+        ],
+        supremeCourt: [
+            { name: 'Judicial Review', cost: '1 action', effect: 'Rule on passed bill constitutionality. Big VP if unconstitutional.' },
+            { name: 'Inquiry of President', cost: '1 action', effect: '+/- President Popularity, +1 VP.' },
+            { name: 'Inquiry of Chamber', cost: '1 action', effect: '+/- PC to a chamber, +1 VP.' },
+            { name: 'Investigate EO', cost: '1 action', effect: 'President -2 VP, -2 Pop. Requires 2+ EOs this round.' },
+            { name: 'Investigate Bill', cost: '1 action', effect: 'Bill legality -2. Setup for judicial review.' },
+            { name: 'Bill Review', cost: '1 action', effect: 'Legality +2, adjust Part/Pop ±2, +2 VP. Once/round.' },
+            { name: 'Amicus Brief', cost: '1 action + 2 JP', effect: '+2 VP, bill legality -4. Once/round.' },
+            { name: 'Disapprove Justice', cost: '1 action', effect: 'Reject a pending justice nominee.' },
+            { name: 'Suggest Justice', cost: '1 action', effect: 'Suggest nominee leaning to President.' },
+            { name: 'General Court', cost: '1 action', effect: '+2 VP. Standard court business. Once/round.' },
+            { name: 'Advisory Role', cost: '1 action', effect: '+2 VP. Requires 2/3 court alignment. Once/round.' },
+            { name: 'Internal Inquiry', cost: '1 action + 2 JP', effect: 'Roll d20: 10+ retires a justice. Limited/game.' },
+            { name: 'Partisan Ruling', cost: '2 actions + 4 JP', effect: 'Shift all bill partisanship. Limited/game.' },
+            { name: 'Constitutional Crisis', cost: '2 actions + 8 JP', effect: 'All bill legality -2 permanently. Limited/game.' },
+            { name: 'Recuse Justice', cost: '1 action + 1 JP', effect: 'Remove a justice from judicial review this round.' },
+            { name: 'Landmark Ruling', cost: '2 actions + 6 JP', effect: 'Once-per-game powerful effect (3-round duration).' },
+            { name: 'Writ of Certiorari', cost: '1 action + 1 JP', effect: 'Target passed bill legality -3, +1 VP.' },
+            { name: 'Oral Arguments', cost: '1 action', effect: 'Bill partisanship toward center, +2 VP. Once/round.' },
+            { name: 'Injunction', cost: '1 action + 3 JP', effect: 'Block bill votes this round, +1 VP. Once/game.' },
+            { name: 'Clerks Research', cost: '1 action', effect: '+2 JP, +1 VP. Once/round.' },
+            { name: 'Write Opinion', cost: '1 action', effect: '+1 VP, +1 JP. Once/round.' },
+            { name: 'Propose Unity Summit', cost: '2 actions + 2 VP', effect: 'All branches unite for stability.' }
+        ]
+    };
+
     return {
         VERSION: VERSION,
         GAME_LENGTHS: GAME_LENGTHS,
@@ -270,6 +351,7 @@ var Config = (function() {
         ELECTIONS: ELECTIONS,
         PER_GAME_LIMITS: PER_GAME_LIMITS,
         ACTION_TOOLTIPS: ACTION_TOOLTIPS,
+        ROLE_ACTIONS: ROLE_ACTIONS,
         BILL_DESCRIPTIONS: BILL_DESCRIPTIONS,
         GLOSSARY: GLOSSARY
     };

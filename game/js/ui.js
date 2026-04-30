@@ -243,6 +243,12 @@ var UI = (function() {
             case 'showDealHistory':
                 showDealHistoryModal();
                 break;
+            case 'showRoleActions':
+                showRoleActionsModal();
+                break;
+            case 'roleActionsTab':
+                switchRoleActionsTab(dataset.role);
+                break;
             case 'showHowToPlay':
                 showHowToPlayModal();
                 break;
@@ -756,6 +762,7 @@ var UI = (function() {
             html += '</div>';
         }
         html += '<div class="header-right">';
+        html += '<button class="btn btn-how-to-play" data-action="showRoleActions" style="background:rgba(255,255,255,0.1);border:1px solid #666;color:#ccc;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.85em;margin-right:8px">📖 Role Actions</button>';
         html += '<button class="btn btn-how-to-play" data-action="showHowToPlay" style="background:rgba(255,255,255,0.1);border:1px solid #666;color:#ccc;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.85em;margin-right:8px">❓ How to Play</button>';
         if (Network.getRoomCode() !== 'LOCAL') {
             html += '<span class="room-code">Room: ' + Network.getRoomCode() + '</span>';
@@ -1596,6 +1603,72 @@ var UI = (function() {
         showModal('📋 Deal History', html, [
             { label: 'Close', action: 'closeModal', className: 'btn-secondary' }
         ]);
+    }
+
+    var currentRoleActionsTab = 'president';
+    function showRoleActionsModal(selectedRole) {
+        var role = selectedRole || currentRoleActionsTab || 'president';
+        currentRoleActionsTab = role;
+        var roles = Config.ROLES;
+        var html = '<div style="padding:0">';
+
+        // Tab bar
+        html += '<div style="display:flex;gap:2px;margin-bottom:10px;flex-wrap:wrap">';
+        for (var r = 0; r < roles.length; r++) {
+            var rl = roles[r];
+            var isActive = rl === role;
+            var tabColor = isActive ? (Config.ROLE_COLORS[rl] || '#4CAF50') : 'rgba(255,255,255,0.08)';
+            var textColor = isActive ? '#fff' : '#aaa';
+            html += '<button data-action="roleActionsTab" data-role="' + rl + '" style="flex:1;min-width:80px;padding:6px 4px;border:none;border-radius:6px 6px 0 0;cursor:pointer;font-size:0.8em;font-weight:' + (isActive ? 'bold' : 'normal') + ';background:' + tabColor + ';color:' + textColor + ';border-bottom:' + (isActive ? '2px solid #fff' : '2px solid transparent') + '">';
+            html += (Config.ROLE_ICONS[rl] || '') + ' ' + (Config.ROLE_LABELS[rl] || rl);
+            html += '</button>';
+        }
+        html += '</div>';
+
+        // Actions list
+        var actions = Config.ROLE_ACTIONS[role] || [];
+        html += '<div style="max-height:350px;overflow-y:auto">';
+        for (var a = 0; a < actions.length; a++) {
+            var act = actions[a];
+            html += '<div style="padding:6px 8px;margin:3px 0;background:rgba(255,255,255,0.03);border-radius:4px;border-left:3px solid ' + (Config.ROLE_COLORS[role] || '#4CAF50') + '">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+            html += '<strong style="color:#e0e0e0;font-size:0.9em">' + escapeHtml(act.name) + '</strong>';
+            html += '<span style="font-size:0.75em;padding:2px 6px;border-radius:3px;background:rgba(255,255,255,0.08);color:#ffb74d">' + escapeHtml(act.cost) + '</span>';
+            html += '</div>';
+            html += '<div style="font-size:0.8em;color:#aaa;margin-top:2px">' + escapeHtml(act.effect) + '</div>';
+            html += '</div>';
+        }
+
+        // Shared actions
+        html += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid #444">';
+        html += '<div style="font-size:0.8em;color:#888;margin-bottom:4px;font-weight:bold">🤝 Shared Actions (All Roles)</div>';
+        var shared = [
+            { name: 'Resolve Event', cost: '1 action', effect: 'Help resolve an active event for VP + stability.' },
+            { name: 'Agree to Amendment', cost: '2 actions + 1 VP', effect: 'Support a pending constitutional amendment.' },
+            { name: 'Reject Amendment', cost: '1 action', effect: 'Cancel a pending amendment.' },
+            { name: 'Agree to Unity Summit', cost: '1 action + 1 VP', effect: 'Support a pending national unity summit.' },
+            { name: 'Reject Unity Summit', cost: '1 action', effect: 'Cancel a pending summit.' },
+            { name: 'Skip Remaining Actions', cost: 'Free', effect: 'End your turn early.' }
+        ];
+        for (var s = 0; s < shared.length; s++) {
+            html += '<div style="padding:4px 8px;margin:2px 0;background:rgba(255,255,255,0.02);border-radius:4px;border-left:3px solid #888">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+            html += '<strong style="color:#bbb;font-size:0.85em">' + escapeHtml(shared[s].name) + '</strong>';
+            html += '<span style="font-size:0.7em;padding:2px 5px;border-radius:3px;background:rgba(255,255,255,0.06);color:#aaa">' + escapeHtml(shared[s].cost) + '</span>';
+            html += '</div>';
+            html += '<div style="font-size:0.75em;color:#888;margin-top:1px">' + escapeHtml(shared[s].effect) + '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+
+        html += '</div></div>';
+        showModal('📖 Role Actions Reference', html, [
+            { label: 'Close', action: 'closeModal', className: 'btn-secondary' }
+        ]);
+    }
+
+    function switchRoleActionsTab(role) {
+        showRoleActionsModal(role);
     }
 
     function showPassedLawsModal() {
